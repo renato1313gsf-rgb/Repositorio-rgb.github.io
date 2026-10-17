@@ -481,7 +481,6 @@ if(realMenu){
           '<label style="display:flex;gap:10px;align-items:flex-start;padding:12px;margin:8px 0;background:#111e29;border:1px solid #405768"><input id="directRedDot" type="checkbox" '+(a.redDotEquipped?'checked':'')+' style="margin-top:4px"><span><b>MIRA RED DOT</b><br><span style="color:#b9c9d5;font-size:13px">Aumenta em 20% o alcance efetivo dos disparos.</span></span></label>'+
           '<label style="display:flex;gap:10px;align-items:flex-start;padding:12px;margin:8px 0;background:#111e29;border:1px solid #405768"><input id="directExtendedMag" type="checkbox" '+(a.extendedMagEquipped?'checked':'')+' style="margin-top:4px"><span><b>CARREGADOR ESTENDIDO</b><br><span style="color:#b9c9d5;font-size:13px">Permite recarregar até 50% mais munição por carregador.</span></span></label>'+
           btn('APLICAR EQUIPAMENTO','apply-loadout');
-      }
     }else if(which==='inventory'){
       heading='ARSENAL & EQUIPAMENTO';
       const e=api&&api.getEquipment()||{armorUpgrade:0,helmetEquipped:true,medkits:2};
