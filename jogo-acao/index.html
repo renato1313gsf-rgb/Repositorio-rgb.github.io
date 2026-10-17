@@ -282,7 +282,7 @@ for(const e of enemies){
  const p=e.mesh.position;
  const to=player.position.clone().sub(p),dist=to.length();
  const profile=enemyTactics[e.type]||enemyTactics.rifle;
- const visible=dist<profile.detect+3&&canSee(p,player.position);
+ const visible=dist<profile.fireRange+3&&canSee(p,player.position);
  e.mesh.rotation.y=Math.atan2(-to.x,-to.z);
  e.attack-=dt;
  // Guardas distantes patrulham em vez de rastrear a posição do jogador pelo mapa inteiro.
