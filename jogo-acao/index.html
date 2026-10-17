@@ -125,4 +125,28 @@ try{const cfg=JSON.parse(localStorage.getItem('operacaoRupturaSettings')||'null'
 function frame(){requestAnimationFrame(frame);const dt=Math.min(clock.getDelta(),.04);update(dt);renderer.render(scene,camera)}frame();
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,1.6))});
 </script>
+<script>
+/* Fallback independente do módulo 3D: mantém o menu acessível mesmo se o motor falhar. */
+(function(){
+  function restoreMenu(){
+    var start=document.getElementById('start');
+    if(start){
+      start.classList.remove('hidden');
+      start.style.setProperty('display','flex','important');
+      start.style.setProperty('visibility','visible','important');
+      start.style.setProperty('opacity','1','important');
+      start.style.setProperty('z-index','10000','important');
+    }
+    var button=document.getElementById('startBtn');
+    if(button){
+      button.style.setProperty('display','inline-block','important');
+      button.style.setProperty('visibility','visible','important');
+      button.style.setProperty('opacity','1','important');
+    }
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',restoreMenu,{once:true});
+  else restoreMenu();
+  window.addEventListener('pageshow',restoreMenu);
+})();
+</script>
 </body></html>
