@@ -54,7 +54,7 @@ for(let i=-48;i<=48;i+=8){box(i,2,-48,7,4,.8,concrete);box(i,2,48,7,4,.8,concret
 building(-27,-25,17,11,13);building(27,-26,18,14,14);building(-29,25,13,8,18);building(28,25,17,10,15);
 // Cover, crates, barrels and industrial props
 for(const [x,z,w,d] of [[-13,-12,5,2.5],[13,-17,5,2.5],[-17,14,5,2.5],[18,12,5,2.5],[0,-27,6,2.5],[0,22,6,2.5],[-8,5,3,3],[9,1,3,3]]){box(x,1.05,z,w,2.1,d,dark);box(x,2.16,z,w+.1,.13,d+.1,yellow,false)}
-for(let i=0;i<12;i++){let x=(Math.random()-.5)*70,z=(Math.random()-.5)*70;if(Math.abs(x)<9&&Math.abs(z)<9)continue;const o=box(x,.6,z,1.15,1.2,1.15,i%2?metal:dark);o.rotation.y=Math.random()*2}
+const blockSpawns=[[-38,-35],[-12,-38],[12,-38],[38,-35],[-39,-8],[38,-7],[-38,8],[39,9],[-38,37],[-12,37],[12,37],[39,36]];for(let i=0;i<blockSpawns.length;i++){const [x,z]=blockSpawns[i];const o=box(x,.6,z,1.15,1.2,1.15,i%2?metal:dark);o.rotation.y=[0,.35,.7,1.05,1.4,.2,.55,.9,1.25,.1,.45,.8][i]}
 const destructibles=[];for(const [x,z] of [[-20,-5],[20,-6],[-5,17],[7,-10]]){const body=cylinder(x,.8,z,.65,.65,1.6,red,12);destructibles.push({mesh:body,alive:true,type:'barrel'})}const enemyCar=box(-15,.8,-28,2.1,1.2,3.7,green,false);destructibles.push({mesh:enemyCar,alive:true,type:'vehicle'});const enemyTank=box(17,.9,25,3.1,1.5,4.2,metal,false);box(17,1.85,24,1.6,.6,1.8,dark,false);box(17,1.8,22.5,.25,.25,2.4,black,false);destructibles.push({mesh:enemyTank,alive:true,type:'vehicle'});obstacles.push({x:-15,z:-28,hx:1.1,hz:1.85,top:1.2},{x:17,z:25,hx:1.55,hz:2.1,top:1.5});
 // Floodlights and overhead cables give the yard more depth.
 for(const [x,z] of [[-39,-38],[39,-38],[-39,38],[39,38]]){cylinder(x,4,z,.12,.16,8,dark);box(x,8,z,.8,.12,.4,yellow,false)}
