@@ -141,8 +141,18 @@ window.__bootStage='Menus registrados; iniciando a primeira renderização';
 function frame(){requestAnimationFrame(frame);const dt=Math.min(clock.getDelta(),.04);update(dt);renderer.render(scene,camera)}frame();
 window.__bootStage='Jogo inicializado; aguardando JOGAR';
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,1.6))});
-/* Esconde o painel de segurança, mas o mantém disponível se ocorrer outro erro. */
-const rescuePanel=document.getElementById('bootRescue');if(rescuePanel)rescuePanel.style.display='none';
+/* Só troca para o menu normal depois de confirmar a inicialização completa. */
+window.__gameReady=true;
+const realMenu=document.getElementById('start');
+if(realMenu){
+  realMenu.classList.remove('hidden');
+  realMenu.style.setProperty('display','flex','important');
+  realMenu.style.setProperty('visibility','visible','important');
+  realMenu.style.setProperty('opacity','1','important');
+  realMenu.style.setProperty('z-index','1000','important');
+}
+const rescuePanel=document.getElementById('bootRescue');
+if(rescuePanel)rescuePanel.style.display='none';
 </script>
 <script>
 /* Diagnóstico de inicialização: mantém uma explicação visível em vez de deixar a tela preta. */
@@ -166,11 +176,14 @@ const rescuePanel=document.getElementById('bootRescue');if(rescuePanel)rescuePan
   window.addEventListener('pageshow',function(){
     if(!window.__gameReady && document.getElementById('bootRescue')){
       var status=document.getElementById('bootRescueStatus');
-      if(status && status.textContent.indexOf('Preparando')>=0){
-        status.textContent='O motor 3D ainda não confirmou a inicialização. Se ficar assim, aguarde a mensagem de erro abaixo ou recarregue.';
-      }
+      if(status) status.textContent='Aguardando o motor 3D. Etapa atual: '+(window.__bootStage||'carregando dependências')+'. O aviso fica visível até a inicialização terminar.';
     }
   });
+  window.setTimeout(function(){
+    if(!window.__gameReady){
+      report('o motor 3D não terminou de inicializar após 8 segundos. Etapa atual: '+(window.__bootStage||'carregando dependências'));
+    }
+  },8000);
 })();
 </script>
 </body></html>
