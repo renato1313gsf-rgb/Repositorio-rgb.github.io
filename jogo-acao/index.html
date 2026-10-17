@@ -42,6 +42,8 @@ const THREE = await import('https://cdn.jsdelivr.net/npm/three@0.160.0/build/thr
     throw secondError;
   }
 });
+/* O menu de emergência só deve existir se o motor 3D falhar ao carregar. */
+document.getElementById('bootRescue')?.remove();
 const $=s=>document.querySelector(s), canvas=$('#game');
 window.addEventListener('error',e=>{const t=$('#toast');if(t){t.textContent='ERRO AO CARREGAR O JOGO: '+(e.message||'erro desconhecido');t.classList.remove('hidden')}});
 window.addEventListener('unhandledrejection',e=>{const t=$('#toast');if(t){t.textContent='ERRO DE INICIALIZAÇÃO: '+(e.reason?.message||String(e.reason||'erro desconhecido'));t.classList.remove('hidden')}});
