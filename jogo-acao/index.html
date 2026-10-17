@@ -44,11 +44,12 @@ const THREE = await import('https://cdn.jsdelivr.net/npm/three@0.160.0/build/thr
 });
 /* O menu de segurança só será removido depois da inicialização completa. */
 const $=s=>document.querySelector(s), canvas=$('#game');
+window.__bootStage='Three.js importado; preparando o renderizador WebGL';
 window.addEventListener('error',e=>{const t=$('#toast');if(t){t.textContent='ERRO AO CARREGAR O JOGO: '+(e.message||'erro desconhecido');t.classList.remove('hidden')}});
 window.addEventListener('unhandledrejection',e=>{const t=$('#toast');if(t){t.textContent='ERRO DE INICIALIZAÇÃO: '+(e.reason?.message||String(e.reason||'erro desconhecido'));t.classList.remove('hidden')}});
 $('#startBtn').addEventListener('click',()=>{closeSub();const m=$('#start .modal');let d=$('#startupError');if(!d){d=document.createElement('p');d.id='startupError';d.style.cssText='color:#ff765f;background:#321512;border:1px solid #ff624d;padding:12px;margin-top:14px;font-size:13px;font-weight:800;overflow-wrap:anywhere';m.appendChild(d)}d.textContent='INICIANDO...';try{reset(false)}catch(e){console.error(e);$('#start').classList.remove('hidden');$('#hud').classList.add('hidden');$('#crosshair').classList.add('hidden');$('#mini').classList.add('hidden');d.textContent='FALHA AO INICIAR: '+(e?.stack||e?.message||String(e));d.style.display='block'}});
 $('#continueBtn').addEventListener('click',()=>{closeSub();const m=$('#start .modal');let d=$('#startupError');if(!d){d=document.createElement('p');d.id='startupError';d.style.cssText='color:#ff765f;background:#321512;border:1px solid #ff624d;padding:12px;margin-top:14px;font-size:13px;font-weight:800;overflow-wrap:anywhere';m.appendChild(d)}d.textContent='CARREGANDO CAMPANHA...';try{if(loadSave())reset(true);else{say('NENHUM PROGRESSO SALVO');reset(false)}}catch(e){console.error(e);$('#start').classList.remove('hidden');$('#hud').classList.add('hidden');$('#crosshair').classList.add('hidden');$('#mini').classList.add('hidden');d.textContent='FALHA AO CONTINUAR: '+(e?.stack||e?.message||String(e));d.style.display='block'}});
-const renderer=new THREE.WebGLRenderer({canvas,antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,1.6));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,1.6));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;window.__bootStage='WebGL criado; construindo cenário 3D';
 const scene=new THREE.Scene();scene.background=new THREE.Color(0x778896);scene.fog=new THREE.Fog(0x778896,35,100);
 const camera=new THREE.PerspectiveCamera(68,innerWidth/innerHeight,.1,180);
 scene.add(new THREE.HemisphereLight(0xc8e0ff,0x252b31,1.8));const rainGeo=new THREE.BufferGeometry();const rainArr=new Float32Array(700*3);for(let i=0;i<700;i++){rainArr[i*3]=(Math.random()-.5)*70;rainArr[i*3+1]=Math.random()*45;rainArr[i*3+2]=(Math.random()-.5)*70}rainGeo.setAttribute('position',new THREE.BufferAttribute(rainArr,3));const rainPoints=new THREE.Points(rainGeo,new THREE.PointsMaterial({color:0xb7d7eb,size:.055,transparent:true,opacity:.5}));rainPoints.visible=false;scene.add(rainPoints);
@@ -68,7 +69,7 @@ const blockSpawns=[[-38,-35],[-12,-38],[12,-38],[38,-35],[-39,-8],[38,-7],[-38,8
 const destructibles=[];for(const [x,z] of [[-20,-5],[20,-6],[-5,17],[7,-10]]){const body=cylinder(x,.8,z,.65,.65,1.6,red,12);destructibles.push({mesh:body,alive:true,type:'barrel'})}const enemyCar=box(-15,.8,-28,2.1,1.2,3.7,green,false);destructibles.push({mesh:enemyCar,alive:true,type:'vehicle'});const enemyTank=box(17,.9,25,3.1,1.5,4.2,metal,false);box(17,1.85,24,1.6,.6,1.8,dark,false);box(17,1.8,22.5,.25,.25,2.4,black,false);destructibles.push({mesh:enemyTank,alive:true,type:'vehicle'});obstacles.push({x:-15,z:-28,hx:1.1,hz:1.85,top:1.2},{x:17,z:25,hx:1.55,hz:2.1,top:1.5});
 // Floodlights and overhead cables give the yard more depth.
 for(const [x,z] of [[-39,-38],[39,-38],[-39,38],[39,38]]){cylinder(x,4,z,.12,.16,8,dark);box(x,8,z,.8,.12,.4,yellow,false)}
-const extraction=new THREE.Group();extraction.position.set(0,.06,-40);scene.add(extraction);const ring=new THREE.Mesh(new THREE.TorusGeometry(3,.16,8,32),yellow);ring.rotation.x=Math.PI/2;extraction.add(ring);const beam=new THREE.Mesh(new THREE.CylinderGeometry(2.8,2.8,5,32,1,true),new THREE.MeshBasicMaterial({color:0xe4b849,transparent:true,opacity:.13,side:THREE.DoubleSide}));beam.position.y=2.5;extraction.add(beam);const beacon=cylinder(0,3.2,-40,.12,.12,6,yellow,8);
+const extraction=new THREE.Group();extraction.position.set(0,.06,-40);scene.add(extraction);const ring=new THREE.Mesh(new THREE.TorusGeometry(3,.16,8,32),yellow);ring.rotation.x=Math.PI/2;extraction.add(ring);const beam=new THREE.Mesh(new THREE.CylinderGeometry(2.8,2.8,5,32,1,true),new THREE.MeshBasicMaterial({color:0xe4b849,transparent:true,opacity:.13,side:THREE.DoubleSide}));beam.position.y=2.5;extraction.add(beam);const beacon=cylinder(0,3.2,-40,.12,.12,6,yellow,8);window.__bootStage='Cenário construído; preparando lógica da missão';
 function soldier(isEnemy=false){const g=new THREE.Group();const body=new THREE.Mesh(new THREE.CapsuleGeometry(.43,.85,4,8),isEnemy?red:blue);body.position.y=1.25;body.castShadow=true;g.add(body);const head=new THREE.Mesh(new THREE.SphereGeometry(.28,10,8),skin);head.position.y=2.02;head.castShadow=true;g.add(head);const helmet=new THREE.Mesh(new THREE.SphereGeometry(.32,10,7,0,Math.PI*2,0,Math.PI/2),isEnemy?dark:green);helmet.position.y=2.13;g.add(helmet);const pack=new THREE.Mesh(new THREE.BoxGeometry(.48,.55,.25),isEnemy?dark:green);pack.position.set(0,1.3,.38);g.add(pack);const gun=new THREE.Mesh(new THREE.BoxGeometry(.15,.15,1.0),black);gun.position.set(.43,1.45,-.42);g.add(gun);const legs=[];for(const x of [-.2,.2]){const leg=new THREE.Mesh(new THREE.BoxGeometry(.22,.62,.27),dark);leg.position.set(x,.42,0);g.add(leg);legs.push(leg)}g.userData={legs,body,gun,isEnemy,head,helmet,pack};return g}
 let player,enemies=[],projectiles=[],effects=[],health=100,armor=50,ammo=30,reserve=150,pistolAmmo=12,pistolReserve=48,smgAmmo=45,smgReserve=225,launcherAmmo=3,launcherReserve=12,grenades=2,kills=0,shots=0,hits=0,running=false,ended=false,reloading=false,clock=new THREE.Clock(),fireCooldown=0,walkTime=0,toastTimer=0,weapon='rifle',yaw=0,pitch=-.05,mouseLocked=false,mission=1,mouseSensitivity=.0012,volumeLevel=.55,graphicsLevel='high',stealthMode=false,alarmTriggered=false,armorUpgrade=0,helmetEquipped=true,rainEnabled=false;
 const keys={};const weaponData={rifle:{mag:30,damage:1,rate:.12,range:55,name:'FUZIL'},pistol:{mag:12,damage:1,rate:.28,range:35,name:'PISTOLA'},shotgun:{mag:8,damage:2,rate:.65,range:19,name:'ESCOPETA'},sniper:{mag:5,damage:4,rate:1.05,range:110,name:'PRECISÃO MK II'},smg:{mag:45,damage:1,rate:.065,range:43,name:'SUBMETRALHADORA'},launcher:{mag:3,damage:5,rate:.8,range:70,name:'LANÇA-FOGUETES'}};let shotgunAmmo=8,shotgunReserve=40,sniperAmmo=5,sniperReserve=25,medkits=2;let audioCtx=null,audioEnabled=true,musicGain=null,musicStarted=false,missionStage=1,vehicle=null,driving=false,dayClock=0,saveTick=0,rain=null,windSoundAt=0;
@@ -115,12 +116,14 @@ for(let i=effects.length-1;i>=0;i--){effects[i].life-=dt;if(effects[i].life<=0){
 const camTarget=player.position.clone().add(new THREE.Vector3(0,driving?2.3:1.5,0));const offset=new THREE.Vector3(0,driving?5:3.0,driving?10:7.1).applyAxisAngle(new THREE.Vector3(0,1,0),yaw);camera.position.lerp(camTarget.clone().add(offset),1-Math.pow(.001,dt));const look=camTarget.clone().add(new THREE.Vector3(-Math.sin(yaw)*2,pitch*7,-Math.cos(yaw)*2));camera.lookAt(look);
 if(kills>=enemies.length&&player.position.distanceTo(new THREE.Vector3(0,0,-40))<5&&keys.KeyE){missionStage++;const completedKills=kills;kills=0;saveGame();kills=completedKills;finish(true)}
 if(vehicle&&player){const near=player.position.distanceTo(vehicle.position)<4;$('#vehiclePrompt').classList.toggle('hidden',!running||(!near&&!driving));$('#vehiclePrompt').textContent=driving?'PRESSIONE F PARA SAIR DO JIPE':'PRESSIONE F PARA ENTRAR NO JIPE'}updateMini();if(toastTimer>0){toastTimer-=dt;if(toastTimer<=0)$('#toast').classList.add('hidden')}}
+window.__bootStage='Lógica da missão pronta; registrando controles';
 document.addEventListener('pointerlockchange',()=>mouseLocked=document.pointerLockElement===canvas);
 canvas.addEventListener('click',()=>{if(!running)return;if(document.pointerLockElement!==canvas)canvas.requestPointerLock?.();else shoot()});
 document.addEventListener('mousemove',e=>{if(mouseLocked&&running){yaw-=e.movementX*mouseSensitivity*2;pitch=THREE.MathUtils.clamp(pitch-e.movementY*mouseSensitivity*1.5,-.6,.42)}});
 document.addEventListener('mousedown',e=>{if(e.button===0&&mouseLocked)shoot()});
 document.addEventListener('keydown',e=>{keys[e.code]=true;if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();if(e.repeat)return;if(e.code==='KeyH'&&running&&medkits>0&&health<100){medkits--;health=Math.min(100,health+35);updateHUD();sound(640,.18,'sine');say('KIT MÉDICO UTILIZADO')}if(e.code==='KeyR')reload();if(e.code==='Digit1')switchWeapon('rifle');if(e.code==='Digit2')switchWeapon('pistol');if(e.code==='Digit3')switchWeapon('shotgun');if(e.code==='Digit4')switchWeapon('sniper');if(e.code==='Digit5')switchWeapon('smg');if(e.code==='Digit6')switchWeapon('launcher');if(e.code==='KeyC'&&running){stealthMode=!stealthMode;say(stealthMode?'MODO FURTIVO ATIVADO':'MODO FURTIVO DESATIVADO')}if(e.code==='KeyG')throwGrenade();if(e.code==='KeyF'&&running&&vehicle&&player.position.distanceTo(vehicle.position)<4){driving=!driving;if(driving){player.visible=false;player.position.copy(vehicle.position);say('JIPE: DIRIJAÇÃO ATIVADA')}else{player.visible=true;player.position.x=vehicle.position.x+2;player.position.z=vehicle.position.z;say('VOCÊ SAIU DO JIPE')}}if(e.code==='KeyE'&&running&&kills>=enemies.length&&player.position.distanceTo(new THREE.Vector3(0,0,-40))<7)finish(true)});
 document.addEventListener('keyup',e=>keys[e.code]=false);$('#againBtn').onclick=()=>reset(false);$('#nextMissionBtn').onclick=()=>{if(missionStage>5){missionStage=1;const s=loadSave();if(s){s.missionStage=1;s.kills=0;try{localStorage.setItem('operacaoRupturaSave',JSON.stringify(s))}catch{}}}reset(true)};$('#endMenuBtn').onclick=()=>{running=false;ended=false;document.body.classList.remove('game-running');$('#end').classList.add('hidden');$('#hud').classList.add('hidden');$('#start').classList.remove('hidden');document.exitPointerLock?.()};
+window.__bootStage='Controles registrados; configurando botões dos menus';
 const subMenu=$('#subMenu'),subTitle=$('#subTitle'),subContent=$('#subContent');
 function openSub(title,html){subTitle.textContent=title;subContent.innerHTML=html;subMenu.classList.add('open')}
 function closeSub(){subMenu.classList.remove('open')}
@@ -134,44 +137,40 @@ $('#creditsBtn').onclick=()=>openSub('CRÉDITOS','<p><b>OPERAÇÃO RUPTURA</b></
 $('#subContent').addEventListener('input',e=>{if(e.target.id==='sens')$('#sensVal').textContent=Number(e.target.value).toFixed(4);if(e.target.id==='vol')$('#volVal').textContent=Math.round(Number(e.target.value)*100)+'%'});
 $('#subContent').addEventListener('click',e=>{const missionButton=e.target.closest('[data-mission-stage]');if(missionButton){const stage=Number(missionButton.dataset.missionStage);closeSub();reset(false,stage);say('MISSÃO '+stage+' INICIADA');return}if(e.target.id==='saveSettings'){mouseSensitivity=Number($('#sens').value);volumeLevel=Number($('#vol').value);graphicsLevel=$('#gfx').value;renderer.setPixelRatio(Math.min(devicePixelRatio,graphicsLevel==='low'?.8:graphicsLevel==='medium'?1.15:1.6));renderer.shadowMap.enabled=graphicsLevel==='high';rainEnabled=graphicsLevel==='high';rainPoints.visible=rainEnabled;try{localStorage.setItem('operacaoRupturaSettings',JSON.stringify({mouseSensitivity,volumeLevel,graphicsLevel}))}catch{}closeSub();say('CONFIGURAÇÕES SALVAS')}if(e.target.id==='armorUpgrade'){if(armorUpgrade<3){armorUpgrade++;armor=Math.min(100,armor+10);saveGame();$('#inventoryBtn').click();say('COLETE MELHORADO')}else say('COLETE JÁ ESTÁ NO NÍVEL MÁXIMO')}if(e.target.id==='helmetToggle'){helmetEquipped=!helmetEquipped;$('#inventoryBtn').click()}if(e.target.id==='medkitRefill'){medkits=Math.min(6,medkits+2);saveGame();say('KITS MÉDICOS REABASTECIDOS');$('#inventoryBtn').click()}if(e.target.id==='saveNow'){saveGame();say('CAMPANHA SALVA');$('#saveManagerBtn').click()}if(e.target.id==='loadNow'){if(loadSave()){closeSub();reset(true);say('CAMPANHA CARREGADA')}}if(e.target.id==='deleteSave'){if(confirm('Apagar permanentemente o progresso salvo?')){localStorage.removeItem('operacaoRupturaSave');$('#saveManagerBtn').click();say('SAVE APAGADO')}}});
 try{const cfg=JSON.parse(localStorage.getItem('operacaoRupturaSettings')||'null');if(cfg){mouseSensitivity=cfg.mouseSensitivity??mouseSensitivity;volumeLevel=cfg.volumeLevel??volumeLevel;graphicsLevel=cfg.graphicsLevel??graphicsLevel;renderer.setPixelRatio(Math.min(devicePixelRatio,graphicsLevel==='low'?.8:graphicsLevel==='medium'?1.15:1.6));renderer.shadowMap.enabled=graphicsLevel==='high';rainEnabled=graphicsLevel==='high';rainPoints.visible=rainEnabled}}catch{}
+window.__bootStage='Menus registrados; iniciando a primeira renderização';
 function frame(){requestAnimationFrame(frame);const dt=Math.min(clock.getDelta(),.04);update(dt);renderer.render(scene,camera)}frame();
+window.__bootStage='Jogo inicializado; aguardando JOGAR';
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,1.6))});
-/* Só libera o menu principal quando todo o módulo 3D terminou de inicializar. */
-document.getElementById('bootRescue')?.remove();
+/* Esconde o painel de segurança, mas o mantém disponível se ocorrer outro erro. */
+const rescuePanel=document.getElementById('bootRescue');if(rescuePanel)rescuePanel.style.display='none';
 </script>
 <script>
-/* Diagnóstico global: evita tela preta silenciosa se o módulo falhar. */
+/* Diagnóstico de inicialização: mantém uma explicação visível em vez de deixar a tela preta. */
 (function(){
+  window.__bootStage='HTML carregado; aguardando Three.js';
   function report(message){
     var panel=document.getElementById('bootRescue');
     var status=document.getElementById('bootRescueStatus');
-    if(panel) panel.style.display='flex';
-    if(status) status.textContent='Falha ao iniciar o jogo: '+String(message||'erro desconhecido').slice(0,240);
+    if(panel){panel.style.display='flex';panel.style.zIndex='2147483647';}
+    if(status){
+      var stage=window.__bootStage||'etapa desconhecida';
+      status.textContent='Falha na etapa: '+stage+'. Detalhe: '+String(message||'erro sem mensagem').slice(0,260);
+    }
   }
   window.addEventListener('error',function(e){
-    if(document.getElementById('bootRescue')) report(e.message||'erro de JavaScript');
+    report(e.message||e.error&&e.error.message||'erro de JavaScript ou carregamento de módulo');
   });
   window.addEventListener('unhandledrejection',function(e){
-    if(document.getElementById('bootRescue')) report(e.reason&&e.reason.message||e.reason||'falha ao carregar o motor 3D');
+    report(e.reason&&e.reason.message||e.reason||'falha ao carregar o motor 3D');
   });
-})();
-/* Mantém o menu principal acessível no carregamento, sem forçá-lo por cima da partida. */
-(function(){
-  function restoreMenu(){
-    var start=document.getElementById('start');
-    var button=document.getElementById('startBtn');
-    if(start){
-      ['display','visibility','opacity','z-index'].forEach(function(p){start.style.removeProperty(p);});
-      if(document.body.classList.contains('game-running')) start.classList.add('hidden');
-      else start.classList.remove('hidden');
+  window.addEventListener('pageshow',function(){
+    if(!window.__gameReady && document.getElementById('bootRescue')){
+      var status=document.getElementById('bootRescueStatus');
+      if(status && status.textContent.indexOf('Preparando')>=0){
+        status.textContent='O motor 3D ainda não confirmou a inicialização. Se ficar assim, aguarde a mensagem de erro abaixo ou recarregue.';
+      }
     }
-    if(button){
-      ['display','visibility','opacity','pointer-events','z-index'].forEach(function(p){button.style.removeProperty(p);});
-    }
-  }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',restoreMenu,{once:true});
-  else restoreMenu();
-  window.addEventListener('pageshow',restoreMenu);
+  });
 })();
 </script>
 </body></html>
