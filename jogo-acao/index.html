@@ -20,7 +20,18 @@
 <div id="start" class="overlay"><div class="modal"><div class="eyebrow">CAMPANHA TÁTICA • EXPERIÊNCIA 3D</div><h1>OPERAÇÃO<br><span class="red">RUPTURA</span></h1><p><b>Campanha 01: Zona Industrial</b></p><p class="small">Uma unidade hostil tomou a estação de comunicações. Infiltre-se no complexo, sobreviva ao contra-ataque e alcance a extração. Os inimigos perseguem, disparam à distância e tentam encurtar a distância quando você se esconde.</p><div class="small"><b>CONTROLES</b><br>WASD mover · Shift correr · Mouse mirar · Clique disparar · R recarregar · 1 fuzil / 2 pistola · G granada · E extração</div><div><span class="chip">IA INIMIGA</span><span class="chip">COBERTURAS</span><span class="chip">ARSENAL</span><span class="chip">GRANADAS</span><span class="chip">MISSÃO DE EXTRAÇÃO</span></div><button class="btn" id="startBtn">INICIAR OPERAÇÃO ▶</button><button class="btn secondary" id="continueBtn">CONTINUAR CAMPANHA</button><div class="small" style="margin-top:14px">Recomendado: teclado e mouse. O jogo usa Three.js por CDN, então precisa de internet para carregar.</div></div></div>
 <div id="end" class="overlay hidden"><div class="modal"><div class="eyebrow" id="endTag">RELATÓRIO DA MISSÃO</div><h1 id="endTitle">MISSÃO <span class="red">CONCLUÍDA</span></h1><p id="endText">A área está segura.</p><p class="small" id="statsText"></p><button class="btn" id="againBtn">JOGAR NOVAMENTE ↻</button></div></div>
 <script type="module">
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+const THREE = await import('https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js').catch(async firstError => {
+  try { return await import('https://unpkg.com/three@0.160.0/build/three.module.js'); }
+  catch (secondError) {
+    const start = document.querySelector('#start');
+    const msg = document.createElement('p');
+    msg.style.cssText = 'color:#ff765f;font-weight:800;margin-top:14px';
+    msg.textContent = 'O motor 3D não carregou. Verifique a internet ou bloqueadores e recarregue a página. (' + (secondError.message || firstError.message || 'falha ao carregar Three.js') + ')';
+    start?.querySelector('.modal')?.appendChild(msg);
+    document.querySelectorAll('#startBtn,#continueBtn').forEach(b => { b.disabled = true; b.style.opacity = '.5'; });
+    throw secondError;
+  }
+});
 const $=s=>document.querySelector(s), canvas=$('#game');
 window.addEventListener('error',e=>{const t=$('#toast');if(t){t.textContent='ERRO AO CARREGAR O JOGO: '+(e.message||'erro desconhecido');t.classList.remove('hidden')}});
 window.addEventListener('unhandledrejection',e=>{const t=$('#toast');if(t){t.textContent='ERRO DE INICIALIZAÇÃO: '+(e.reason?.message||String(e.reason||'erro desconhecido'));t.classList.remove('hidden')}});
