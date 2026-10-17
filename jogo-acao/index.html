@@ -13,9 +13,16 @@
   <div style="width:min(620px,100%);padding:28px;background:#0a121b;border:1px solid #405768;box-shadow:0 20px 80px #000">
     <div style="font-size:11px;letter-spacing:3px;color:#ff765f;font-weight:900">CAMPANHA TÁTICA • EXPERIÊNCIA 3D</div>
     <h1 style="font-size:clamp(30px,7vw,48px);line-height:1.05;margin:12px 0">OPERAÇÃO<br><span style="color:#ff765f">RUPTURA</span></h1>
-    <p id="bootRescueStatus" style="color:#b9c9d5;line-height:1.6">Preparando o motor 3D. O menu principal aparecerá quando o jogo estiver pronto.</p>
-    <button type="button" style="display:block;width:100%;padding:15px;border:0;background:#d94736;color:white;font-size:16px;font-weight:900;cursor:pointer" onclick="document.getElementById('startBtn')?.click();setTimeout(()=>{if(document.body.classList.contains('game-running'))document.getElementById('bootRescue').style.display='none';else{const s=document.getElementById('bootRescueStatus');if(s)s.textContent='A partida ainda não iniciou. Recarregue a página; se a falha continuar, o jogo exibirá uma mensagem aqui.'}},400)">JOGAR ▶</button>
-    <button type="button" style="display:block;width:100%;margin-top:9px;padding:12px;border:1px solid #405768;background:#142332;color:#edf4fa;font-weight:800;cursor:pointer" onclick="location.reload()">RECARREGAR JOGO</button>
+    <p id="bootRescueStatus" style="color:#b9c9d5;line-height:1.6">Menu de segurança ativo. Escolha uma opção; o menu só sai quando a partida começar.</p>
+    <button type="button" style="display:block;width:100%;padding:13px;border:0;background:#d94736;color:white;font-size:16px;font-weight:900;cursor:pointer" onclick="window.__rescueAction('startBtn','JOGAR')">JOGAR ▶</button>
+    <button type="button" style="display:block;width:100%;margin-top:8px;padding:11px;border:1px solid #405768;background:#263846;color:#edf4fa;font-weight:800;cursor:pointer" onclick="window.__rescueAction('continueBtn','CONTINUAR CAMPANHA')">CONTINUAR CAMPANHA</button>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:9px">
+      <button type="button" style="padding:11px 6px;border:1px solid #405768;background:#142332;color:#edf4fa;font-weight:800;cursor:pointer" onclick="window.__rescueSubMenu('missionsBtn','MISSÕES')">MISSÕES</button>
+      <button type="button" style="padding:11px 6px;border:1px solid #405768;background:#142332;color:#edf4fa;font-weight:800;cursor:pointer" onclick="window.__rescueSubMenu('controlsBtn','CONTROLES')">CONTROLES</button>
+      <button type="button" style="padding:11px 6px;border:1px solid #405768;background:#142332;color:#edf4fa;font-weight:800;cursor:pointer" onclick="window.__rescueSubMenu('settingsBtn','CONFIGURAÇÕES')">CONFIGURAÇÕES</button>
+      <button type="button" style="padding:11px 6px;border:1px solid #405768;background:#142332;color:#edf4fa;font-weight:800;cursor:pointer" onclick="window.__rescueSubMenu('saveManagerBtn','GERENCIAR SAVE')">GERENCIAR SAVE</button>
+    </div>
+    <button type="button" style="display:block;width:100%;margin-top:8px;padding:11px;border:1px solid #405768;background:#142332;color:#edf4fa;font-weight:800;cursor:pointer" onclick="location.reload()">RECARREGAR JOGO</button>
   </div>
 </div>
 <canvas id="game" style="position:fixed;inset:0;z-index:0"></canvas>
@@ -151,21 +158,63 @@ if(realMenu){
   realMenu.style.setProperty('opacity','1','important');
   realMenu.style.setProperty('z-index','1000','important');
 }
-const rescuePanel=document.getElementById('bootRescue');
-if(rescuePanel)rescuePanel.style.display='none';
+/* O menu de segurança fica no topo até que a partida comece de verdade. */
 </script>
 <script>
-/* Diagnóstico de inicialização: mantém uma explicação visível em vez de deixar a tela preta. */
+/* Menus de segurança independentes do motor 3D. */
 (function(){
-  window.__bootStage='HTML carregado; aguardando Three.js';
-  function report(message){
-    var panel=document.getElementById('bootRescue');
-    var status=document.getElementById('bootRescueStatus');
-    if(panel){panel.style.display='flex';panel.style.zIndex='2147483647';}
-    if(status){
-      var stage=window.__bootStage||'etapa desconhecida';
-      status.textContent='Falha na etapa: '+stage+'. Detalhe: '+String(message||'erro sem mensagem').slice(0,260);
+  window.__bootStage=window.__bootStage||'HTML carregado; aguardando o motor 3D';
+  function panel(){return document.getElementById('bootRescue')}
+  function status(message){
+    var s=document.getElementById('bootRescueStatus');
+    if(s)s.textContent=String(message||'O menu continua disponível.');
+  }
+  function stageError(action){
+    var detail=document.getElementById('startupError');
+    var step=window.__bootStage||'etapa desconhecida';
+    status(action+' não iniciou. Etapa: '+step+(detail&&detail.textContent?' · '+detail.textContent:''));
+  }
+  window.__rescueAction=function(id,label){
+    var btn=document.getElementById(id);
+    if(!btn){stageError(label);return}
+    try{btn.click()}catch(e){stageError(label+': '+(e&&e.message||e));return}
+    window.setTimeout(function(){
+      if(document.body.classList.contains('game-running')){
+        if(panel())panel().style.display='none';
+      }else if(!document.getElementById('subMenu')?.classList.contains('open')){
+        stageError(label);
+        if(panel())panel().style.display='flex';
+      }
+    },500);
+  };
+  window.__rescueSubMenu=function(id,label){
+    var btn=document.getElementById(id);
+    if(!btn){stageError(label);return}
+    try{btn.click()}catch(e){stageError(label+': '+(e&&e.message||e));return}
+    window.setTimeout(function(){
+      var sub=document.getElementById('subMenu');
+      if(sub&&sub.classList.contains('open')){
+        if(panel())panel().style.display='none';
+      }else{
+        stageError(label);
+        if(panel())panel().style.display='flex';
+      }
+    },120);
+  };
+  document.addEventListener('click',function(e){
+    if(e.target.closest('#subClose')||e.target.closest('#subContent button')){
+      window.setTimeout(function(){
+        var p=panel(),sub=document.getElementById('subMenu');
+        if(!p)return;
+        if(document.body.classList.contains('game-running'))p.style.display='none';
+        else if(!sub||!sub.classList.contains('open'))p.style.display='flex';
+      },220);
     }
+  });
+  function report(message){
+    var p=panel();
+    if(p){p.style.display='flex';p.style.zIndex='2147483647'}
+    status('Falha na inicialização: '+String(message||'erro desconhecido').slice(0,320)+' · etapa: '+(window.__bootStage||'desconhecida'));
   }
   window.addEventListener('error',function(e){
     report(e.message||e.error&&e.error.message||'erro de JavaScript ou carregamento de módulo');
@@ -173,16 +222,8 @@ if(rescuePanel)rescuePanel.style.display='none';
   window.addEventListener('unhandledrejection',function(e){
     report(e.reason&&e.reason.message||e.reason||'falha ao carregar o motor 3D');
   });
-  window.addEventListener('pageshow',function(){
-    if(!window.__gameReady && document.getElementById('bootRescue')){
-      var status=document.getElementById('bootRescueStatus');
-      if(status) status.textContent='Aguardando o motor 3D. Etapa atual: '+(window.__bootStage||'carregando dependências')+'. O aviso fica visível até a inicialização terminar.';
-    }
-  });
   window.setTimeout(function(){
-    if(!window.__gameReady){
-      report('o motor 3D não terminou de inicializar após 8 segundos. Etapa atual: '+(window.__bootStage||'carregando dependências'));
-    }
+    if(!window.__gameReady)report('o motor 3D não terminou de inicializar em 8 segundos');
   },8000);
 })();
 </script>
