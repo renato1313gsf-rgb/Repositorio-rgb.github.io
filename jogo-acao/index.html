@@ -300,7 +300,7 @@ for(const e of enemies){
        const beforeX=p.x,beforeZ=p.z;
        moveEnemySafe(e,patrolDX/patrolDist*e.speed*.62*dt,patrolDZ/patrolDist*e.speed*.62*dt);
        // Se chegou ao destino ou ficou preso em uma parede, escolhe outro ponto para patrulhar.
-       if(Math.hypot(p.x-beforeX,p.z-beforeZ)<.001&&Math.random()<dt*3 || patrolDist<2.2){
+       if(Math.hypot(p.x-beforeX,p.z-beforeZ)<.001&&Math.random()<dt*3){
          const home=e.home||[p.x,p.z];
          e.patrol=[THREE.MathUtils.clamp(home[0]+(Math.random()-.5)*22,-39,39),THREE.MathUtils.clamp(home[1]+(Math.random()-.5)*22,-39,39)];
        }
