@@ -9,6 +9,15 @@
 </style>
 </head>
 <body>
+<div id="bootRescue" style="position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(ellipse at center,#142332,#030609);color:#edf4fa;font-family:system-ui,Arial">
+  <div style="width:min(620px,100%);padding:28px;background:#0a121b;border:1px solid #405768;box-shadow:0 20px 80px #000">
+    <div style="font-size:11px;letter-spacing:3px;color:#ff765f;font-weight:900">CAMPANHA TÁTICA • EXPERIÊNCIA 3D</div>
+    <h1 style="font-size:clamp(30px,7vw,48px);line-height:1.05;margin:12px 0">OPERAÇÃO<br><span style="color:#ff765f">RUPTURA</span></h1>
+    <p style="color:#b9c9d5;line-height:1.6">Menu de segurança. Se o menu principal falhar, este botão tenta iniciar o jogo.</p>
+    <button type="button" style="display:block;width:100%;padding:15px;border:0;background:#d94736;color:white;font-size:16px;font-weight:900;cursor:pointer" onclick="document.getElementById('startBtn')?.click();if(document.body.classList.contains('game-running'))document.getElementById('bootRescue').style.display='none'">JOGAR ▶</button>
+    <button type="button" style="display:block;width:100%;margin-top:9px;padding:12px;border:1px solid #405768;background:#142332;color:#edf4fa;font-weight:800;cursor:pointer" onclick="location.reload()">RECARREGAR JOGO</button>
+  </div>
+</div>
 <canvas id="game" style="position:fixed;inset:0;z-index:0"></canvas>
 <div id="hud" class="hidden">
  <div class="row">
