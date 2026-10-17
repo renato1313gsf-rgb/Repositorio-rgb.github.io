@@ -20,6 +20,7 @@
       <button type="button" style="padding:11px 6px;border:1px solid #405768;background:#142332;color:#edf4fa;font-weight:800;cursor:pointer" onclick="window.__openDirectMenu('missions')">MISSÕES</button>
       <button type="button" style="padding:11px 6px;border:1px solid #405768;background:#142332;color:#edf4fa;font-weight:800;cursor:pointer" onclick="window.__openDirectMenu('controls')">CONTROLES</button>
       <button type="button" style="padding:11px 6px;border:1px solid #405768;background:#142332;color:#edf4fa;font-weight:800;cursor:pointer" onclick="window.__openDirectMenu('settings')">CONFIGURAÇÕES</button>
+      <button type="button" style="padding:11px 6px;border:1px solid #b94c3f;background:#51231f;color:#fff;font-weight:900;cursor:pointer" onclick="window.__openDirectMenu('arsenal')">ARSENAL TÁTICO ⚙</button>
       <button type="button" style="padding:11px 6px;border:1px solid #405768;background:#142332;color:#edf4fa;font-weight:800;cursor:pointer" onclick="window.__openDirectMenu('saves')">GERENCIAR SAVE</button>
     </div>
     <button type="button" style="display:block;width:100%;margin-top:8px;padding:11px;border:1px solid #405768;background:#142332;color:#edf4fa;font-weight:800;cursor:pointer" onclick="location.reload()">RECARREGAR JOGO</button>
@@ -39,11 +40,10 @@
   <div class="panel"><div class="eyebrow">UNIDADE TÁTICA • CAMPANHA 01</div><div class="title">OPERAÇÃO <span class="red">RUPTURA</span></div><div class="stat">SAÚDE <b id="healthText">100</b>%</div><div class="bar"><div id="healthBar" class="fill"></div></div><div class="stat">COLETE <b id="armorText">50</b>%</div><div class="bar"><div id="armorBar" class="fill bluefill"></div></div><div class="stat">MUNIÇÃO <b id="ammo">30</b> / <span id="reserve">150</span> <span id="weaponName">• FUZIL</span></div></div>
   <div class="panel" style="text-align:right"><div class="eyebrow">RELATÓRIO TÁTICO</div><div class="title" id="kills">HOSTIS: 0 / 10</div><div class="small" id="status">ÁREA DE INSERÇÃO</div><div class="stat">GRANADAS <b id="grenades">2</b> · KITS <b id="medkits">2</b> <span class="hide-mobile">· ABATES <b id="accuracy">0</b></span></div></div>
  </div>
- <button id="arsenalBtn" type="button" onclick="window.__openDirectMenu('arsenal')" style="position:fixed;right:18px;top:315px;z-index:50;pointer-events:auto;padding:12px 18px;background:#b83f31;border:1px solid #ff806b;color:#fff;font-weight:950;letter-spacing:1px;cursor:pointer;box-shadow:0 5px 22px #0008">ARSENAL ⚙</button>
  <div class="bottom"><div class="panel objective"><div class="eyebrow" id="missionLabel">MISSÃO 01 — ZONA INDUSTRIAL</div><div id="objective" style="font-weight:850;margin:5px 0">Elimine os combatentes hostis.</div><div class="small" id="hint">Use as coberturas. Os inimigos vão tentar flanquear sua posição.</div></div><div class="panel controls"><div><span class="key">WASD</span> mover · <span class="key">SHIFT</span> correr</div><div><span class="key">MOUSE</span> mirar · <span class="key">CLIQUE</span> atirar</div><div><span class="key">R</span> recarregar · <span class="key">1-6</span> armas · <span class="key">G</span> granada</div><div><span class="key">C</span> modo furtivo · <span class="key">H</span> kit médico<div><span class="key">F</span> jipe · <span class="key">C</span> agachar · <span class="key">H</span> curar · <span class="key">E</span> extração</div></div></div>
 </div>
 <canvas id="mini" class="hidden" width="150" height="150"></canvas><div id="vehiclePrompt" class="hidden">PRESSIONE F PARA ENTRAR NO JIPE</div><div id="crosshair" class="hidden"></div><div id="hitmarker" class="hitmarker hidden">×</div><div id="toast" class="hidden"></div><div id="subMenu"><div class="modal"><div class="eyebrow">CENTRAL DE OPERAÇÕES</div><h1 id="subTitle">CONFIGURAÇÕES</h1><div id="subContent"></div><button class="btn secondary" id="subClose">VOLTAR</button></div></div>
-<div id="start" class="overlay"><div class="modal"><div class="eyebrow">CAMPANHA TÁTICA • EXPERIÊNCIA 3D</div><h1>OPERAÇÃO<br><span class="red">RUPTURA</span></h1><p><b>Campanha 01: Zona Industrial</b></p><p class="small">Uma unidade hostil tomou a estação de comunicações. Infiltre-se no complexo, sobreviva ao contra-ataque e alcance a extração. Os inimigos perseguem, disparam à distância e tentam encurtar a distância quando você se esconde.</p><div class="small"><b>CONTROLES</b><br>WASD mover · Shift correr · Mouse mirar · Clique disparar · R recarregar · 1 fuzil / 2 pistola · G granada · E extração</div><div><span class="chip">IA INIMIGA</span><span class="chip">COBERTURAS</span><span class="chip">ARSENAL</span><span class="chip">GRANADAS</span><span class="chip">MISSÃO DE EXTRAÇÃO</span></div><div class="menuGrid"><button class="btn" id="startBtn">JOGAR ▶</button><button class="btn secondary" id="continueBtn">CONTINUAR CAMPANHA</button><button class="btn secondary" id="missionsBtn">MISSÕES</button><button class="btn secondary" id="controlsBtn">CONTROLES</button><button class="btn secondary" id="settingsBtn">CONFIGURAÇÕES</button><button class="btn secondary" id="inventoryBtn">ARSENAL & EQUIPAMENTO</button><button class="btn secondary" id="saveManagerBtn">GERENCIAR SAVE</button><button class="btn secondary" id="creditsBtn">CRÉDITOS</button></div><div class="small" style="margin-top:14px">Teclado e mouse recomendados. O jogo usa Three.js por CDN e precisa de internet para carregar.</div></div></div>
+<div id="start" class="overlay"><div class="modal"><div class="eyebrow">CAMPANHA TÁTICA • EXPERIÊNCIA 3D</div><h1>OPERAÇÃO<br><span class="red">RUPTURA</span></h1><p><b>Campanha 01: Zona Industrial</b></p><p class="small">Uma unidade hostil tomou a estação de comunicações. Infiltre-se no complexo, sobreviva ao contra-ataque e alcance a extração. Os inimigos perseguem, disparam à distância e tentam encurtar a distância quando você se esconde.</p><div class="small"><b>CONTROLES</b><br>WASD mover · Shift correr · Mouse mirar · Clique disparar · R recarregar · 1 fuzil / 2 pistola · G granada · E extração</div><div><span class="chip">IA INIMIGA</span><span class="chip">COBERTURAS</span><span class="chip">ARSENAL</span><span class="chip">GRANADAS</span><span class="chip">MISSÃO DE EXTRAÇÃO</span></div><div class="menuGrid"><button class="btn" id="startBtn">JOGAR ▶</button><button class="btn secondary" id="continueBtn">CONTINUAR CAMPANHA</button><button class="btn secondary" id="missionsBtn">MISSÕES</button><button class="btn secondary" id="controlsBtn">CONTROLES</button><button class="btn secondary" id="settingsBtn">CONFIGURAÇÕES</button><button class="btn secondary" id="inventoryBtn">EQUIPAMENTO & MELHORIAS</button><button class="btn secondary" type="button" onclick="window.__openDirectMenu('arsenal')">ARSENAL TÁTICO ⚙</button><button class="btn secondary" id="saveManagerBtn">GERENCIAR SAVE</button><button class="btn secondary" id="creditsBtn">CRÉDITOS</button></div><div class="small" style="margin-top:14px">Teclado e mouse recomendados. O jogo usa Three.js por CDN e precisa de internet para carregar.</div></div></div>
 <div id="end" class="overlay hidden"><div class="modal"><div class="eyebrow" id="endTag">RELATÓRIO DA MISSÃO</div><h1 id="endTitle">MISSÃO <span class="red">CONCLUÍDA</span></h1><p id="endText">A área está segura.</p><p class="small" id="statsText"></p><button class="btn" id="againBtn">REPETIR MISSÃO ↻</button><button class="btn secondary" id="nextMissionBtn">PRÓXIMA MISSÃO ▶</button><button class="btn secondary" id="endMenuBtn">MENU PRINCIPAL</button></div></div>
 <script type="module">
 const THREE = await import('https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js').catch(async firstError => {
@@ -473,12 +473,10 @@ if(realMenu){
         html+=btn('APAGAR SAVE','delete',s?'':'disabled');
       }else html+='<p>O motor do jogo ainda está carregando. Aguarde um pouco.</p>';
     }else if(which==='arsenal'){
-      heading='ARSENAL & ACESSÓRIOS';
-      if(!api){
-        html='<p>O motor do jogo ainda está carregando. Aguarde e tente novamente.</p>';
-      }else{
-        const a=api.getLoadout();
-        html='<p style="color:#b9c9d5;line-height:1.65">Configure o equipamento antes ou durante a missão. As escolhas ficam salvas neste navegador.</p>'+
+      heading='ARSENAL TÁTICO • PRÉ-MISSÃO';
+      let a;
+      try{a=api&&api.getLoadout?api.getLoadout():JSON.parse(localStorage.getItem('operacaoRupturaSettings')||'{}')}catch{a={}}
+      html='<p style="color:#b9c9d5;line-height:1.65">Prepare o soldado antes de entrar na zona de combate. Escolha os acessórios e aplique o equipamento antes de clicar em JOGAR.</p>'+
           '<label style="display:flex;gap:10px;align-items:flex-start;padding:12px;margin:8px 0;background:#111e29;border:1px solid #405768"><input id="directSuppressor" type="checkbox" '+(a.suppressorEquipped?'checked':'')+' style="margin-top:4px"><span><b>SILENCIADOR</b><br><span style="color:#b9c9d5;font-size:13px">Fuzil, pistola e submetralhadora fazem menos barulho. Inimigos distantes demoram mais para reagir.</span></span></label>'+
           '<label style="display:flex;gap:10px;align-items:flex-start;padding:12px;margin:8px 0;background:#111e29;border:1px solid #405768"><input id="directRedDot" type="checkbox" '+(a.redDotEquipped?'checked':'')+' style="margin-top:4px"><span><b>MIRA RED DOT</b><br><span style="color:#b9c9d5;font-size:13px">Aumenta em 20% o alcance efetivo dos disparos.</span></span></label>'+
           '<label style="display:flex;gap:10px;align-items:flex-start;padding:12px;margin:8px 0;background:#111e29;border:1px solid #405768"><input id="directExtendedMag" type="checkbox" '+(a.extendedMagEquipped?'checked':'')+' style="margin-top:4px"><span><b>CARREGADOR ESTENDIDO</b><br><span style="color:#b9c9d5;font-size:13px">Permite recarregar até 50% mais munição por carregador.</span></span></label>'+
@@ -520,12 +518,19 @@ if(realMenu){
         if(!api){content().innerHTML='<p>O motor ainda está carregando. Aguarde e tente de novo.</p>';return}
         if(overlay())overlay().style.display='none';api.startMission(action.dataset.stage);return;
       }
-      if(cmd==='apply-loadout'&&api){
-        api.applyLoadout({
+      if(cmd==='apply-loadout'){
+        const loadout={
           suppressorEquipped:document.getElementById('directSuppressor').checked,
           redDotEquipped:document.getElementById('directRedDot').checked,
           extendedMagEquipped:document.getElementById('directExtendedMag').checked
-        });
+        };
+        if(api&&api.applyLoadout)api.applyLoadout(loadout);
+        else{
+          let prefs={};try{prefs=JSON.parse(localStorage.getItem('operacaoRupturaSettings')||'{}')}catch{}
+          Object.assign(prefs,loadout);
+          localStorage.setItem('operacaoRupturaSettings',JSON.stringify(prefs));
+          const t=document.getElementById('toast');if(t){t.textContent='ARSENAL SALVO PARA A MISSÃO';t.classList.remove('hidden');}
+        }
         close();return;
       }
       if(cmd==='apply-settings'&&api){
