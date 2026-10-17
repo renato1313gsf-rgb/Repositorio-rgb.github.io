@@ -17,12 +17,20 @@
     <button type="button" style="display:block;width:100%;padding:13px;border:0;background:#d94736;color:white;font-size:16px;font-weight:900;cursor:pointer" onclick="window.__rescueAction('startBtn','JOGAR')">JOGAR ▶</button>
     <button type="button" style="display:block;width:100%;margin-top:8px;padding:11px;border:1px solid #405768;background:#263846;color:#edf4fa;font-weight:800;cursor:pointer" onclick="window.__rescueAction('continueBtn','CONTINUAR CAMPANHA')">CONTINUAR CAMPANHA</button>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:9px">
-      <button type="button" style="padding:11px 6px;border:1px solid #405768;background:#142332;color:#edf4fa;font-weight:800;cursor:pointer" onclick="window.__rescueSubMenu('missionsBtn','MISSÕES')">MISSÕES</button>
-      <button type="button" style="padding:11px 6px;border:1px solid #405768;background:#142332;color:#edf4fa;font-weight:800;cursor:pointer" onclick="window.__rescueSubMenu('controlsBtn','CONTROLES')">CONTROLES</button>
-      <button type="button" style="padding:11px 6px;border:1px solid #405768;background:#142332;color:#edf4fa;font-weight:800;cursor:pointer" onclick="window.__rescueSubMenu('settingsBtn','CONFIGURAÇÕES')">CONFIGURAÇÕES</button>
-      <button type="button" style="padding:11px 6px;border:1px solid #405768;background:#142332;color:#edf4fa;font-weight:800;cursor:pointer" onclick="window.__rescueSubMenu('saveManagerBtn','GERENCIAR SAVE')">GERENCIAR SAVE</button>
+      <button type="button" style="padding:11px 6px;border:1px solid #405768;background:#142332;color:#edf4fa;font-weight:800;cursor:pointer" onclick="window.__openDirectMenu('missions')">MISSÕES</button>
+      <button type="button" style="padding:11px 6px;border:1px solid #405768;background:#142332;color:#edf4fa;font-weight:800;cursor:pointer" onclick="window.__openDirectMenu('controls')">CONTROLES</button>
+      <button type="button" style="padding:11px 6px;border:1px solid #405768;background:#142332;color:#edf4fa;font-weight:800;cursor:pointer" onclick="window.__openDirectMenu('settings')">CONFIGURAÇÕES</button>
+      <button type="button" style="padding:11px 6px;border:1px solid #405768;background:#142332;color:#edf4fa;font-weight:800;cursor:pointer" onclick="window.__openDirectMenu('saves')">GERENCIAR SAVE</button>
     </div>
     <button type="button" style="display:block;width:100%;margin-top:8px;padding:11px;border:1px solid #405768;background:#142332;color:#edf4fa;font-weight:800;cursor:pointer" onclick="location.reload()">RECARREGAR JOGO</button>
+  </div>
+</div>
+<div id="directMenu" style="position:fixed;inset:0;z-index:2147483647;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(2,5,8,.98);color:#edf4fa;font-family:system-ui,Arial">
+  <div style="width:min(680px,100%);max-height:92vh;overflow:auto;padding:26px;background:#0a121b;border:1px solid #405768;box-shadow:0 20px 80px #000">
+    <div style="font-size:11px;letter-spacing:3px;color:#ff765f;font-weight:900">OPERAÇÃO RUPTURA • CENTRAL</div>
+    <h1 id="directMenuTitle" style="font-size:clamp(26px,6vw,42px);margin:12px 0">MENU</h1>
+    <div id="directMenuContent"></div>
+    <button type="button" data-direct-action="close" style="width:100%;margin-top:15px;padding:13px;background:#263846;border:1px solid #516777;color:#fff;font-weight:900;cursor:pointer">VOLTAR AO MENU</button>
   </div>
 </div>
 <canvas id="game" style="position:fixed;inset:0;z-index:0"></canvas>
@@ -180,6 +188,35 @@ $('#settingsBtn').onclick=()=>openSub('CONFIGURAÇÕES','<div class="settingRow"
 $('#inventoryBtn').onclick=()=>openSub('ARSENAL & EQUIPAMENTO','<p class="menuNote">Prepare sua unidade antes do combate.</p><div class="settingRow"><span>Colete reforçado (+10 proteção por melhoria)</span><button class="btn" id="armorUpgrade">MELHORAR COLETE ('+armorUpgrade+'/3)</button></div><div class="settingRow"><span>Capacete tático</span><button class="btn secondary" id="helmetToggle">'+(helmetEquipped?'EQUIPADO':'DESEQUIPADO')+'</button></div><div class="settingRow"><span>Reabastecer kits médicos</span><button class="btn secondary" id="medkitRefill">+2 KITS</button></div><p class="menuNote">Armas: 1 Fuzil · 2 Pistola · 3 Escopeta · 4 Precisão MK II · 5 Submetralhadora · 6 Lança-foguetes.</p>');
 $('#saveManagerBtn').onclick=()=>{const s=loadSave();openSub('GERENCIAR CAMPANHA','<p class="menuNote">'+(s?'Save encontrado: missão '+String(s.missionStage||1).padStart(2,'0')+' · saúde '+(s.health??100)+' · abates '+(s.kills??0)+'.':'Nenhum save encontrado neste navegador.')+'</p><button class="btn" id="saveNow" '+(!player?'disabled':'')+'>SALVAR AGORA</button><button class="btn secondary" id="loadNow" '+(!s?'disabled':'')+'>CARREGAR SAVE</button><button class="btn secondary" id="deleteSave" '+(!s?'disabled':'')+'>APAGAR SAVE</button>')};
 $('#creditsBtn').onclick=()=>openSub('CRÉDITOS','<p><b>OPERAÇÃO RUPTURA</b></p><p class="menuNote">Protótipo tático 3D em HTML, JavaScript e Three.js.</p><p class="menuNote">Áudio sintetizado via Web Audio API. Versão experimental em desenvolvimento.</p>');
+window.__gameAPI={
+  getSettings(){return {mouseSensitivity,volumeLevel,graphicsLevel,enemyDifficulty}},
+  applySettings(values){
+    mouseSensitivity=Number(values.mouseSensitivity);
+    volumeLevel=Number(values.volumeLevel);
+    graphicsLevel=values.graphicsLevel;
+    const old=enemyDifficulty;
+    enemyDifficulty=enemyDifficultyData[values.enemyDifficulty]?values.enemyDifficulty:'veterano';
+    const ratio=enemyDifficultyData[enemyDifficulty].speed/enemyDifficultyData[old].speed;
+    for(const enemy of enemies)enemy.speed*=ratio;
+    renderer.setPixelRatio(Math.min(devicePixelRatio,graphicsLevel==='low'?.8:graphicsLevel==='medium'?1.15:1.6));
+    renderer.shadowMap.enabled=graphicsLevel==='high';
+    rainEnabled=graphicsLevel==='high';
+    rainPoints.visible=rainEnabled;
+    try{localStorage.setItem('operacaoRupturaSettings',JSON.stringify({mouseSensitivity,volumeLevel,graphicsLevel,enemyDifficulty}))}catch{}
+    say('CONFIGURAÇÕES SALVAS');
+  },
+  startMission(stage){reset(false,Number(stage)||1)},
+  continueCampaign(){if(loadSave())reset(true);else{say('NENHUM PROGRESSO SALVO');reset(false)}},
+  hasPlayer(){return !!player},
+  save(){saveGame()},
+  getSave(){return loadSave()},
+  load(){const saved=loadSave();if(!saved)return false;reset(true);return true},
+  deleteSave(){localStorage.removeItem('operacaoRupturaSave')},
+  getEquipment(){return {armorUpgrade,helmetEquipped,medkits}},
+  upgradeArmor(){if(armorUpgrade>=3)return false;armorUpgrade++;if(player){armor=Math.min(100,armor+10);updateHUD()}saveGame();return true},
+  toggleHelmet(){helmetEquipped=!helmetEquipped;saveGame();return helmetEquipped},
+  refillMedkits(){medkits=Math.min(6,medkits+2);saveGame();return medkits}
+};
 $('#subContent').addEventListener('input',e=>{if(e.target.id==='sens')$('#sensVal').textContent=Number(e.target.value).toFixed(4);if(e.target.id==='vol')$('#volVal').textContent=Math.round(Number(e.target.value)*100)+'%'});
 $('#subContent').addEventListener('click',e=>{const missionButton=e.target.closest('[data-mission-stage]');if(missionButton){const stage=Number(missionButton.dataset.missionStage);closeSub();reset(false,stage);say('MISSÃO '+stage+' INICIADA');return}if(e.target.id==='saveSettings'){mouseSensitivity=Number($('#sens').value);volumeLevel=Number($('#vol').value);graphicsLevel=$('#gfx').value;const previousDifficulty=enemyDifficulty;enemyDifficulty=$('#enemyDifficulty').value;const speedRatio=enemyDifficultyData[enemyDifficulty].speed/enemyDifficultyData[previousDifficulty].speed;for(const enemy of enemies)enemy.speed*=speedRatio;renderer.setPixelRatio(Math.min(devicePixelRatio,graphicsLevel==='low'?.8:graphicsLevel==='medium'?1.15:1.6));renderer.shadowMap.enabled=graphicsLevel==='high';rainEnabled=graphicsLevel==='high';rainPoints.visible=rainEnabled;try{localStorage.setItem('operacaoRupturaSettings',JSON.stringify({mouseSensitivity,volumeLevel,graphicsLevel,enemyDifficulty}))}catch{}closeSub();say('CONFIGURAÇÕES SALVAS')}if(e.target.id==='armorUpgrade'){if(armorUpgrade<3){armorUpgrade++;armor=Math.min(100,armor+10);saveGame();$('#inventoryBtn').click();say('COLETE MELHORADO')}else say('COLETE JÁ ESTÁ NO NÍVEL MÁXIMO')}if(e.target.id==='helmetToggle'){helmetEquipped=!helmetEquipped;$('#inventoryBtn').click()}if(e.target.id==='medkitRefill'){medkits=Math.min(6,medkits+2);saveGame();say('KITS MÉDICOS REABASTECIDOS');$('#inventoryBtn').click()}if(e.target.id==='saveNow'){saveGame();say('CAMPANHA SALVA');$('#saveManagerBtn').click()}if(e.target.id==='loadNow'){if(loadSave()){closeSub();reset(true);say('CAMPANHA CARREGADA')}}if(e.target.id==='deleteSave'){if(confirm('Apagar permanentemente o progresso salvo?')){localStorage.removeItem('operacaoRupturaSave');$('#saveManagerBtn').click();say('SAVE APAGADO')}}});
 try{const cfg=JSON.parse(localStorage.getItem('operacaoRupturaSettings')||'null');if(cfg){mouseSensitivity=cfg.mouseSensitivity??mouseSensitivity;volumeLevel=cfg.volumeLevel??volumeLevel;graphicsLevel=cfg.graphicsLevel??graphicsLevel;enemyDifficulty=cfg.enemyDifficulty&&enemyDifficultyData[cfg.enemyDifficulty]?cfg.enemyDifficulty:enemyDifficulty;renderer.setPixelRatio(Math.min(devicePixelRatio,graphicsLevel==='low'?.8:graphicsLevel==='medium'?1.15:1.6));renderer.shadowMap.enabled=graphicsLevel==='high';rainEnabled=graphicsLevel==='high';rainPoints.visible=rainEnabled}}catch{}
@@ -264,6 +301,113 @@ if(realMenu){
   window.setTimeout(function(){
     if(!window.__gameReady)report('o motor 3D não terminou de inicializar em 8 segundos');
   },8000);
+})();
+</script>
+<script>
+(function(){
+  const overlay=()=>document.getElementById('directMenu');
+  const content=()=>document.getElementById('directMenuContent');
+  const title=()=>document.getElementById('directMenuTitle');
+  const esc=v=>String(v==null?'':v).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+  const btn=(label,action,extra='')=>'<button type="button" data-direct-action="'+action+'" '+extra+' style="display:block;width:100%;margin:7px 0;padding:13px;background:#263846;border:1px solid #516777;color:#fff;font-weight:850;cursor:pointer;text-align:left">'+label+'</button>';
+  function close(){
+    const p=overlay();if(p)p.style.display='none';
+    if(document.body.classList.contains('game-running')){
+      const rescue=document.getElementById('bootRescue');if(rescue)rescue.style.display='none';
+    }else if(window.__gameReady){
+      const start=document.getElementById('start');if(start){start.classList.remove('hidden');start.style.display='flex';start.style.visibility='visible';start.style.opacity='1';start.style.zIndex='1000'}
+      const rescue=document.getElementById('bootRescue');if(rescue)rescue.style.display='none';
+    }else{
+      const rescue=document.getElementById('bootRescue');if(rescue)rescue.style.display='flex';
+    }
+  }
+  function open(which){
+    const p=overlay(),body=content();if(!p||!body)return;
+    const api=window.__gameAPI;
+    let heading='MENU',html='';
+    if(which==='missions'){
+      heading='ESCOLHER MISSÃO';
+      html='<p style="color:#b9c9d5;line-height:1.6">Selecione onde quer iniciar a campanha.</p>'+
+        [['1','ZONA INDUSTRIAL'],['2','BASE DA PEDREIRA'],['3','PORTO SOB CERCO'],['4','COMPLEXO NOTURNO'],['5','FORTALEZA: CHEFE HOSTIL']].map(([n,name])=>btn('MISSÃO '+n+' · '+name,'mission','data-stage="'+n+'"')).join('');
+    }else if(which==='controls'){
+      heading='CONTROLES';
+      html='<p style="color:#c8d7e2;line-height:2"><b>W A S D</b> — mover<br><b>SHIFT</b> — correr<br><b>MOUSE</b> — mirar<br><b>CLIQUE ESQUERDO</b> — disparar<br><b>R</b> — recarregar<br><b>1–6</b> — trocar de arma<br><b>G</b> — granada<br><b>H</b> — kit médico<br><b>C</b> — modo furtivo/agachar conforme configuração<br><b>F</b> — entrar/sair do jipe<br><b>E</b> — extração quando a área estiver limpa.</p>';
+    }else if(which==='settings'){
+      heading='CONFIGURAÇÕES';
+      if(!api){html='<p>O motor ainda está carregando. Feche esta tela e aguarde a inicialização.</p>'}
+      else{
+        const s=api.getSettings();
+        html='<div style="display:grid;gap:13px">'+
+          '<label>Sensibilidade do mouse <b id="directSensText">'+Number(s.mouseSensitivity).toFixed(4)+'</b><input id="directSens" type="range" min="0.0004" max="0.003" step="0.0001" value="'+s.mouseSensitivity+'" style="display:block;width:100%"></label>'+
+          '<label>Volume de efeitos <b id="directVolText">'+Math.round(s.volumeLevel*100)+'%</b><input id="directVol" type="range" min="0" max="1" step="0.05" value="'+s.volumeLevel+'" style="display:block;width:100%"></label>'+
+          '<label>Qualidade gráfica<select id="directGfx" style="display:block;width:100%;padding:10px;margin-top:5px;background:#142332;color:white"><option value="low" '+(s.graphicsLevel==='low'?'selected':'')+'>Desempenho</option><option value="medium" '+(s.graphicsLevel==='medium'?'selected':'')+'>Equilibrado</option><option value="high" '+(s.graphicsLevel==='high'?'selected':'')+'>Alta</option></select></label>'+
+          '<label>Dificuldade dos inimigos<select id="directDiff" style="display:block;width:100%;padding:10px;margin-top:5px;background:#142332;color:white"><option value="recruta" '+(s.enemyDifficulty==='recruta'?'selected':'')+'>Recruta — mais fáceis</option><option value="normal" '+(s.enemyDifficulty==='normal'?'selected':'')+'>Normal</option><option value="veterano" '+(s.enemyDifficulty==='veterano'?'selected':'')+'>Veterano — rápidos</option><option value="pesadelo" '+(s.enemyDifficulty==='pesadelo'?'selected':'')+'>Pesadelo — muito rápidos</option></select></label>'+
+          btn('SALVAR CONFIGURAÇÕES','apply-settings')+'</div>';
+      }
+    }else if(which==='saves'){
+      heading='GERENCIAR SAVE';
+      const s=api&&api.getSave();
+      html='<p style="color:#b9c9d5;line-height:1.7">'+(s?'Save encontrado: missão '+esc(String(s.missionStage||1).padStart(2,'0'))+' · saúde '+esc(s.health??100)+' · abates '+esc(s.kills??0)+'.':'Nenhum save encontrado neste navegador.')+'</p>';
+      if(api){
+        html+=btn('SALVAR AGORA','save');
+        html+=btn('CARREGAR CAMPANHA','load',s?'':'disabled');
+        html+=btn('APAGAR SAVE','delete',s?'':'disabled');
+      }else html+='<p>O motor do jogo ainda está carregando. Aguarde um pouco.</p>';
+    }else if(which==='inventory'){
+      heading='ARSENAL & EQUIPAMENTO';
+      const e=api&&api.getEquipment()||{armorUpgrade:0,helmetEquipped:true,medkits:2};
+      html='<p style="color:#b9c9d5">Melhore a proteção da unidade antes da missão.</p>'+
+        btn('MELHORAR COLETE ('+e.armorUpgrade+'/3)','armor')+
+        btn('CAPACETE: '+(e.helmetEquipped?'EQUIPADO':'DESEQUIPADO'),'helmet')+
+        btn('REABASTECER +2 KITS MÉDICOS','medkits');
+    }else if(which==='credits'){
+      heading='CRÉDITOS';
+      html='<p style="color:#b9c9d5;line-height:1.7">OPERAÇÃO RUPTURA<br>Protótipo tático 3D em HTML, JavaScript e Three.js.</p>';
+    }
+    title().textContent=heading;
+    body.innerHTML=html;
+    const rescue=document.getElementById('bootRescue');if(rescue)rescue.style.display='none';
+    const start=document.getElementById('start');if(start)start.style.zIndex='1';
+    p.style.display='flex';
+  }
+  window.__openDirectMenu=open;
+  window.__closeDirectMenu=close;
+  document.addEventListener('click',function(e){
+    const menuBtn=e.target.closest('#missionsBtn,#controlsBtn,#settingsBtn,#saveManagerBtn,#inventoryBtn,#creditsBtn');
+    if(menuBtn){
+      e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
+      const map={missionsBtn:'missions',controlsBtn:'controls',settingsBtn:'settings',saveManagerBtn:'saves',inventoryBtn:'inventory',creditsBtn:'credits'};
+      open(map[menuBtn.id]);return;
+    }
+    const action=e.target.closest('[data-direct-action]');
+    if(!action)return;
+    e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
+    const cmd=action.dataset.directAction,api=window.__gameAPI;
+    try{
+      if(cmd==='close'){close();return}
+      if(cmd==='mission'){
+        if(!api){content().innerHTML='<p>O motor ainda está carregando. Aguarde e tente de novo.</p>';return}
+        if(overlay())overlay().style.display='none';api.startMission(action.dataset.stage);return;
+      }
+      if(cmd==='apply-settings'&&api){
+        api.applySettings({mouseSensitivity:document.getElementById('directSens').value,volumeLevel:document.getElementById('directVol').value,graphicsLevel:document.getElementById('directGfx').value,enemyDifficulty:document.getElementById('directDiff').value});
+        close();return;
+      }
+      if(cmd==='save'&&api){api.save();open('saves');return}
+      if(cmd==='load'&&api){if(api.load()){if(overlay())overlay().style.display='none';close()}else open('saves');return}
+      if(cmd==='delete'&&api){if(window.confirm('Apagar permanentemente o progresso salvo?')){api.deleteSave();open('saves')}return}
+      if(cmd==='armor'&&api){if(!api.upgradeArmor())window.alert('O colete já está no nível máximo.');open('inventory');return}
+      if(cmd==='helmet'&&api){api.toggleHelmet();open('inventory');return}
+      if(cmd==='medkits'&&api){api.refillMedkits();open('inventory');return}
+    }catch(err){
+      const p=overlay();if(p)p.style.display='flex';
+      content().innerHTML='<p style="color:#ff765f">Erro ao abrir essa opção: '+esc(err&&err.message||err)+'</p>';
+    }
+  },true);
+  document.addEventListener('input',function(e){
+    if(e.target.id==='directSens'){const t=document.getElementById('directSensText');if(t)t.textContent=Number(e.target.value).toFixed(4)}
+    if(e.target.id==='directVol'){const t=document.getElementById('directVolText');if(t)t.textContent=Math.round(Number(e.target.value)*100)+'%'}
+  });
 })();
 </script>
 </body></html>
