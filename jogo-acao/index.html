@@ -13,8 +13,8 @@
   <div style="width:min(620px,100%);padding:28px;background:#0a121b;border:1px solid #405768;box-shadow:0 20px 80px #000">
     <div style="font-size:11px;letter-spacing:3px;color:#ff765f;font-weight:900">CAMPANHA TÁTICA • EXPERIÊNCIA 3D</div>
     <h1 style="font-size:clamp(30px,7vw,48px);line-height:1.05;margin:12px 0">OPERAÇÃO<br><span style="color:#ff765f">RUPTURA</span></h1>
-    <p style="color:#b9c9d5;line-height:1.6">Menu de segurança. Se o menu principal falhar, este botão tenta iniciar o jogo.</p>
-    <button type="button" style="display:block;width:100%;padding:15px;border:0;background:#d94736;color:white;font-size:16px;font-weight:900;cursor:pointer" onclick="document.getElementById('startBtn')?.click();if(document.body.classList.contains('game-running'))document.getElementById('bootRescue').style.display='none'">JOGAR ▶</button>
+    <p id="bootRescueStatus" style="color:#b9c9d5;line-height:1.6">Preparando o motor 3D. O menu principal aparecerá quando o jogo estiver pronto.</p>
+    <button type="button" style="display:block;width:100%;padding:15px;border:0;background:#d94736;color:white;font-size:16px;font-weight:900;cursor:pointer" onclick="document.getElementById('startBtn')?.click();setTimeout(()=>{if(document.body.classList.contains('game-running'))document.getElementById('bootRescue').style.display='none';else{const s=document.getElementById('bootRescueStatus');if(s)s.textContent='A partida ainda não iniciou. Recarregue a página; se a falha continuar, o jogo exibirá uma mensagem aqui.'}},400)">JOGAR ▶</button>
     <button type="button" style="display:block;width:100%;margin-top:9px;padding:12px;border:1px solid #405768;background:#142332;color:#edf4fa;font-weight:800;cursor:pointer" onclick="location.reload()">RECARREGAR JOGO</button>
   </div>
 </div>
@@ -42,8 +42,7 @@ const THREE = await import('https://cdn.jsdelivr.net/npm/three@0.160.0/build/thr
     throw secondError;
   }
 });
-/* O menu de emergência só deve existir se o motor 3D falhar ao carregar. */
-document.getElementById('bootRescue')?.remove();
+/* O menu de segurança só será removido depois da inicialização completa. */
 const $=s=>document.querySelector(s), canvas=$('#game');
 window.addEventListener('error',e=>{const t=$('#toast');if(t){t.textContent='ERRO AO CARREGAR O JOGO: '+(e.message||'erro desconhecido');t.classList.remove('hidden')}});
 window.addEventListener('unhandledrejection',e=>{const t=$('#toast');if(t){t.textContent='ERRO DE INICIALIZAÇÃO: '+(e.reason?.message||String(e.reason||'erro desconhecido'));t.classList.remove('hidden')}});
@@ -137,8 +136,25 @@ $('#subContent').addEventListener('click',e=>{const missionButton=e.target.close
 try{const cfg=JSON.parse(localStorage.getItem('operacaoRupturaSettings')||'null');if(cfg){mouseSensitivity=cfg.mouseSensitivity??mouseSensitivity;volumeLevel=cfg.volumeLevel??volumeLevel;graphicsLevel=cfg.graphicsLevel??graphicsLevel;renderer.setPixelRatio(Math.min(devicePixelRatio,graphicsLevel==='low'?.8:graphicsLevel==='medium'?1.15:1.6));renderer.shadowMap.enabled=graphicsLevel==='high';rainEnabled=graphicsLevel==='high';rainPoints.visible=rainEnabled}}catch{}
 function frame(){requestAnimationFrame(frame);const dt=Math.min(clock.getDelta(),.04);update(dt);renderer.render(scene,camera)}frame();
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,1.6))});
+/* Só libera o menu principal quando todo o módulo 3D terminou de inicializar. */
+document.getElementById('bootRescue')?.remove();
 </script>
 <script>
+/* Diagnóstico global: evita tela preta silenciosa se o módulo falhar. */
+(function(){
+  function report(message){
+    var panel=document.getElementById('bootRescue');
+    var status=document.getElementById('bootRescueStatus');
+    if(panel) panel.style.display='flex';
+    if(status) status.textContent='Falha ao iniciar o jogo: '+String(message||'erro desconhecido').slice(0,240);
+  }
+  window.addEventListener('error',function(e){
+    if(document.getElementById('bootRescue')) report(e.message||'erro de JavaScript');
+  });
+  window.addEventListener('unhandledrejection',function(e){
+    if(document.getElementById('bootRescue')) report(e.reason&&e.reason.message||e.reason||'falha ao carregar o motor 3D');
+  });
+})();
 /* Mantém o menu principal acessível no carregamento, sem forçá-lo por cima da partida. */
 (function(){
   function restoreMenu(){
