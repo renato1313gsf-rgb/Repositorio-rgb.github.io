@@ -571,7 +571,7 @@ companion=soldier(false,'rifle');companion.position.copy(player.position).add(ne
 intelRecovered=!!(saved&&saved.missionStage===missionStage&&saved.intelRecovered);
 relaysDisabled=saved&&saved.missionStage===missionStage&&Array.isArray(saved.relaysDisabled)?[0,1,2].map(i=>!!saved.relaysDisabled[i]):[false,false,false];
 const savedDestructibles=saved&&saved.missionStage===missionStage&&Array.isArray(saved.destructibleStatus)?saved.destructibleStatus:null;
-destructibles.forEach((d,i)=>{d.alive=savedDestructibles?savedDestructibles[i]!==false:true;if(d.alive)scene.add(d.mesh);else scene.remove(d.mesh)});
+destructibles.forEach((d,i)=>{d.alive=savedDestructibles?savedDestructibles[i]!==false:true;if(d.alive){scene.add(d.mesh);if(d.obstacle&&!obstacles.includes(d.obstacle))obstacles.push(d.obstacle)}else scene.remove(d.mesh)});
 campaignComplete=false;
 const floorPalette={1:0x535e61,2:0x716653,3:0x4a6670,4:0x292f3c,5:0x594d50,6:0x343b42};floor.material.color.setHex(floorPalette[Math.min(missionStage,6)]||0x535e61);dayClock=missionStage===4?150:missionStage===5?220:missionStage===6?280:missionStage*24;
 // A sexta missão usa uma distribuição própria para o combate dentro da prisão.
@@ -772,6 +772,7 @@ for(const e of enemies){
  if(e.alert&&visible&&playerDist<profile.detect+5)e.alertPosition=null;
  const moveTarget=e.alertPosition||player.position;
  const to=moveTarget.clone().sub(p),dist=to.length();
+ if(e.type==='cover'&&e.alert&&!e.alertPosition&&dist>profile.min+3){const lateral=new THREE.Vector3(-playerDelta.z,0,playerDelta.x).normalize().multiplyScalar(e.strafe*4);to.add(lateral)}
  e.mesh.rotation.y=Math.atan2(-playerDelta.x,-playerDelta.z);
  e.attack-=dt;
  // Guardas distantes patrulham em vez de rastrear a posição do jogador pelo mapa inteiro.
@@ -864,7 +865,7 @@ function openSub(title,html){subTitle.textContent=title;subContent.innerHTML=htm
 function closeSub(){subMenu.classList.remove('open')}
 $('#subClose').onclick=closeSub;
 $('#missionsBtn').onclick=()=>openSub('SELECIONAR MISSÃO','<p class="menuNote">Escolha uma missão para iniciar. As missões avançadas podem ser mais difíceis.</p><div class="menuGrid">'+[['1','ZONA INDUSTRIAL'],['2','BASE DA PEDREIRA'],['3','PORTO SOB CERCO'],['4','COMPLEXO NOTURNO'],['5','FORTALEZA: CHEFE HOSTIL'],['6','OPERAÇÃO: PRISÃO DE FERRO']].map(([n,label])=>'<button class="btn secondary" data-mission-stage="'+n+'">MISSÃO '+n+' · '+label+'</button>').join('')+'</div>');
-$('#controlsBtn').onclick=()=>openSub('CONTROLES','<p class="menuNote"><b>WASD</b> — mover · <b>SHIFT</b> — correr<br><b>MOUSE</b> — mirar · <b>CLIQUE</b> — disparar<br><b>R</b> — recarregar · <b>1–6</b> — trocar arma<br><b>G</b> — granada · <b>H</b> — kit médico<br><b>C</b> — modo furtivo · <b>F</b> — entrar/sair do jipe<br><b>E</b> — extração quando a área estiver limpa.</p>');
+$('#controlsBtn').onclick=()=>openSub('CONTROLES','<p class="menuNote"><b>WASD</b> — mover · <b>SHIFT</b> — correr<br><b>MOUSE</b> — mirar · <b>CLIQUE</b> — disparar<br><b>R</b> — recarregar · <b>1–6</b> — trocar arma<br><b>G</b> — granada · <b>H</b> — kit médico<br><b>C</b> — modo furtivo · <b>V</b> — aliado seguir/segurar posição<br><b>F</b> — entrar/sair do jipe<br><b>E</b> — interagir/extrair sob pressão.</p>');
 $('#settingsBtn').onclick=()=>openSub('CONFIGURAÇÕES','<div class="settingRow"><label>Sensibilidade do mouse</label><input id="sens" type="range" min="0.0004" max="0.003" step="0.0001" value="'+mouseSensitivity+'"><b id="sensVal">'+mouseSensitivity.toFixed(4)+'</b></div><div class="settingRow"><label>Volume de efeitos</label><input id="vol" type="range" min="0" max="1" step="0.05" value="'+volumeLevel+'"><b id="volVal">'+Math.round(volumeLevel*100)+'%</b></div><div class="settingRow"><label>Qualidade gráfica</label><select id="gfx"><option value="low">Desempenho</option><option value="medium">Equilibrado</option><option value="high">Alta</option></select></div><div class="settingRow"><label>Velocidade e agressividade inimiga</label><select id="enemyDifficulty"><option value="recruta" '+(enemyDifficulty==='recruta'?'selected':'')+'>Recruta — devagar</option><option value="normal" '+(enemyDifficulty==='normal'?'selected':'')+'>Normal</option><option value="veterano" '+(enemyDifficulty==='veterano'?'selected':'')+'>Veterano — rápido</option><option value="pesadelo" '+(enemyDifficulty==='pesadelo'?'selected':'')+'>Pesadelo — muito rápido</option></select></div><p class="menuNote">A dificuldade altera velocidade, cadência e dano dos hostis. A mudança vale imediatamente para os inimigos vivos.</p><button class="btn" id="saveSettings">SALVAR CONFIGURAÇÕES</button>');
 $('#inventoryBtn').onclick=()=>openSub('ARSENAL & EQUIPAMENTO','<p class="menuNote">Prepare sua unidade antes do combate.</p><div class="settingRow"><span>Colete reforçado (+10 proteção por melhoria)</span><button class="btn" id="armorUpgrade">MELHORAR COLETE ('+armorUpgrade+'/3)</button></div><div class="settingRow"><span>Capacete tático</span><button class="btn secondary" id="helmetToggle">'+(helmetEquipped?'EQUIPADO':'DESEQUIPADO')+'</button></div><div class="settingRow"><span>Reabastecer kits médicos</span><button class="btn secondary" id="medkitRefill">+2 KITS</button></div><p class="menuNote">Armas: 1 Fuzil · 2 Pistola · 3 Escopeta · 4 Precisão MK II · 5 Submetralhadora · 6 Lança-foguetes.</p>');
 $('#saveManagerBtn').onclick=()=>{const s=loadSave();openSub('GERENCIAR CAMPANHA','<p class="menuNote">'+(s?'Save encontrado: missão '+String(s.missionStage||1).padStart(2,'0')+' · saúde '+(s.health??100)+' · abates '+(s.kills??0)+'.':'Nenhum save encontrado neste navegador.')+'</p><button class="btn" id="saveNow" '+(!player?'disabled':'')+'>SALVAR AGORA</button><button class="btn secondary" id="loadNow" '+(!s?'disabled':'')+'>CARREGAR SAVE</button><button class="btn secondary" id="deleteSave" '+(!s?'disabled':'')+'>APAGAR SAVE</button>')};
@@ -1027,7 +1028,7 @@ if(realMenu){
         [['1','ZONA INDUSTRIAL','Limpe a estação e extraia'],['2','BASE DA PEDREIRA','Destrua o jipe e o tanque'],['3','PORTO SOB CERCO','Recupere inteligência'],['4','COMPLEXO NOTURNO','Desative 3 transmissores'],['5','FORTALEZA: CHEFE HOSTIL','Elimine o comandante'],['6','OPERAÇÃO: PRISÃO DE FERRO','Infiltração longa, 5 etapas, resgate e fuga']].map(([n,name,desc])=>btn('MISSÃO '+n+' · '+name+'<br><span style="font-weight:500;color:#b9c9d5;font-size:12px">'+desc+'</span>','mission','data-stage="'+n+'"')).join('');
     }else if(which==='controls'){
       heading='CONTROLES';
-      html='<p style="color:#c8d7e2;line-height:2"><b>W A S D</b> — mover<br><b>SHIFT</b> — correr<br><b>MOUSE</b> — mirar<br><b>CLIQUE ESQUERDO</b> — disparar<br><b>R</b> — recarregar<br><b>1–6</b> — trocar de arma<br><b>G</b> — granada<br><b>H</b> — kit médico<br><b>C</b> — modo furtivo/agachar conforme configuração<br><b>F</b> — entrar/sair do jipe<br><b>E</b> — extração quando a área estiver limpa.</p>';
+      html='<p style="color:#c8d7e2;line-height:2"><b>W A S D</b> — mover<br><b>SHIFT</b> — correr<br><b>MOUSE</b> — mirar<br><b>CLIQUE ESQUERDO</b> — disparar<br><b>R</b> — recarregar<br><b>1–6</b> — trocar de arma<br><b>G</b> — granada<br><b>H</b> — kit médico<br><b>C</b> — modo furtivo/agachar conforme configuração<br><b>V</b> — aliado seguir/segurar posição<br><b>F</b> — entrar/sair do jipe<br><b>E</b> — interagir/extrair sob pressão.</p>';
     }else if(which==='settings'){
       heading='CONFIGURAÇÕES';
       if(!api){html='<p>O motor ainda está carregando. Feche esta tela e aguarde a inicialização.</p>'}
@@ -1057,6 +1058,8 @@ if(realMenu){
           '<label style="display:flex;gap:10px;align-items:flex-start;padding:12px;margin:8px 0;background:#111e29;border:1px solid #405768"><input id="directSuppressor" type="checkbox" '+(a.suppressorEquipped?'checked':'')+' style="margin-top:4px"><span><b>SILENCIADOR</b><br><span style="color:#b9c9d5;font-size:13px">Fuzil, pistola e submetralhadora fazem menos barulho. Inimigos distantes demoram mais para reagir.</span></span></label>'+
           '<label style="display:flex;gap:10px;align-items:flex-start;padding:12px;margin:8px 0;background:#111e29;border:1px solid #405768"><input id="directRedDot" type="checkbox" '+(a.redDotEquipped?'checked':'')+' style="margin-top:4px"><span><b>MIRA RED DOT</b><br><span style="color:#b9c9d5;font-size:13px">Aumenta em 20% o alcance efetivo dos disparos.</span></span></label>'+
           '<label style="display:flex;gap:10px;align-items:flex-start;padding:12px;margin:8px 0;background:#111e29;border:1px solid #405768"><input id="directExtendedMag" type="checkbox" '+(a.extendedMagEquipped?'checked':'')+' style="margin-top:4px"><span><b>CARREGADOR ESTENDIDO</b><br><span style="color:#b9c9d5;font-size:13px">Permite recarregar até 50% mais munição por carregador.</span></span></label>'+
+          '<label style="display:flex;gap:10px;align-items:flex-start;padding:12px;margin:8px 0;background:#111e29;border:1px solid #405768"><input id="directForegrip" type="checkbox" '+(a.foregripEquipped?'checked':'')+' style="margin-top:4px"><span><b>EMPUNHADURA TÁTICA</b><br><span style="color:#b9c9d5;font-size:13px">Reduz o recuo e estabiliza a arma, mas não aumenta o dano.</span></span></label>'+
+          '<label style="display:flex;gap:10px;align-items:flex-start;padding:12px;margin:8px 0;background:#111e29;border:1px solid #405768"><input id="directLightArmor" type="checkbox" '+(a.lightArmorEquipped?'checked':'')+' style="margin-top:4px"><span><b>BLINDAGEM LEVE</b><br><span style="color:#b9c9d5;font-size:13px">Movimento 12% mais rápido, mas o colete absorve menos dano e começa com menos proteção.</span></span></label>'+
           btn('APLICAR EQUIPAMENTO','apply-loadout');
     }else if(which==='inventory'){
       heading='ARSENAL & EQUIPAMENTO';
@@ -1098,7 +1101,9 @@ if(realMenu){
         const loadout={
           suppressorEquipped:document.getElementById('directSuppressor').checked,
           redDotEquipped:document.getElementById('directRedDot').checked,
-          extendedMagEquipped:document.getElementById('directExtendedMag').checked
+          extendedMagEquipped:document.getElementById('directExtendedMag').checked,
+          foregripEquipped:document.getElementById('directForegrip').checked,
+          lightArmorEquipped:document.getElementById('directLightArmor').checked
         };
         if(api&&api.applyLoadout)api.applyLoadout(loadout);
         else{
