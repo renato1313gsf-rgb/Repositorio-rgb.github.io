@@ -669,7 +669,7 @@ const missionMapSpecs=[
  {key:'c1-3',title:'PORTO SOB CERCO',kind:'harbor',groundColor:0x5a686d,fogColor:0x203946,exitPositive:false,spawns:[[-31,-30],[-18,-17],[-8,-28],[3,-30],[18,-26],[34,-15],[-30,1],[-12,9],[10,10],[23,23],[30,-8],[-35,25],[0,30],[7,-8],[-18,33],[19,34],[36,28]]},
  {key:'c1-4',title:'COMPLEXO DE COMUNICAÇÕES',kind:'comms',groundColor:0x343b40,fogColor:0x0c151d,exitPositive:false,spawns:[[-31,-31],[-20,-14],[-7,-28],[7,-30],[25,-27],[34,-11],[-31,4],[-12,12],[12,12],[27,21],[30,-8],[-33,25],[0,31],[8,-5],[-18,34],[19,34],[36,30]]},
  {key:'c1-5',title:'FORTALEZA VERMELHA',kind:'fortress',groundColor:0x554a4a,fogColor:0x211b20,exitPositive:false,spawns:[[-31,-30],[-20,-20],[-7,-29],[8,-30],[25,-27],[35,-12],[-28,3],[-12,12],[10,17],[20,10],[30,-8],[-32,25],[0,29],[7,-5],[-18,34],[19,34],[36,29]]},
- {key:'c2-1',title:'ÚLTIMO VIADUTO',kind:'lastViaduct',groundColor:0x4b5051,fogColor:0x3c4248,exitPositive:true,lampColor:0xff7b48,spawns:[[-30,-25],[-22,-10],[-4,-24],[8,-28],[25,-24],[31,-8],[-29,2],[-18,15],[15,12],[25,28],[0,18],[-30,28],[0,34],[5,-3],[-20,34],[20,35],[34,20]]},
+ {key:'c2-1',title:'COMBOIO FANTASMA',kind:'harbor',groundColor:0x4b5051,fogColor:0x3c4248,exitPositive:true,lampColor:0xff7b48,spawns:[[-30,-25],[-22,-10],[-4,-24],[8,-28],[25,-24],[31,-8],[-29,2],[-18,15],[15,12],[25,28],[0,18],[-30,28],[0,34],[5,-3],[-20,34],[20,35],[34,20]]},
  {key:'c2-2',title:'RODOVIA CONGELADA',kind:'iceRoad',groundColor:0xb7c8d0,fogColor:0x193546,exitPositive:true,spawns:[[-34,-30],[-22,-13],[-10,-30],[8,-30],[25,-25],[34,-12],[-31,0],[-14,10],[12,9],[26,24],[0,14],[-32,25],[0,32],[7,-8],[-18,34],[19,34],[36,29]]},
  {key:'c2-3',title:'ARQUIVO SUBTERRÂNEO',kind:'archive',groundColor:0x4c565e,fogColor:0x101b25,exitPositive:true,spawns:[[-28,-30],[-22,-15],[-10,-27],[10,-30],[27,-27],[31,-14],[-29,1],[-12,8],[12,8],[28,24],[0,14],[-30,25],[0,32],[7,-8],[-18,34],[19,34],[36,29]]},
  {key:'c2-4',title:'MONTANHA DE ANTENAS',kind:'mountainRelay',groundColor:0xa7b7c0,fogColor:0x1b2b38,exitPositive:true,spawns:[[-32,-30],[-22,-14],[-10,-29],[9,-30],[27,-25],[34,-13],[-30,0],[-13,10],[12,10],[26,24],[0,14],[-32,25],[0,32],[7,-8],[-18,34],[19,34],[36,29]]},
@@ -1028,7 +1028,7 @@ const missionDefinitions={
   6:{name:'OPERAÇÃO: PRISÃO DE FERRO',brief:'Infiltre-se no complexo penitenciário e resgate o Capitão Price, prisioneiro 627.',main:'Invada o complexo e resgate o Capitão Price',detail:'Atravesse o perímetro, assegure a sala de controle, varra as alas celulares, recolha as três intel, abra a cela especial e extraia sob contra-ataque.'}
 };
 const campaignTwoDefinitions={
-  1:{name:'ÚLTIMO VIADUTO',brief:'Atravesse o Nó Rodoviário 7 enquanto as rodovias elevadas desabam sob bombardeio.',main:'Abra caminho até a ponte principal',detail:'Neutralize a resistência, atravesse as pistas destruídas e alcance a extração no extremo sul da ponte.'},
+  1:{name:'COMBOIO FANTASMA',brief:'Destrua o transporte de armas antes que desapareça na tempestade.',main:'Destrua os dois veículos militares',detail:'Destrua o jipe e o blindado, neutralize pelo menos 5 hostis e extraia.'},
   2:{name:'COMBOIO FANTASMA',brief:'Destrua o transporte de armas antes que desapareça na tempestade.',main:'Destrua os dois veículos militares',detail:'Destrua o jipe e o blindado, neutralize pelo menos 5 hostis e extraia.'},
   3:{name:'ARQUIVO FANTASMA',brief:'Recupere os dados roubados do programa Noite Zero.',main:'Recupere o núcleo de inteligência',detail:'Localize o marcador ciano, pressione E, neutralize pelo menos 4 hostis e extraia.'},
   4:{name:'SILÊNCIO DE RÁDIO',brief:'Desative a rede que orienta os reforços inimigos.',main:'Sabote os três transmissores',detail:'Desative os três transmissores com E, neutralize pelo menos 5 hostis e extraia.'},
@@ -1742,11 +1742,11 @@ if(realMenu){
       heading='MISSÕES DA CAMPANHA '+String(api&&api.getCampaign?api.getCampaign():1).padStart(2,'0');
       const campaign=(api&&api.getCampaign?api.getCampaign():1);
       const list=campaign===2?[
-        ['1','ÚLTIMO VIADUTO','Atravesse o complexo rodoviário em colapso'],
-        ['2','COMBOIO FANTASMA','Destrua o jipe e o blindado'],
-        ['3','ARQUIVO FANTASMA','Recupere os dados secretos'],
-        ['4','SILÊNCIO DE RÁDIO','Sabote três transmissores'],
-        ['5','COMANDANTE VÉSPERA','Elimine o comandante'],
+        ['1','COMBOIO FANTASMA','Destrua o jipe e o blindado'],
+        ['2','ARQUIVO FANTASMA','Recupere os dados secretos'],
+        ['3','SILÊNCIO DE RÁDIO','Sabote três transmissores'],
+        ['4','COMANDANTE VÉSPERA','Elimine o comandante'],
+        ['5','BLACKSITE: EXTRAÇÃO ZERO','Resgate a Dra. Vega e extraia'],
         ['6','BLACKSITE: EXTRAÇÃO ZERO','Resgate a Dra. Vega e extraia']
       ]:[
         ['2','BASE DA PEDREIRA','Destrua o jipe e o tanque'],
