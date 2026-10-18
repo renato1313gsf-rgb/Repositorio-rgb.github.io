@@ -20,6 +20,7 @@
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:9px">
       <button type="button" style="padding:11px 6px;border:1px solid #405768;background:#142332;color:#edf4fa;font-weight:800;cursor:pointer" onclick="window.__openDirectMenu('missions')">MISSÕES</button>
       <button type="button" style="padding:11px 6px;border:1px solid #405768;background:#142332;color:#edf4fa;font-weight:800;cursor:pointer" onclick="window.__openDirectMenu('controls')">CONTROLES</button>
+      <button type="button" style="padding:11px 6px;border:1px solid #b94c3f;background:#51231f;color:#fff;font-weight:900;cursor:pointer" onclick="window.__openDirectMenu('campaigns')">ESCOLHER CAMPANHA</button>
       <button type="button" style="padding:11px 6px;border:1px solid #405768;background:#142332;color:#edf4fa;font-weight:800;cursor:pointer" onclick="window.__openDirectMenu('settings')">CONFIGURAÇÕES</button>
       <button type="button" style="padding:11px 6px;border:1px solid #b94c3f;background:#51231f;color:#fff;font-weight:900;cursor:pointer" onclick="window.__openDirectMenu('arsenal')">ARSENAL TÁTICO ⚙</button>
       <button type="button" style="padding:11px 6px;border:1px solid #405768;background:#142332;color:#edf4fa;font-weight:800;cursor:pointer" onclick="window.__openDirectMenu('saves')">GERENCIAR SAVE</button>
@@ -44,7 +45,7 @@
  <div class="bottom"><div id="missionPanel" class="panel objective hidden"><div class="eyebrow" id="missionLabel">MISSÃO 01 — ZONA INDUSTRIAL</div><div id="objective" style="font-weight:850;margin:5px 0">Elimine os combatentes hostis.</div><div class="small" id="hint">Use as coberturas. Os inimigos vão tentar flanquear sua posição.</div></div></div>
 </div>
 <div id="evacTimer" class="hidden">EXTRAÇÃO EM <b id="evacTimerText">75</b>s</div><div id="allyStatus" class="hidden"><b id="allyHealthLabel">ALIADO · 100%</b><div class="allyBar"><div id="allyHealthFill"></div></div><div id="allyHealthHint" style="margin-top:5px;color:#b9c9d5">COBERTURA TÁTICA</div></div><div id="gatePrompt" class="hidden">E — ABRIR PORTÃO BLINDADO<em>PORTÃO DUPLO • ACIONAMENTO ELÉTRICO</em></div><div id="vehiclePrompt" class="hidden">PRESSIONE F PARA ENTRAR NO JIPE</div><div id="crosshair" class="hidden"></div><div id="toast" class="hidden"></div><div id="subMenu"><div class="modal"><div class="eyebrow">CENTRAL DE OPERAÇÕES</div><h1 id="subTitle">CONFIGURAÇÕES</h1><div id="subContent"></div><button class="btn secondary" id="subClose">VOLTAR</button></div></div>
-<div id="start" class="overlay"><div class="modal"><div class="eyebrow">CAMPANHA TÁTICA • EXPERIÊNCIA 3D</div><h1>OPERAÇÃO<br><span class="red">RUPTURA</span></h1><p><b>Campanha 01: Zona Industrial</b></p><p class="small">Uma unidade hostil tomou a estação de comunicações. Infiltre-se no complexo, sobreviva ao contra-ataque e alcance a extração. Os inimigos perseguem, disparam à distância e tentam encurtar a distância quando você se esconde.</p><div class="small"><b>CONTROLES</b><br>WASD mover · Shift correr · Mouse mirar · Clique disparar · R recarregar · 1 fuzil / 2 pistola · G granada · E extração</div><div><span class="chip">IA INIMIGA</span><span class="chip">COBERTURAS</span><span class="chip">ARSENAL</span><span class="chip">GRANADAS</span><span class="chip">MISSÃO DE EXTRAÇÃO</span></div><div class="menuGrid"><button class="btn" id="startBtn">JOGAR ▶</button><button class="btn secondary" id="continueBtn">CONTINUAR CAMPANHA</button><button class="btn secondary" id="missionsBtn">MISSÕES</button><button class="btn secondary" id="controlsBtn">CONTROLES</button><button class="btn secondary" id="settingsBtn">CONFIGURAÇÕES</button><button class="btn secondary" id="inventoryBtn">EQUIPAMENTO & MELHORIAS</button><button class="btn secondary" type="button" onclick="window.__openDirectMenu('arsenal')">ARSENAL TÁTICO ⚙</button><button class="btn secondary" id="saveManagerBtn">GERENCIAR SAVE</button><button class="btn secondary" id="creditsBtn">CRÉDITOS</button></div><div class="small" style="margin-top:14px">Teclado e mouse recomendados. O jogo usa Three.js por CDN e precisa de internet para carregar.</div></div></div>
+<div id="start" class="overlay"><div class="modal"><div class="eyebrow">CAMPANHA TÁTICA • EXPERIÊNCIA 3D</div><h1>OPERAÇÃO<br><span class="red">RUPTURA</span></h1><p><b>Campanha 01: Zona Industrial</b></p><p class="small">Uma unidade hostil tomou a estação de comunicações. Infiltre-se no complexo, sobreviva ao contra-ataque e alcance a extração. Os inimigos perseguem, disparam à distância e tentam encurtar a distância quando você se esconde.</p><div class="small"><b>CONTROLES</b><br>WASD mover · Shift correr · Mouse mirar · Clique disparar · R recarregar · 1 fuzil / 2 pistola · G granada · E extração</div><div><span class="chip">IA INIMIGA</span><span class="chip">COBERTURAS</span><span class="chip">ARSENAL</span><span class="chip">GRANADAS</span><span class="chip">MISSÃO DE EXTRAÇÃO</span></div><div class="menuGrid"><button class="btn" id="startBtn">JOGAR ▶</button><button class="btn secondary" id="continueBtn">CONTINUAR CAMPANHA</button><button class="btn secondary" id="missionsBtn">MISSÕES</button><button class="btn secondary" type="button" onclick="window.__openDirectMenu('campaigns')">CAMPANHAS</button><button class="btn secondary" id="controlsBtn">CONTROLES</button><button class="btn secondary" id="settingsBtn">CONFIGURAÇÕES</button><button class="btn secondary" id="inventoryBtn">EQUIPAMENTO & MELHORIAS</button><button class="btn secondary" type="button" onclick="window.__openDirectMenu('arsenal')">ARSENAL TÁTICO ⚙</button><button class="btn secondary" id="saveManagerBtn">GERENCIAR SAVE</button><button class="btn secondary" id="creditsBtn">CRÉDITOS</button></div><div class="small" style="margin-top:14px">Teclado e mouse recomendados. O jogo usa Three.js por CDN e precisa de internet para carregar.</div></div></div>
 <div id="end" class="overlay hidden"><div class="modal"><div class="eyebrow" id="endTag">RELATÓRIO DA MISSÃO</div><h1 id="endTitle">MISSÃO <span class="red">CONCLUÍDA</span></h1><p id="endText">A área está segura.</p><p class="small" id="statsText"></p><button class="btn" id="againBtn">REPETIR MISSÃO ↻</button><button class="btn secondary" id="nextMissionBtn">PRÓXIMA MISSÃO ▶</button><button class="btn secondary" id="endMenuBtn">MENU PRINCIPAL</button></div></div>
 <script type="module">
 const THREE = await import('https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js').catch(async firstError => {
@@ -95,7 +96,8 @@ const laneMaterial=new THREE.MeshStandardMaterial({color:0xd2aa53,roughness:.8,m
 for(let z=-36;z<=36;z+=8){const stripe=new THREE.Mesh(new THREE.BoxGeometry(.12,.025,3.2),laneMaterial);stripe.position.set(0,.035,z);stripe.castShadow=false;stripe.receiveShadow=false;scene.add(stripe)}
 const obstacles=[];
 const gulagCollision=[];
-let gulagActive=false,gulagPhase=0;
+const campaign2Collision=[];
+let gulagActive=false,gulagPhase=0,campaign2Active=false;
 function box(x,y,z,sx,sy,sz,material,solid=true){const o=new THREE.Mesh(new THREE.BoxGeometry(sx,sy,sz),material);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;scene.add(o);if(solid)obstacles.push({x,y,z,hx:sx/2,hy:sy/2,hz:sz/2,minY:y-sy/2,maxY:y+sy/2,top:sy});return o}
 function cylinder(x,y,z,r1,r2,h,material,segments=8){const o=new THREE.Mesh(new THREE.CylinderGeometry(r1,r2,h,segments),material);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;scene.add(o);return o}
 function building(x,z,w,h,d){box(x,h/2,z,w,h,d,concrete);for(let y=2;y<h-1;y+=3){for(let xx=x-w/2+1.5;xx<x+w/2-1;xx+=3)box(xx,y,z-d/2-.045,1.1,1,.08,dark,false)}box(x,h+.15,z,w+.4,.3,d+.4,dark,false);for(let xx=x-w/2+2;xx<x+w/2-1;xx+=4)box(xx,h*.65,z-d/2-.09,1.2,1.1,.05,glass,false)}
@@ -143,6 +145,97 @@ function setGulagWorld(active){
  rainPoints.visible=active?true:rainEnabled;
  if(active){scene.fog.near=18;scene.fog.far=92;scene.fog.color.setHex(0x1d2931);scene.background.setHex(0x1d2931)}
  else{scene.fog.near=35;scene.fog.far=100}
+}
+// Campanha 02: posto militar ártico do projeto Noite Zero.
+const campaign2Group=new THREE.Group();campaign2Group.name='CAMPANHA 02 — ESTAÇÃO POLAR';scene.add(campaign2Group);campaign2Group.visible=false;
+const c2Wall=mat(0x46545d,.84,.24),c2Metal=mat(0x687984,.46,.62),c2Dark=mat(0x202a32,.88,.25),c2Snow=mat(0xc5d0d5,.98),c2Signal=mat(0x42c9ef,.32,.2),c2Warning=new THREE.MeshStandardMaterial({color:0xb9302c,roughness:.55,metalness:.3,emissive:0x520d0b,emissiveIntensity:.65});
+function c2Box(x,y,z,sx,sy,sz,material,solid=false,rotY=0){
+ const mesh=new THREE.Mesh(new THREE.BoxGeometry(sx,sy,sz),material);mesh.position.set(x,y,z);mesh.rotation.y=rotY;mesh.castShadow=true;mesh.receiveShadow=true;campaign2Group.add(mesh);
+ if(solid)campaign2Collision.push({x,y,z,hx:sx/2,hy:sy/2,hz:sz/2,minY:Math.max(0,y-sy/2),maxY:y+sy/2,top:sy,rotY});
+ return mesh;
+}
+function c2Cylinder(x,y,z,r,h,material,segments=10){
+ const mesh=new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,segments),material);mesh.position.set(x,y,z);mesh.castShadow=true;mesh.receiveShadow=true;campaign2Group.add(mesh);return mesh;
+}
+function c2Radar(x,z){
+ c2Cylinder(x,2.6,z,.18,5.2,c2Metal,8);
+ const dish=new THREE.Mesh(new THREE.SphereGeometry(1.35,16,10,0,Math.PI*2,0,Math.PI*.55),c2Signal);
+ dish.position.set(x,5.25,z);dish.rotation.x=Math.PI;dish.rotation.z=-.24;dish.castShadow=true;campaign2Group.add(dish);
+ c2Box(x,5.9,z-.05,.12,1.2,.12,c2Dark,false,.15);
+}
+for(let x=-43;x<=43;x+=3){
+ c2Box(x,1.8,-46,.085,3.6,.085,c2Metal);
+ c2Box(x,1.8,46,.085,3.6,.085,c2Metal);
+ c2Box(x,3.15,-46,.08,.08,.08,c2Warning);
+ c2Box(x,3.15,46,.08,.08,.08,c2Warning);
+}
+for(let z=-43;z<=43;z+=3){
+ c2Box(-46,1.8,z,.085,3.6,.085,c2Metal);
+ c2Box(46,1.8,z,.085,3.6,.085,c2Metal);
+}
+c2Box(0,1.8,-46,88,.12,.18,c2Dark);
+c2Box(-23,1.8,46,46,3.6,.22,c2Wall,true);
+c2Box(23,1.8,46,46,3.6,.22,c2Wall,true);
+c2Box(0,.15,43.4,13,.12,4.8,c2Metal,false);
+for(const x of [-6,-3,0,3,6])c2Box(x,.24,43.4,.12,.08,4.5,c2Warning);
+for(const [x,z,w,h,d] of [[-28,-25,15,9,13],[27,-25,13,8,12],[-29,25,13,7,13],[28,25,14,9,14]]){
+ c2Box(x,h/2,z,w,h,d,c2Wall,true);
+ c2Box(x,h+.12,z,w+.4,.24,d+.4,c2Dark,false);
+ c2Box(x,.7,z-d/2-.08,w*.45,1.1,.12,c2Signal,false);
+ c2Box(x,1.55,z-d/2-.15,w*.52,.13,.12,c2Warning,false);
+}
+for(const [x,z] of [[-40,-40],[40,-40],[-40,40],[40,40]]){
+ c2Box(x,4,z,2.6,8,2.6,c2Dark,true);
+ c2Box(x,8.15,z,3.1,.3,3.1,c2Metal,false);
+ c2Box(x,5.6,z,2.72,.18,2.72,c2Warning,false);
+ const light=new THREE.PointLight(0x78cfff,19,25,2);light.position.set(x,7.4,z);campaign2Group.add(light);
+}
+c2Radar(24,-31);
+for(const [x,z] of [[-22,6],[22,6],[0,-20]]){
+ c2Box(x,1.4,z,1.05,2.8,1.05,c2Dark,false);
+ c2Cylinder(x,3.5,z,.07,1.5,c2Metal,8);
+ c2Box(x,4.15,z,.9,.12,.12,c2Warning,false);
+ c2Box(x,3.75,z,.08,.12,.08,c2Signal,false);
+}
+c2Box(4,.4,17,1.8,.8,1.25,c2Dark,false);
+c2Box(4,.84,17,1.55,.08,1.02,c2Signal,false);
+for(const [x,z] of [[-20,-8],[20,-8],[-18,17],[18,17],[-6,30],[7,-31]]){
+ c2Box(x,.85,z,3.8,1.7,1.45,c2Dark,true);
+ c2Box(x,1.74,z,3.95,.12,1.56,c2Metal,false);
+ c2Box(x,.45,z-.76,1.1,.45,.05,c2Warning,false);
+}
+for(const x of [-35,-20,-5,10,25,38])c2Box(x,.06,0,.1,.035,74,c2Snow,false);
+for(const [x,z] of [[-34,-28],[35,-18],[-34,18],[34,30]]){
+ c2Cylinder(x,4.8,z,.12,9.6,c2Dark,8);
+ c2Box(x,9.55,z,.85,.14,.45,c2Signal,false);
+ const lamp=new THREE.PointLight(0x9edfff,11,20,2);lamp.position.set(x,8.9,z);campaign2Group.add(lamp);
+}
+for(const d of destructibles){
+ const p=d.mesh.position;let hx=.7,hz=.7,minY=0,maxY=2.2;
+ if(d.obstacle){hx=d.obstacle.hx;hz=d.obstacle.hz;minY=d.obstacle.minY??0;maxY=d.obstacle.maxY??2.2}
+ else if(d.type==='vehicle'&&d.mesh.geometry?.parameters){hx=(d.mesh.geometry.parameters.width||2)/2;hz=(d.mesh.geometry.parameters.depth||3)/2;maxY=d.mesh.geometry.parameters.height||2}
+ const col={x:p.x,z:p.z,hx,hz,minY,maxY,top:maxY,rotY:d.mesh.rotation.y||0};d.campaign2Obstacle=col;campaign2Collision.push(col);
+}
+function setCampaign2World(active){
+ campaign2Active=!!active;campaign2Group.visible=campaign2Active;
+ for(const o of gulagBaseMapObjects)o.visible=!campaign2Active&&!gulagActive;
+ floor.visible=true;grid.visible=!campaign2Active&&!gulagActive;
+ floor.material.color.setHex(campaign2Active?0xa8b8c0:gulagActive?0x343c42:0x535e61);
+ rainPoints.visible=(campaign2Active||gulagActive)?true:rainEnabled;
+ extraction.visible=campaign2Active?true:!gulagActive;extraction.position.set(0,.06,campaign2Active?42:-40);
+ if(campaign2Active){
+  scene.fog.near=18;scene.fog.far=94;scene.fog.color.setHex(0x213746);scene.background.setHex(0x213746);
+  for(const d of destructibles){
+   d.mesh.visible=!!d.alive;if(d.alive&&!d.mesh.parent)scene.add(d.mesh);
+   if(d.extras)d.extras.forEach(o=>{o.visible=!!d.alive;if(d.alive&&!o.parent)scene.add(o)});
+   const ci=campaign2Collision.indexOf(d.campaign2Obstacle);
+   if(d.alive&&ci<0)campaign2Collision.push(d.campaign2Obstacle);
+   if(!d.alive&&ci>=0)campaign2Collision.splice(ci,1);
+  }
+ }else if(!gulagActive){scene.fog.near=35;scene.fog.far=100}
+ if(typeof intelMarker!=='undefined')intelMarker.visible=campaign2Active&&missionStage===3&&!intelRecovered;
+ if(typeof relayMarkers!=='undefined')relayMarkers.forEach((m,i)=>m.visible=campaign2Active&&missionStage===4&&!relaysDisabled[i]);
+ if(typeof optionalMarker!=='undefined')optionalMarker.visible=campaign2Active&&!optionalObjectiveFound;
 }
 // O oceano e o heliporto ficam ao norte, antes do portão de contenção.
 const sea=new THREE.Mesh(new THREE.PlaneGeometry(100,22),new THREE.MeshStandardMaterial({color:0x123043,roughness:.32,metalness:.35}));
@@ -257,6 +350,12 @@ const gulagMarkers=[
  makeMissionMarker(0,21,0xff765f),makeMissionMarker(8,29,0x61e39b)
 ];
 const gulagIntelMarkers=[makeMissionMarker(-4,-17,0x4bdfff),makeMissionMarker(9,0,0x4bdfff),makeMissionMarker(8,30.5,0x4bdfff)];
+const campaign2FinalOverlay=new THREE.Group();campaign2FinalOverlay.name='BLACKSITE — NOITE ZERO';gulagGroup.add(campaign2FinalOverlay);campaign2FinalOverlay.visible=false;
+const c2CoreMat=new THREE.MeshStandardMaterial({color:0x1d9bc2,emissive:0x086080,emissiveIntensity:1.4,metalness:.32,roughness:.3});
+const c2Core=new THREE.Mesh(new THREE.IcosahedronGeometry(.85,1),c2CoreMat);c2Core.position.set(0,1.6,-17);campaign2FinalOverlay.add(c2Core);
+const c2CoreRing=new THREE.Mesh(new THREE.TorusGeometry(1.2,.055,8,32),c2Signal);c2CoreRing.position.set(0,1.6,-17);c2CoreRing.rotation.x=Math.PI/2;campaign2FinalOverlay.add(c2CoreRing);
+for(const x of [-1.7,1.7]){const panel=new THREE.Mesh(new THREE.BoxGeometry(.2,2.4,.22),c2Warning);panel.position.set(x,1.45,-17);campaign2FinalOverlay.add(panel)}
+const c2CoreLight=new THREE.PointLight(0x32bfff,8,18,2);c2CoreLight.position.set(0,2.4,-17);campaign2FinalOverlay.add(c2CoreLight);
 let gulagIntel=[false,false,false],gulagShieldTaken=false,prisonerRescued=false;
 window.__bootStage='Cenário construído; preparando lógica da missão';
 // Uniformes camuflados e equipamento tático: texturas geradas localmente, sem downloads adicionais.
@@ -542,6 +641,7 @@ let companion=null,companionMode='follow',companionAttackCooldown=0,companionHea
 let distractionCharges=2,lightsOut=false;
 let headshots=0,bodyHits=0,armHits=0,legHits=0,alarmsRaised=0,missionElapsed=0;
 let optionalObjectiveFound=false,extractionStarted=false,extractionTimer=0,weaponRecoil=0,weaponKickTime=0;
+let campaignNumber=(()=>{try{return Number(localStorage.getItem('operacaoRupturaLastCampaign'))===2?2:1}catch(e){return 1}})();
 const missionDefinitions={
   1:{name:'ZONA INDUSTRIAL',brief:'Retome a estação de comunicações.',main:'Neutralize toda a resistência',detail:'Elimine todos os hostis e alcance a extração.'},
   2:{name:'BASE DA PEDREIRA',brief:'Interrompa o transporte de armamento.',main:'Destrua o jipe e o tanque',detail:'Destrua os 2 veículos militares, neutralize 5 hostis e extraia.'},
@@ -550,11 +650,19 @@ const missionDefinitions={
   5:{name:'FORTALEZA: CHEFE HOSTIL',brief:'Elimine o comandante da operação.',main:'Neutralize o comandante',detail:'Elimine o chefe hostil e alcance a extração.'},
   6:{name:'OPERAÇÃO: PRISÃO DE FERRO',brief:'Infiltre-se no complexo penitenciário e resgate o Capitão Price, prisioneiro 627.',main:'Invada o complexo e resgate o Capitão Price',detail:'Atravesse o perímetro, assegure a sala de controle, varra as alas celulares, recolha as três intel, abra a cela especial e extraia sob contra-ataque.'}
 };
+const campaignTwoDefinitions={
+  1:{name:'ESTAÇÃO POLAR',brief:'Recupere a estação de rastreamento isolada na neve.',main:'Retome a estação polar',detail:'Elimine a guarnição do perímetro e alcance o ponto de extração.'},
+  2:{name:'COMBOIO FANTASMA',brief:'Destrua o transporte de armas antes que desapareça na tempestade.',main:'Destrua os dois veículos militares',detail:'Destrua o jipe e o blindado, neutralize pelo menos 5 hostis e extraia.'},
+  3:{name:'ARQUIVO FANTASMA',brief:'Recupere os dados roubados do programa Noite Zero.',main:'Recupere o núcleo de inteligência',detail:'Localize o marcador ciano, pressione E, neutralize pelo menos 4 hostis e extraia.'},
+  4:{name:'SILÊNCIO DE RÁDIO',brief:'Desative a rede que orienta os reforços inimigos.',main:'Sabote os três transmissores',detail:'Desative os três transmissores com E, neutralize pelo menos 5 hostis e extraia.'},
+  5:{name:'COMANDANTE VÉSPERA',brief:'Enfrente o comandante que coordena o projeto secreto.',main:'Neutralize o comandante Véspera',detail:'Elimine o comandante blindado e alcance a extração.'},
+  6:{name:'BLACKSITE: EXTRAÇÃO ZERO',brief:'Invada o centro de detenção subterrâneo e resgate a cientista Dra. Vega.',main:'Resgate a Dra. Vega e extraia os dados',detail:'Abra o portão blindado, avance pelos setores, recolha as três credenciais de dados, resgate a Dra. Vega e escape sob contra-ataque.'}
+};
 function say(s){const t=$('#toast');t.textContent=s;t.classList.remove('hidden');toastTimer=2.4}
 function sound(freq=220,duration=.08,type='square',volume=.025){if(!audioEnabled)return;try{audioCtx??=new (window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume();const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=type;o.frequency.value=freq;g.gain.setValueAtTime(volume*volumeLevel,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+duration);o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+duration)}catch(e){}}
 function startMusic(){if(!audioEnabled)return;try{audioCtx??=new (window.AudioContext||window.webkitAudioContext)();if(musicStarted){musicGain.gain.setTargetAtTime(.012,audioCtx.currentTime,.5);return}const a=audioCtx.createOscillator(),b=audioCtx.createOscillator();musicGain=audioCtx.createGain();a.type='sine';b.type='triangle';a.frequency.value=55;b.frequency.value=82.4;musicGain.gain.value=.012;a.connect(musicGain);b.connect(musicGain);musicGain.connect(audioCtx.destination);a.start();b.start();musicStarted=true}catch(e){}}
-function saveGame(){try{localStorage.setItem('operacaoRupturaSave',JSON.stringify({missionStage,gulagPhase,gulagIntel,gulagShieldTaken,prisonerRescued,health,armor,ammo,reserve,pistolAmmo,pistolReserve,smgAmmo,smgReserve,launcherAmmo,launcherReserve,shotgunAmmo,shotgunReserve,sniperAmmo,sniperReserve,grenades,medkits,kills,shots,hits,armorUpgrade,helmetEquipped,suppressorEquipped,redDotEquipped,extendedMagEquipped,foregripEquipped,lightArmorEquipped,distractionCharges,lightsOut,intelRecovered,optionalObjectiveFound,headshots,bodyHits,armHits,legHits,alarmsRaised,missionElapsed,relaysDisabled,destructibleStatus:destructibles.map(d=>d.alive),playerPos:player?player.position.toArray():[0,0,5]}));}catch(e){say('NÃO FOI POSSÍVEL SALVAR NESTE NAVEGADOR')}}
-function loadSave(){try{return JSON.parse(localStorage.getItem('operacaoRupturaSave')||'null')}catch(e){return null}}
+function saveGame(){try{const data={campaignNumber,missionStage,gulagPhase,gulagIntel,gulagShieldTaken,prisonerRescued,health,armor,ammo,reserve,pistolAmmo,pistolReserve,smgAmmo,smgReserve,launcherAmmo,launcherReserve,shotgunAmmo,shotgunReserve,sniperAmmo,sniperReserve,grenades,medkits,kills,shots,hits,armorUpgrade,helmetEquipped,suppressorEquipped,redDotEquipped,extendedMagEquipped,foregripEquipped,lightArmorEquipped,distractionCharges,lightsOut,intelRecovered,optionalObjectiveFound,headshots,bodyHits,armHits,legHits,alarmsRaised,missionElapsed,relaysDisabled,destructibleStatus:destructibles.map(d=>d.alive),playerPos:player?player.position.toArray():[0,0,5]};localStorage.setItem('operacaoRupturaSaveC'+campaignNumber,JSON.stringify(data));localStorage.setItem('operacaoRupturaSave',JSON.stringify(data));localStorage.setItem('operacaoRupturaLastCampaign',String(campaignNumber));}catch(e){say('NÃO FOI POSSÍVEL SALVAR NESTE NAVEGADOR')}}
+function loadSave(forCampaign=campaignNumber){try{const slot=localStorage.getItem('operacaoRupturaSaveC'+(Number(forCampaign)===2?2:1));if(slot)return JSON.parse(slot);const legacy=JSON.parse(localStorage.getItem('operacaoRupturaSave')||'null');return legacy&&(!legacy.campaignNumber||legacy.campaignNumber===(Number(forCampaign)===2?2:1))?legacy:null}catch(e){return null}}
 function updateHUD(){updateAllyHUD();$('#healthText').textContent=health;$('#healthBar').style.width=health+'%';$('#armorText').textContent=armor;$('#armorBar').style.width=armor+'%';$('#ammo').textContent=currentAmmo();$('#reserve').textContent=currentReserve();$('#weaponName').textContent='• '+weaponData[weapon].name;$('#grenades').textContent=grenades;$('#medkits').textContent=medkits;$('#decoys').textContent=distractionCharges;$('#accuracy').textContent=kills;$('#weaponName').textContent='• '+weaponData[weapon].name;refreshMissionHUD()}
 function updateAllyHUD(){
  const panel=$('#allyStatus');if(!panel)return;
@@ -596,7 +704,15 @@ function missionProgressText(){
  if(missionStage===3)return 'Pacote de inteligência: '+(intelRecovered?'RECUPERADO':'PENDENTE')+' · Hostis: '+Math.min(kills,4)+'/4';
  if(missionStage===4)return 'Transmissores desativados: '+relaysDisabled.filter(Boolean).length+'/3 · Hostis: '+Math.min(kills,5)+'/5';
  if(missionStage===6){
-   const steps=[
+   const steps=campaignNumber===2?[
+    'PORTÃO DO BLACKSITE: entre no centro de detenção subterrâneo e use E no portão.',
+    'CENTRAL DE SERVIDORES: neutralize 5 hostis e recolha a credencial de dados 1.',
+    'ALA DE CONTENÇÃO: neutralize 11 hostis e recolha a credencial de dados 2.',
+    'ARSENAL DO BLACKSITE: neutralize 15 hostis e recolha o escudo antimotim.',
+    'TÚNEIS DE SERVIÇO: neutralize 21 hostis e avance até a cela de pesquisa.',
+    'CÉLULA DE PESQUISA: neutralize 25 hostis, recupere a credencial 3 e resgate a Dra. Vega.',
+    'EXTRAÇÃO ZERO: retire a Dra. Vega; são necessários 27 abates e as três credenciais.'
+   ]:[
     'PORTÃO EXTERNO: avance do heliporto e use E no portão.',
     'PÁTIO / SALA DE CONTROLE: neutralize 5 hostis e acione o painel. INTEL 1.',
     'BLOCO CIRCULAR DE CELAS: neutralize 11 hostis e vasculhe o corredor. INTEL 2.',
@@ -612,51 +728,53 @@ function missionProgressText(){
  return 'Comandante: '+(!boss||!boss.alive?'NEUTRALIZADO':'ATIVO');
 }
 function refreshMissionHUD(){
- const spec=missionDefinitions[missionStage]||missionDefinitions[1];
+ const spec=(campaignNumber===2?campaignTwoDefinitions:missionDefinitions)[missionStage]||(campaignNumber===2?campaignTwoDefinitions:missionDefinitions)[1];
  const ready=missionRequirementsMet();
- $('#missionLabel').textContent='MISSÃO '+String(missionStage).padStart(2,'0')+' — '+spec.name;
+ $('#missionLabel').textContent=(campaignNumber===2?'CAMPANHA 02 · ':'')+'MISSÃO '+String(missionStage).padStart(2,'0')+' — '+spec.name;
  $('#objective').textContent=ready?'OBJETIVOS CUMPRIDOS — alcance o ponto de extração.':spec.main+' · '+missionProgressText();
  $('#hint').textContent=missionStage===3&&!intelRecovered?'OBJETIVO: localize o marcador ciano e pressione E para recuperar a inteligência. '+spec.detail:
    missionStage===4&&relaysDisabled.some(v=>!v)?'OBJETIVO: aproxime-se dos transmissores amarelos e pressione E para desativá-los. '+spec.detail:
    missionStage===6?missionProgressText():
    ready?'Vá ao círculo amarelo e pressione E para concluir a extração.':spec.detail;
  if(typeof optionalMarker!=='undefined'&&optionalMarker.visible&&!optionalObjectiveFound)$('#hint').textContent+=' OBJETIVO OPCIONAL: marcador verde; pressione E para recolher suprimentos.';
- if(typeof intelMarker!=='undefined')intelMarker.visible=missionStage===3&&!intelRecovered;
- if(typeof relayMarkers!=='undefined')relayMarkers.forEach((m,i)=>{m.visible=missionStage===4&&!relaysDisabled[i]});
- if(typeof optionalMarker!=='undefined')optionalMarker.visible=!optionalObjectiveFound;
+ if(typeof intelMarker!=='undefined')intelMarker.visible=!gulagActive&&missionStage===3&&!intelRecovered;
+ if(typeof relayMarkers!=='undefined')relayMarkers.forEach((m,i)=>{m.visible=!gulagActive&&missionStage===4&&!relaysDisabled[i]});
+ if(typeof optionalMarker!=='undefined')optionalMarker.visible=!gulagActive&&!optionalObjectiveFound;
  if(typeof gulagMarkers!=='undefined')gulagMarkers.forEach((m,i)=>{m.visible=missionStage===6&&i===gulagPhase&&gulagPhase<6});
  if(typeof gulagIntelMarkers!=='undefined')gulagIntelMarkers.forEach((m,i)=>{m.visible=missionStage===6&&!gulagIntel[i]});
  if(typeof gulagExtract!=='undefined')gulagExtract.visible=missionStage===6;
  if(typeof pricePrisoner!=='undefined')pricePrisoner.visible=missionStage===6&&gulagPhase>=5&&!prisonerRescued;
 }
 function clearWorld(){for(const e of enemies)scene.remove(e.mesh);for(const p of projectiles)scene.remove(p.mesh);for(const e of effects)scene.remove(e.mesh);if(player)scene.remove(player);if(companion)scene.remove(companion);companion=null;enemies=[];projectiles=[];effects=[]}
-function reset(fromSave=false,chosenStage=null){clearWorld();$('#missionPanel').classList.add('hidden');player=soldier(false);player.position.set(-40,0,-40);scene.add(player);health=100;armor=(lightArmorEquipped?30:50)+armorUpgrade*10;ammo=30;reserve=150;pistolAmmo=12;pistolReserve=48;smgAmmo=45;smgReserve=225;launcherAmmo=3;launcherReserve=12;shotgunAmmo=8;shotgunReserve=40;sniperAmmo=5;sniperReserve=25;grenades=2;medkits=2;stealthMode=false;lightsOut=false;distractionCharges=2;alarmTriggered=false;alarmEverRaised=false;kills=0;shots=0;hits=0;headshots=0;bodyHits=0;armHits=0;legHits=0;alarmsRaised=0;missionElapsed=0;optionalObjectiveFound=false;extractionStarted=false;extractionTimer=0;weaponRecoil=0;weaponKickTime=0;companionMode='follow';companionAttackCooldown=0;companionHealth=100;companionDown=false;$('#evacTimer').classList.add('hidden');$('#allyStatus').classList.add('hidden');ended=false;reloading=false;weapon='rifle';updateFirstPersonWeapon();yaw=-Math.PI*0.75;pitch=-.05;driving=false;createVehicle();const saved=fromSave?loadSave():null;if(!saved)missionStage=chosenStage||1;if(saved){missionStage=saved.missionStage||1;suppressorEquipped=saved.suppressorEquipped??suppressorEquipped;redDotEquipped=saved.redDotEquipped??redDotEquipped;extendedMagEquipped=saved.extendedMagEquipped??extendedMagEquipped;foregripEquipped=saved.foregripEquipped??foregripEquipped;lightArmorEquipped=saved.lightArmorEquipped??lightArmorEquipped;lightsOut=!!saved.lightsOut;distractionCharges=saved.distractionCharges??2;optionalObjectiveFound=!!(saved.optionalObjectiveFound&&saved.missionStage===missionStage);headshots=saved.headshots??0;bodyHits=saved.bodyHits??0;armHits=saved.armHits??0;legHits=saved.legHits??0;alarmsRaised=saved.alarmsRaised??0;missionElapsed=saved.missionElapsed??0;for(const k of ['health','armor','ammo','reserve','pistolAmmo','pistolReserve','smgAmmo','smgReserve','launcherAmmo','launcherReserve','shotgunAmmo','shotgunReserve','sniperAmmo','sniperReserve','grenades','medkits','kills','shots','hits','armorUpgrade','helmetEquipped'])if(saved[k]!==undefined)({health,armor,ammo,reserve,pistolAmmo,pistolReserve,shotgunAmmo,shotgunReserve,sniperAmmo,sniperReserve,grenades,kills,shots,hits}[k]=saved[k]);health=saved.health??health;armor=saved.armor??armor;ammo=saved.ammo??ammo;reserve=saved.reserve??reserve;pistolAmmo=saved.pistolAmmo??pistolAmmo;pistolReserve=saved.pistolReserve??pistolReserve;shotgunAmmo=saved.shotgunAmmo??shotgunAmmo;shotgunReserve=saved.shotgunReserve??shotgunReserve;sniperAmmo=saved.sniperAmmo??sniperAmmo;sniperReserve=saved.sniperReserve??sniperReserve;grenades=saved.grenades??grenades;medkits=saved.medkits??medkits;kills=Math.min(saved.kills??0,30);shots=saved.shots??0;hits=saved.hits??0;missionStage=saved.missionStage||1;/* O início de cada sessão/missão é sempre no canto seguro, mesmo ao continuar save. */}
-gulagActive=missionStage===6;setGulagWorld(gulagActive);if(vehicle)vehicle.visible=!gulagActive;
+function reset(fromSave=false,chosenStage=null,chosenCampaign=null){clearWorld();$('#missionPanel').classList.add('hidden');player=soldier(false);player.position.set(-40,0,-40);scene.add(player);health=100;armor=(lightArmorEquipped?30:50)+armorUpgrade*10;ammo=30;reserve=150;pistolAmmo=12;pistolReserve=48;smgAmmo=45;smgReserve=225;launcherAmmo=3;launcherReserve=12;shotgunAmmo=8;shotgunReserve=40;sniperAmmo=5;sniperReserve=25;grenades=2;medkits=2;stealthMode=false;lightsOut=false;distractionCharges=2;alarmTriggered=false;alarmEverRaised=false;kills=0;shots=0;hits=0;headshots=0;bodyHits=0;armHits=0;legHits=0;alarmsRaised=0;missionElapsed=0;optionalObjectiveFound=false;extractionStarted=false;extractionTimer=0;weaponRecoil=0;weaponKickTime=0;companionMode='follow';companionAttackCooldown=0;companionHealth=100;companionDown=false;$('#evacTimer').classList.add('hidden');$('#allyStatus').classList.add('hidden');ended=false;reloading=false;weapon='rifle';updateFirstPersonWeapon();yaw=-Math.PI*0.75;pitch=-.05;driving=false;createVehicle();if(chosenCampaign!==null&&chosenCampaign!==undefined)campaignNumber=Number(chosenCampaign)===2?2:1;const saved=fromSave?loadSave(campaignNumber):null;if(fromSave&&saved)campaignNumber=Number(saved.campaignNumber)===2?2:campaignNumber;if(!saved)missionStage=chosenStage||1;if(saved){missionStage=saved.missionStage||1;suppressorEquipped=saved.suppressorEquipped??suppressorEquipped;redDotEquipped=saved.redDotEquipped??redDotEquipped;extendedMagEquipped=saved.extendedMagEquipped??extendedMagEquipped;foregripEquipped=saved.foregripEquipped??foregripEquipped;lightArmorEquipped=saved.lightArmorEquipped??lightArmorEquipped;lightsOut=!!saved.lightsOut;distractionCharges=saved.distractionCharges??2;optionalObjectiveFound=!!(saved.optionalObjectiveFound&&saved.missionStage===missionStage);headshots=saved.headshots??0;bodyHits=saved.bodyHits??0;armHits=saved.armHits??0;legHits=saved.legHits??0;alarmsRaised=saved.alarmsRaised??0;missionElapsed=saved.missionElapsed??0;for(const k of ['health','armor','ammo','reserve','pistolAmmo','pistolReserve','smgAmmo','smgReserve','launcherAmmo','launcherReserve','shotgunAmmo','shotgunReserve','sniperAmmo','sniperReserve','grenades','medkits','kills','shots','hits','armorUpgrade','helmetEquipped'])if(saved[k]!==undefined)({health,armor,ammo,reserve,pistolAmmo,pistolReserve,shotgunAmmo,shotgunReserve,sniperAmmo,sniperReserve,grenades,kills,shots,hits}[k]=saved[k]);health=saved.health??health;armor=saved.armor??armor;ammo=saved.ammo??ammo;reserve=saved.reserve??reserve;pistolAmmo=saved.pistolAmmo??pistolAmmo;pistolReserve=saved.pistolReserve??pistolReserve;shotgunAmmo=saved.shotgunAmmo??shotgunAmmo;shotgunReserve=saved.shotgunReserve??shotgunReserve;sniperAmmo=saved.sniperAmmo??sniperAmmo;sniperReserve=saved.sniperReserve??sniperReserve;grenades=saved.grenades??grenades;medkits=saved.medkits??medkits;kills=Math.min(saved.kills??0,30);shots=saved.shots??0;hits=saved.hits??0;missionStage=saved.missionStage||1;/* O início de cada sessão/missão é sempre no canto seguro, mesmo ao continuar save. */}
+gulagActive=missionStage===6;campaign2Active=campaignNumber===2&&missionStage!==6;setGulagWorld(gulagActive);
 gulagPhase=(saved&&saved.missionStage===6)?Math.min(6,Number(saved.gulagPhase)||0):0;
 setGulagGateState(missionStage===6&&gulagPhase>0);
 gulagIntel=saved&&saved.missionStage===6&&Array.isArray(saved.gulagIntel)?[0,1,2].map(i=>!!saved.gulagIntel[i]):[false,false,false];
 gulagShieldTaken=!!(saved&&saved.missionStage===6&&saved.gulagShieldTaken);
 prisonerRescued=!!(saved&&saved.missionStage===6&&saved.prisonerRescued);
-if(missionStage===6){player.position.set(-4.3,0,-41.5);yaw=Math.PI;}
+if(missionStage===6){player.position.set(-4.3,0,-41.5);yaw=Math.PI;}else if(campaign2Active){player.position.set(-40,0,40);yaw=-Math.PI/4;}
 const optionalSpots={1:[-5,-31],2:[-27,12],3:[-5,-34],4:[8,32],5:[0,30],6:[14,21]};optionalMarker.position.set(...optionalSpots[missionStage]);optionalMarker.visible=!optionalObjectiveFound;
 companion=soldier(false,'rifle');const buddyForward=new THREE.Vector3(-Math.sin(yaw),0,-Math.cos(yaw)),buddyRight=new THREE.Vector3(Math.cos(yaw),0,-Math.sin(yaw));companion.position.copy(player.position).addScaledVector(buddyForward,-2.6).addScaledVector(buddyRight,-1.4);companion.rotation.y=yaw;scene.add(companion);
 intelRecovered=!!(saved&&saved.missionStage===missionStage&&saved.intelRecovered);
 relaysDisabled=saved&&saved.missionStage===missionStage&&Array.isArray(saved.relaysDisabled)?[0,1,2].map(i=>!!saved.relaysDisabled[i]):[false,false,false];
 const savedDestructibles=saved&&saved.missionStage===missionStage&&Array.isArray(saved.destructibleStatus)&&saved.destructibleStatus.length===destructibles.length?saved.destructibleStatus:null;
-destructibles.forEach((d,i)=>{d.alive=savedDestructibles?savedDestructibles[i]!==false:true;if(d.alive){scene.add(d.mesh);if(d.extras)d.extras.forEach(o=>scene.add(o));if(d.obstacle&&!obstacles.includes(d.obstacle))obstacles.push(d.obstacle)}else{scene.remove(d.mesh);if(d.extras)d.extras.forEach(o=>scene.remove(o))}});
+destructibles.forEach((d,i)=>{d.alive=savedDestructibles?savedDestructibles[i]!==false:true;if(d.alive){d.mesh.visible=true;scene.add(d.mesh);if(d.extras)d.extras.forEach(o=>{o.visible=true;scene.add(o)});if(d.obstacle&&!obstacles.includes(d.obstacle))obstacles.push(d.obstacle)}else{scene.remove(d.mesh);if(d.extras)d.extras.forEach(o=>scene.remove(o))}if(d.campaign2Obstacle){const ci=campaign2Collision.indexOf(d.campaign2Obstacle);if(d.alive&&ci<0)campaign2Collision.push(d.campaign2Obstacle);else if(!d.alive&&ci>=0)campaign2Collision.splice(ci,1)}});
+setCampaign2World(campaign2Active);if(vehicle)vehicle.visible=!gulagActive&&!campaign2Active;campaign2FinalOverlay.visible=campaignNumber===2&&missionStage===6;
 campaignComplete=false;
-const floorPalette={1:0x535e61,2:0x716653,3:0x4a6670,4:0x292f3c,5:0x594d50,6:0x343b42};floor.material.color.setHex(floorPalette[Math.min(missionStage,6)]||0x535e61);dayClock=missionStage===4?150:missionStage===5?220:missionStage===6?280:missionStage*24;
+const floorPalette={1:0x535e61,2:0x716653,3:0x4a6670,4:0x292f3c,5:0x594d50,6:0x343b42};floor.material.color.setHex(campaign2Active?0xa8b8c0:(floorPalette[Math.min(missionStage,6)]||0x535e61));dayClock=campaign2Active?285:missionStage===4?150:missionStage===5?220:missionStage===6?280:missionStage*24;
 // A sexta missão usa uma distribuição própria para o combate dentro da prisão.
 const standardSpots=[[-10,-4],[10,-7],[-22,0],[22,2],[4,-19],[-5,-24],[34,12],[-35,-12],[0,14],[15,29],[30,-8],[-34,2],[34,-2],[-7,-35],[7,35],[-18,34],[19,-35]];
+const campaign2Spots=[[-36,-29],[-24,-15],[13,-34],[34,-24],[-33,-5],[-4,-8],[31,-3],[-31,12],[10,7],[30,17],[-8,28],[0,34],[18,32],[-38,20],[38,8],[4,-37],[-11,17]];
 const gulagSpots=[[-28,-27],[-21,-27],[-10,-26],[10,-26],[21,-26],[28,-26],[-28,-18],[-20,-18],[-12,-17],[12,-18],[20,-18],[28,-17],[-28,-7],[-19,-7],[-13,-7],[13,-7],[19,-7],[28,-6],[-28,4],[-19,4],[-13,5],[13,4],[19,5],[28,6],[-26,15],[-16,16],[-5,17],[5,16],[16,16],[26,17],[-12,27],[0,26],[18,27]];
-const spots=missionStage===6?gulagSpots:standardSpots;
+const spots=missionStage===6?gulagSpots:campaign2Active?campaign2Spots:standardSpots;
 spots.forEach((p,i)=>{if(i===(missionStage===6?spots.length-1:10)&&missionStage<5)return;const type=i===(missionStage===6?spots.length-1:10)?'boss':i%5===0?'heavy':i%4===0?'sniper':i%3===0?'cover':'rifle';const mesh=soldier(true,type);/* O papel de cada classe é preservado, mas a posição inicial não pode ficar dentro de uma parede. */const bodyRadius=(type==='heavy'||type==='boss')?.82:.72;const safeSpawn=findEnemySpawn(p[0],p[1],bodyRadius);mesh.position.set(safeSpawn.x,0,safeSpawn.z);const alive=!(saved&&saved.missionStage===missionStage&&i<kills);if(alive)scene.add(mesh);const patrolHome=[safeSpawn.x,safeSpawn.z];enemies.push({mesh,type,hp:Math.ceil((type==='boss'?24+missionStage*3:type==='heavy'?9+missionStage*1.5:type==='sniper'?5+missionStage*1.3:i%4===0?6+missionStage:4+Math.min(missionStage-1,2))*(1+(missionStage-1)*.12)),speed:(type==='sniper'?.72:type==='heavy'?.9:type==='boss'?.9:1.18+(i%3)*.19)*(1+Math.min(missionStage-1,4)*.16)*enemyDifficultyData[enemyDifficulty].speed,attack:1+Math.random(),alive,strafe:i%2?1:-1,alert:false,state:'patrol',home:patrolHome,patrol:patrolHome.map((v,j)=>v+(j===0?((i%3)-1)*9:((i%2)*14-7)))});});
 updateHUD();refreshMissionHUD();document.body.classList.add('game-running');$('#start').classList.add('hidden');['display','visibility','opacity','z-index'].forEach(p=>$('#start').style.removeProperty(p));$('#end').classList.add('hidden');$('#hud').classList.remove('hidden');$('#crosshair').classList.remove('hidden');$('#vehiclePrompt').classList.add('hidden');running=true;clock.start();sound(440,.15,'sawtooth');startMusic();say('OPERAÇÃO INICIADA — SINAL HOSTIL DETECTADO');saveGame()}
 function finish(win,reportStage=missionStage){
  if(ended)return;ended=true;running=false;document.exitPointerLock?.();$('#crosshair').classList.add('hidden');$('#evacTimer').classList.add('hidden');
  $('#endTag').textContent=win?'RELATÓRIO DA MISSÃO':'SINAL PERDIDO';
  $('#endTitle').innerHTML=win?'MISSÃO <span class="red">CONCLUÍDA</span>':'MISSÃO <span class="red">FALHOU</span>';
- $('#endText').textContent=win?(campaignComplete?'Todas as seis operações foram concluídas. Campanha finalizada!':'Objetivos concluídos na missão '+reportStage+'. Próximo destino: missão '+(reportStage+1)+'.'):'Você foi abatido. Reagrupe e tente novamente.';
+ $('#endText').textContent=win?(campaignComplete?(campaignNumber===2?'OPERAÇÃO NOITE ZERO concluída. Campanha 02 finalizada!':'Todas as seis operações foram concluídas. Campanha 01 finalizada!'):'Objetivos concluídos na missão '+reportStage+'. Próximo destino: missão '+(reportStage+1)+'.'):'Você foi abatido. Reagrupe e tente novamente.';
  $('#nextMissionBtn').textContent=campaignComplete?'REINICIAR CAMPANHA ↻':'PRÓXIMA MISSÃO ▶';
  $('#nextMissionBtn').style.display=win?'inline-block':'none';
  $('#statsText').textContent='Hostis neutralizados: '+kills+' · Disparos: '+shots+' · Acertos: '+hits+' · Precisão: '+(shots?Math.round(hits/shots*100):0)+'%\nTiros na cabeça: '+headshots+' · Braços: '+armHits+' · Pernas: '+legHits+' · Alarmes: '+alarmsRaised+'\nTempo: '+Math.floor(missionElapsed/60)+'m '+(Math.floor(missionElapsed)%60)+'s · Objetivo opcional: '+(optionalObjectiveFound?'SIM':'NÃO');
@@ -684,7 +802,7 @@ function deployDistraction(){if(!running||distractionCharges<=0){say('SEM ISCAS 
 function interactMission(){
  if(!running||!player)return;
  if(optionalMarker.visible&&!optionalObjectiveFound&&player.position.distanceTo(optionalMarker.position)<2.8){optionalObjectiveFound=true;optionalMarker.visible=false;armor=Math.min(100,armor+12);medkits=Math.min(6,medkits+1);setReserve(Math.min(999,currentReserve()+20));updateHUD();saveGame();say('OBJETIVO OPCIONAL CONCLUÍDO — SUPRIMENTOS RECUPERADOS');return}
- const extractPos=missionStage===6?new THREE.Vector3(0,0,42):new THREE.Vector3(0,0,-40);
+ const extractPos=(missionStage===6||campaign2Active)?new THREE.Vector3(0,0,42):new THREE.Vector3(0,0,-40);
  if(missionStage===3&&!intelRecovered&&player.position.distanceTo(new THREE.Vector3(4,0,17))<3.2){
    intelRecovered=true;refreshMissionHUD();saveGame();say('PACOTE DE INTELIGÊNCIA RECUPERADO');return;
  }
@@ -695,7 +813,7 @@ function interactMission(){
  if(missionStage===6){
    const intelPositions=[new THREE.Vector3(-4,0,-17),new THREE.Vector3(9,0,0),new THREE.Vector3(8,0,30.5)];
    const intelIndex=intelPositions.findIndex((p,i)=>!gulagIntel[i]&&player.position.distanceTo(p)<2.8);
-   if(intelIndex>=0){gulagIntel[intelIndex]=true;say('INTEL '+(intelIndex+1)+'/3 RECUPERADA');refreshMissionHUD();saveGame();return}
+   if(intelIndex>=0){gulagIntel[intelIndex]=true;say(campaignNumber===2?'CREDENCIAL DE DADOS '+(intelIndex+1)+'/3 RECUPERADA':'INTEL '+(intelIndex+1)+'/3 RECUPERADA');refreshMissionHUD();saveGame();return}
    if(gulagPhase===0&&player.position.distanceTo(new THREE.Vector3(0,0,-34))<4.8&&!gulagGateOpen){
     if(!gulagGateAnimating){gulagGateAnimating=true;gulagGateProgress=0;sound(92,.35,'sawtooth',.035);say('PORTÃO BLINDADO — ACIONANDO OS ATUADORES ELÉTRICOS...')}
     return;
@@ -706,7 +824,7 @@ function interactMission(){
    if(gulagPhase<6&&player.position.distanceTo(marker)<4.4){
      if(kills<needs[gulagPhase]){say('SETOR AINDA SOB CONTROLE INIMIGO — '+Math.min(kills,needs[gulagPhase])+'/'+needs[gulagPhase]+' HOSTIS');return}
      if(gulagPhase===3&&!gulagShieldTaken){gulagShieldTaken=true;armor=Math.min(100,armor+35);updateHUD();say('ESCUDO ANTIMOTIM RECOLHIDO — PROTEÇÃO REFORÇADA');}
-     if(gulagPhase===5){prisonerRescued=true;pricePrisoner.visible=false;say('CAPITÃO PRICE — PRISIONEIRO 627 RESGATADO! RETIRE-SE PARA A EXTRAÇÃO!');}
+     if(gulagPhase===5){prisonerRescued=true;pricePrisoner.visible=false;say(campaignNumber===2?'DRA. VEGA RESGATADA! EXTRAIA A CIENTISTA E OS DADOS!':'CAPITÃO PRICE — PRISIONEIRO 627 RESGATADO! RETIRE-SE PARA A EXTRAÇÃO!');}
      else say(['PORTÃO VIOLADO. ATRAVESSE O PÁTIO ATÉ A SALA DE CONTROLE.','CONTROLE ASEGURADO. AVANCE PARA O BLOCO CIRCULAR DE CELAS.','ALA CELULAR VARRIDA. DESCIDA PARA A ARMARIA.','ESCUDO RECOLHIDO. ATRAVESSE OS CHUVEIROS E OS TÚNEIS.','BRECHA ABERTA. ENTRE NA CELA ESPECIAL E PROCURE O PRISIONEIRO.'][gulagPhase]||'OBJETIVO ATUALIZADO');
      gulagPhase++;refreshMissionHUD();saveGame();return;
    }
@@ -717,7 +835,7 @@ function interactMission(){
  }
  if(missionStage===3&&!intelRecovered)say('LOCALIZE O MARCADOR CIANO PARA RECUPERAR A INTELIGÊNCIA');
  else if(missionStage===4&&relaysDisabled.some(v=>!v))say('APROXIME-SE DE UM TRANSMISSOR AMARELO PARA DESATIVÁ-LO');
- else if(missionStage===6)say('SIGA O MARCADOR DA PRISÃO E USE E PARA INTERAGIR. '+missionProgressText());
+ else if(missionStage===6)say((campaignNumber===2?'SIGA OS MARCADORES DO BLACKSITE E USE E PARA INTERAGIR. ':'SIGA O MARCADOR DA PRISÃO E USE E PARA INTERAGIR. ')+missionProgressText());
  else if(!missionRequirementsMet())say('OBJETIVOS PENDENTES — '+missionProgressText());
  else say('VÁ ATÉ O CÍRCULO AMARELO DE EXTRAÇÃO');
 }
@@ -751,7 +869,7 @@ const targets=[];for(const e of enemies)if(e.alive){e.mesh.traverse(part=>{if(!p
 const tracer=new THREE.Mesh(new THREE.CylinderGeometry(.025,.025,Math.min(impact.distanceTo(start),effectiveRange),5),new THREE.MeshBasicMaterial({color:0xffd18a,transparent:true,opacity:.65}));tracer.position.copy(start).add(impact).multiplyScalar(.5);tracer.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),impact.clone().sub(start).normalize());scene.add(tracer);effects.push({mesh:tracer,life:.055})}
 function canSee(from,to){const origin=from.clone().add(new THREE.Vector3(0,1.4,0)),delta=to.clone().add(new THREE.Vector3(0,1,0)).sub(origin),distance=delta.length();const ray=new THREE.Raycaster(origin,delta.normalize(),0,distance);const visibleThroughAncestors=o=>{let n=o;while(n&&n!==scene){if(!n.visible)return false;n=n.parent}return true};return !ray.intersectObjects(scene.children,true).some(h=>!h.object.userData.ignoreSightRay&&visibleThroughAncestors(h.object)&&h.object!==floor&&h.object!==grid&&h.object!==player&&h.object.parent!==player&&h.distance>1.2&&h.distance<distance-.4&&h.object.material!==undefined&&h.object.material!==yellow)}
 function actorCollisionPenalty(x,z,r){
- const blockList=gulagActive?gulagCollision:obstacles;let total=0;
+ const blockList=campaign2Active?campaign2Collision:(gulagActive?gulagCollision:obstacles);let total=0;
  for(const o of blockList){
   const dx=x-o.x,dz=z-o.z,rot=o.rotY||0,c=Math.cos(rot),sn=Math.sin(rot);
   const lx=dx*c-dz*sn,lz=dx*sn+dz*c;
@@ -775,7 +893,7 @@ function moveActorSafe(position,dx,dz,r=.58,min=-44,max=44){
 }
 // Colisão dedicada dos inimigos: corpo circular contra caixas orientadas, não apenas o centro do personagem.
 function enemyWallHit(x,z,r){
- const list=gulagActive?gulagCollision:obstacles;
+ const list=campaign2Active?campaign2Collision:(gulagActive?gulagCollision:obstacles);
  for(const o of list){
   const rot=o.rotY||0,c=Math.cos(rot),sn=Math.sin(rot),dx=x-o.x,dz=z-o.z;
   const lx=dx*c-dz*sn,lz=dx*sn+dz*c;
@@ -804,7 +922,7 @@ function enemyBodyBlocked(x,z,r,self){
 }
 function enemyPositionBlocked(x,z,r,self){return enemyWallHit(x,z,r)||enemyBodyBlocked(x,z,r,self)}
 function pushEnemyOutOfWalls(position,r){
- const list=gulagActive?gulagCollision:obstacles;
+ const list=campaign2Active?campaign2Collision:(gulagActive?gulagCollision:obstacles);
  for(let pass=0;pass<8;pass++){
   let moved=false;
   for(const o of list){
@@ -855,7 +973,7 @@ function moveEnemySafe(e,dx,dz){
  }
 }
 function solidIntersectionDistance(from,to,padding=.08){
- const list=gulagActive?gulagCollision:obstacles,dx=to.x-from.x,dy=to.y-from.y,dz=to.z-from.z,segmentLength=Math.hypot(dx,dy,dz);
+ const list=campaign2Active?campaign2Collision:(gulagActive?gulagCollision:obstacles),dx=to.x-from.x,dy=to.y-from.y,dz=to.z-from.z,segmentLength=Math.hypot(dx,dy,dz);
  if(segmentLength<1e-8)return Infinity;
  let nearest=Infinity;
  for(const o of list){
@@ -897,7 +1015,7 @@ function projectileSegmentHitsActor(from,to,actor,radius=.56){
  }
  return exit>=0&&enter<=1;
 }
-function destroyProp(d,explosive=false){d.alive=false;scene.remove(d.mesh);if(d.extras)d.extras.forEach(o=>scene.remove(o));if(d.obstacle){const index=obstacles.indexOf(d.obstacle);if(index>=0)obstacles.splice(index,1)}if(d.type==='crate')spawnEffect(d.mesh.position.clone().add(new THREE.Vector3(0,.7,0)),0xffc36b,.35,.22);else if(explosive)spawnEffect(d.mesh.position.clone().add(new THREE.Vector3(0,.7,0)),0xff7b32,.7,.2)}
+function destroyProp(d,explosive=false){d.alive=false;scene.remove(d.mesh);if(d.extras)d.extras.forEach(o=>scene.remove(o));if(d.obstacle){const index=obstacles.indexOf(d.obstacle);if(index>=0)obstacles.splice(index,1)}if(d.campaign2Obstacle){const ci=campaign2Collision.indexOf(d.campaign2Obstacle);if(ci>=0)campaign2Collision.splice(ci,1)}if(d.type==='crate')spawnEffect(d.mesh.position.clone().add(new THREE.Vector3(0,.7,0)),0xffc36b,.35,.22);else if(explosive)spawnEffect(d.mesh.position.clone().add(new THREE.Vector3(0,.7,0)),0xff7b32,.7,.2)}
 function detonate(pos){sound(48,.45,'sawtooth',.07);spawnEffect(pos,0xff7b32,1.5,.4);spawnEffect(pos,0xffd48a,2.2,.24);spawnEffect(pos.clone().add(new THREE.Vector3(.5,.5,0)),0x383d42,.9,.9);spawnEffect(pos.clone().add(new THREE.Vector3(-.4,.2,.5)),0x242a30,.75,1.1);for(let i=0;i<8;i++)spawnEffect(pos.clone().add(new THREE.Vector3((Math.random()-.5)*2,Math.random()*1.8,(Math.random()-.5)*2)),0xffb34d,.08,.25);for(const e of enemies){if(e.alive&&e.mesh.position.distanceTo(pos)<5.5){e.hp-=4;if(e.hp<=0){e.alive=false;scene.remove(e.mesh);kills++}}}if(!gulagActive)for(const d of destructibles){if(d.alive&&d.mesh.position.distanceTo(pos)<5){destroyProp(d,true);spawnEffect(d.mesh.position,0xff7b32,1,.25);for(const e of enemies){if(e.alive&&e.mesh.position.distanceTo(d.mesh.position)<4){e.hp-=3;if(e.hp<=0){e.alive=false;scene.remove(e.mesh);kills++}}}}}updateHUD();saveGame();refreshMissionHUD()}
 function damagePlayer(amount){if(armor>0){const absorbed=Math.min(armor,Math.ceil(amount*(lightArmorEquipped?.45:.7)));armor-=absorbed;amount-=absorbed}health=Math.max(0,health-amount);updateHUD();$('#hud').classList.add('damage');setTimeout(()=>$('#hud').classList.remove('damage'),180);if(health<=0)finish(false)}
 function update(dt){if(!running||ended)return;missionElapsed+=dt;fireCooldown=Math.max(0,fireCooldown-dt);walkTime+=dt;dayClock+=dt;saveTick+=dt;
@@ -910,7 +1028,7 @@ function update(dt){if(!running||ended)return;missionElapsed+=dt;fireCooldown=Ma
    sound(440,.22,'triangle',.055);refreshMissionHUD();saveGame();
    say('PORTÃO ABERTO — ATRAVESSE O PÁTIO ATÉ A SALA DE CONTROLE');
   }
- }if(missionRequirementsMet()&&!extractionStarted){extractionStarted=true;extractionTimer=missionStage===6?90:75;alarmTriggered=true;alarmsRaised++;enemies.forEach(e=>{if(e.alive){e.alert=true;e.alertPosition=player.position.clone()}});$('#evacTimer').classList.remove('hidden');say('OBJETIVOS CUMPRIDOS — EXTRAÇÃO SOB PRESSÃO!')}if(extractionStarted){extractionTimer=Math.max(0,extractionTimer-dt);$('#evacTimerText').textContent=Math.ceil(extractionTimer);$('#evacTimer').classList.remove('hidden');if(extractionTimer<=0){$('#evacTimer').classList.add('hidden');say('EXTRAÇÃO PERDIDA — TEMPO ESGOTADO');finish(false);return}}if(saveTick>12){saveTick=0;saveGame()}const daylight=.5+.5*Math.sin(dayClock*.035);sun.intensity=lightsOut?.12:.65+daylight*2.1;ambientLight.intensity=lightsOut?.35:1.8;if(rainPoints&&rainEnabled){const a=rainPoints.geometry.attributes.position;for(let i=0;i<a.count;i++){a.array[i*3+1]-=dt*28;if(a.array[i*3+1]<0){a.array[i*3+1]=25+Math.random()*20;a.array[i*3]=player.position.x+(Math.random()-.5)*70;a.array[i*3+2]=player.position.z+(Math.random()-.5)*70}}a.needsUpdate=true}scene.fog.color.setRGB(.025+daylight*.43,.04+daylight*.49,.06+daylight*.53);scene.background.copy(scene.fog.color);if(missionStage===6){scene.fog.color.setHex(0x1d2931);scene.background.setHex(0x1d2931);sun.intensity=lightsOut?.08:.8+daylight*.55;}player.rotation.y=yaw;
+ }if(missionRequirementsMet()&&!extractionStarted){extractionStarted=true;extractionTimer=missionStage===6?90:75;alarmTriggered=true;alarmsRaised++;enemies.forEach(e=>{if(e.alive){e.alert=true;e.alertPosition=player.position.clone()}});$('#evacTimer').classList.remove('hidden');say('OBJETIVOS CUMPRIDOS — EXTRAÇÃO SOB PRESSÃO!')}if(extractionStarted){extractionTimer=Math.max(0,extractionTimer-dt);$('#evacTimerText').textContent=Math.ceil(extractionTimer);$('#evacTimer').classList.remove('hidden');if(extractionTimer<=0){$('#evacTimer').classList.add('hidden');say('EXTRAÇÃO PERDIDA — TEMPO ESGOTADO');finish(false);return}}if(saveTick>12){saveTick=0;saveGame()}const daylight=.5+.5*Math.sin(dayClock*.035);sun.intensity=lightsOut?.12:.65+daylight*2.1;ambientLight.intensity=lightsOut?.35:1.8;if(rainPoints&&rainEnabled){const a=rainPoints.geometry.attributes.position;for(let i=0;i<a.count;i++){a.array[i*3+1]-=dt*28;if(a.array[i*3+1]<0){a.array[i*3+1]=25+Math.random()*20;a.array[i*3]=player.position.x+(Math.random()-.5)*70;a.array[i*3+2]=player.position.z+(Math.random()-.5)*70}}a.needsUpdate=true}scene.fog.color.setRGB(.025+daylight*.43,.04+daylight*.49,.06+daylight*.53);scene.background.copy(scene.fog.color);if(campaign2Active){scene.fog.color.setHex(0x213746);scene.background.setHex(0x213746);sun.intensity=lightsOut?.05:.65;}else if(missionStage===6){scene.fog.color.setHex(0x1d2931);scene.background.setHex(0x1d2931);sun.intensity=lightsOut?.08:.8+daylight*.55;}player.rotation.y=yaw;
 const forward=new THREE.Vector3(-Math.sin(yaw),0,-Math.cos(yaw)),right=new THREE.Vector3(Math.cos(yaw),0,-Math.sin(yaw));let move=new THREE.Vector3();if(keys.KeyW||keys.ArrowUp)move.add(forward);if(keys.KeyS||keys.ArrowDown)move.sub(forward);if(keys.KeyD||keys.ArrowRight)move.add(right);if(keys.KeyA||keys.ArrowLeft)move.sub(right);
 if(player&&!driving){const crouch=keys.KeyC?1:0;player.userData.body.position.y=crouch?.94:1.25;player.userData.head.position.y=crouch?1.62:2.02;player.userData.equipment.position.y=-.3*crouch}if(driving&&vehicle){const vMove=new THREE.Vector3();if(keys.KeyW)vMove.z-=1;if(keys.KeyS)vMove.z+=1;if(keys.KeyA)vMove.x-=1;if(keys.KeyD)vMove.x+=1;if(vMove.lengthSq()>0){vMove.normalize().multiplyScalar(10*dt).applyAxisAngle(new THREE.Vector3(0,1,0),vehicle.rotation.y);const nx=THREE.MathUtils.clamp(vehicle.position.x+vMove.x,-43,43),nz=THREE.MathUtils.clamp(vehicle.position.z+vMove.z,-43,43);if(!blocked(nx,vehicle.position.z,1.4))vehicle.position.x=nx;if(!blocked(vehicle.position.x,nz,1.5))vehicle.position.z=nz;const targetYaw=Math.atan2(-vMove.x,-vMove.z);let yawDiff=targetYaw-vehicle.rotation.y;while(yawDiff>Math.PI)yawDiff-=Math.PI*2;while(yawDiff<-Math.PI)yawDiff+=Math.PI*2;vehicle.rotation.y+=yawDiff*Math.min(1,dt*1.8);sound(75,.03,'sawtooth',.006);
 for(const enemy of enemies){
@@ -979,7 +1097,7 @@ for(const e of enemies){
  const moveTarget=e.alertPosition||player.position;
  const to=moveTarget.clone().sub(p),dist=to.length();
  if(e.seekingCoverUntil>missionElapsed){
-  const coverList=gulagActive?gulagCollision:obstacles;let chosenCover=null,bestCover=Infinity;
+  const coverList=campaign2Active?campaign2Collision:(gulagActive?gulagCollision:obstacles);let chosenCover=null,bestCover=Infinity;
   for(const cover of coverList){const dx=cover.x-p.x,dz=cover.z-p.z,d=Math.hypot(dx,dz);if(d<.8||d>12)continue;const score=d+Math.hypot(player.position.x-cover.x,player.position.z-cover.z)*.08;if(score<bestCover){bestCover=score;chosenCover=cover}}
   if(chosenCover){const away=new THREE.Vector3(p.x-chosenCover.x,0,p.z-chosenCover.z).normalize();const hideX=chosenCover.x+away.x*(Math.max(chosenCover.hx,chosenCover.hz)+.65),hideZ=chosenCover.z+away.z*(Math.max(chosenCover.hx,chosenCover.hz)+.65);to.set(hideX-p.x,0,hideZ-p.z)}
  }else if(e.type==='cover'&&e.alert&&!e.alertPosition&&dist>profile.min+3){const lateral=new THREE.Vector3(-playerDelta.z,0,playerDelta.x).normalize().multiplyScalar(e.strafe*4);to.add(lateral)}
@@ -1102,12 +1220,14 @@ window.__gameAPI={
     say('CONFIGURAÇÕES SALVAS');
   },
   startMission(stage){reset(false,Number(stage)||1)},
+  startCampaign(number){const n=Number(number)===2?2:1;reset(!!loadSave(n),null,n);say(n===2?'CAMPANHA 02 — OPERAÇÃO NOITE ZERO. ESTAÇÃO POLAR HOSTIL.':'CAMPANHA 01 — OPERAÇÃO RUPTURA.');},
+  getCampaign(){return campaignNumber},
   continueCampaign(){if(loadSave())reset(true);else{say('NENHUM PROGRESSO SALVO');reset(false)}},
   hasPlayer(){return !!player},
   save(){saveGame()},
   getSave(){return loadSave()},
   load(){const saved=loadSave();if(!saved)return false;reset(true);return true},
-  deleteSave(){localStorage.removeItem('operacaoRupturaSave')},
+  deleteSave(){localStorage.removeItem('operacaoRupturaSaveC'+campaignNumber);localStorage.removeItem('operacaoRupturaSave')},
   getLoadout(){return {suppressorEquipped,redDotEquipped,extendedMagEquipped,foregripEquipped,lightArmorEquipped}},
   applyLoadout(values){
     suppressorEquipped=!!values.suppressorEquipped;
@@ -1236,10 +1356,31 @@ if(realMenu){
     const p=overlay(),body=content();if(!p||!body)return;
     const api=window.__gameAPI;
     let heading='MENU',html='';
-    if(which==='missions'){
-      heading='ESCOLHER MISSÃO';
-      html='<p style="color:#b9c9d5;line-height:1.6">Selecione onde quer iniciar a campanha.</p>'+
-        [['1','ZONA INDUSTRIAL','Limpe a estação e extraia'],['2','BASE DA PEDREIRA','Destrua o jipe e o tanque'],['3','PORTO SOB CERCO','Recupere inteligência'],['4','COMPLEXO NOTURNO','Desative 3 transmissores'],['5','FORTALEZA: CHEFE HOSTIL','Elimine o comandante'],['6','OPERAÇÃO: PRISÃO DE FERRO','Infiltração longa, 5 etapas, resgate e fuga']].map(([n,name,desc])=>btn('MISSÃO '+n+' · '+name+'<br><span style="font-weight:500;color:#b9c9d5;font-size:12px">'+desc+'</span>','mission','data-stage="'+n+'"')).join('');
+    if(which==='campaigns'){
+      heading='SELECIONAR CAMPANHA';
+      html='<p style="color:#b9c9d5;line-height:1.6">Duas operações independentes. Cada uma tem seis missões e save separado.</p>'+
+        btn('CAMPANHA 01 · OPERAÇÃO RUPTURA<br><span style="font-weight:500;color:#b9c9d5;font-size:12px">Zona industrial, comboio inimigo, fortaleza e resgate no complexo penitenciário.</span>','campaign','data-campaign="1"')+
+        btn('CAMPANHA 02 · OPERAÇÃO NOITE ZERO<br><span style="font-weight:500;color:#b9c9d5;font-size:12px">Estação polar, comboio fantasma, dados secretos, sabotagem de rádio e extração no blacksite.</span>','campaign','data-campaign="2"');
+    }else if(which==='missions'){
+      heading='MISSÕES DA CAMPANHA '+String(api&&api.getCampaign?api.getCampaign():1).padStart(2,'0');
+      const campaign=(api&&api.getCampaign?api.getCampaign():1);
+      const list=campaign===2?[
+        ['1','ESTAÇÃO POLAR','Retome o perímetro da estação'],
+        ['2','COMBOIO FANTASMA','Destrua o jipe e o blindado'],
+        ['3','ARQUIVO FANTASMA','Recupere os dados secretos'],
+        ['4','SILÊNCIO DE RÁDIO','Sabote três transmissores'],
+        ['5','COMANDANTE VÉSPERA','Elimine o comandante'],
+        ['6','BLACKSITE: EXTRAÇÃO ZERO','Resgate a Dra. Vega e extraia']
+      ]:[
+        ['1','ZONA INDUSTRIAL','Limpe a estação e extraia'],
+        ['2','BASE DA PEDREIRA','Destrua o jipe e o tanque'],
+        ['3','PORTO SOB CERCO','Recupere inteligência'],
+        ['4','COMPLEXO NOTURNO','Desative três transmissores'],
+        ['5','FORTALEZA: CHEFE HOSTIL','Elimine o comandante'],
+        ['6','OPERAÇÃO: PRISÃO DE FERRO','Resgate o Capitão Price']
+      ];
+      html='<p style="color:#b9c9d5;line-height:1.6">Selecione uma missão da campanha atual.</p>'+
+        list.map(([n,name,desc])=>btn('MISSÃO '+n+' · '+name+'<br><span style="font-weight:500;color:#b9c9d5;font-size:12px">'+desc+'</span>','mission','data-stage="'+n+'"')).join('');
     }else if(which==='controls'){
       heading='CONTROLES';
       html='<p style="color:#c8d7e2;line-height:2"><b>W A S D</b> — mover<br><b>SHIFT</b> — correr<br><b>MOUSE</b> — mirar<br><b>CLIQUE ESQUERDO</b> — disparar<br><b>R</b> — recarregar<br><b>1–6</b> — trocar de arma<br><b>G</b> — granada<br><b>H</b> — kit médico<br><b>C</b> — modo furtivo/agachar conforme configuração<br><b>V</b> — aliado seguir/segurar posição<br><b>F</b> — entrar/sair do jipe<br><b>E</b> — interagir/extrair sob pressão.</p>';
@@ -1307,6 +1448,11 @@ if(realMenu){
     const cmd=action.dataset.directAction,api=window.__gameAPI;
     try{
       if(cmd==='close'){close();return}
+      if(cmd==='campaign'){
+        if(!api){content().innerHTML='<p>O motor ainda está carregando. Aguarde e tente de novo.</p>';return}
+        const number=Number(action.dataset.campaign)===2?2:1;
+        if(overlay())overlay().style.display='none';api.startCampaign(number);return;
+      }
       if(cmd==='mission'){
         if(!api){content().innerHTML='<p>O motor ainda está carregando. Aguarde e tente de novo.</p>';return}
         if(overlay())overlay().style.display='none';api.startMission(action.dataset.stage);return;
