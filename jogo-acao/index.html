@@ -653,23 +653,19 @@ function spawnEffect(pos,color=0xffc85c,size=.12,life=.1){const mesh=new THREE.M
 function createVehicle(){if(vehicle)scene.remove(vehicle);vehicle=new THREE.Group();const chassis=new THREE.Mesh(new THREE.BoxGeometry(2.1,.65,3.4),green);chassis.position.y=.85;vehicle.add(chassis);const cabin=new THREE.Mesh(new THREE.BoxGeometry(1.65,.8,1.55),glass);cabin.position.set(0,1.48,-.15);vehicle.add(cabin);const hood=new THREE.Mesh(new THREE.BoxGeometry(1.8,.25,1.1),dark);hood.position.set(0,1.2,-1.25);vehicle.add(hood);for(const x of [-1,1])for(const z of [-1.15,1.15]){const w=new THREE.Mesh(new THREE.CylinderGeometry(.38,.38,.22,12),black);w.rotation.z=Math.PI/2;w.position.set(x, .48,z);vehicle.add(w)}vehicle.position.set(5,0,7);vehicle.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true}});scene.add(vehicle)}
 function updateMini(){const c=$('#mini'),ctx=c.getContext('2d');if(!ctx)return;ctx.clearRect(0,0,150,150);ctx.fillStyle='#07111b';ctx.fillRect(0,0,150,150);ctx.strokeStyle='#506473';ctx.strokeRect(1,1,148,148);const px=x=>75+(x/100)*140,pz=z=>75+(z/100)*140;ctx.fillStyle='#77838a';for(const o of obstacles)ctx.fillRect(px(o.x)-o.hx*1.4,pz(o.z)-o.hz*1.4,o.hx*2.8,o.hz*2.8);ctx.fillStyle=stealthMode&&!alarmTriggered?'#7f8b90':'#ff5144';for(const e of enemies)if(e.alive&&(!stealthMode||alarmTriggered||e.mesh.position.distanceTo(player.position)<18))ctx.fillRect(px(e.mesh.position.x)-2,pz(e.mesh.position.z)-2,4,4);ctx.fillStyle='#56d69b';if(!gulagActive)for(const d of destructibles)if(d.alive&&d.type==='vehicle')ctx.fillRect(px(d.mesh.position.x)-3,pz(d.mesh.position.z)-3,6,6);ctx.fillStyle='#e8c04d';ctx.beginPath();ctx.arc(px(0),pz(missionStage===6?42:-40),4,0,Math.PI*2);ctx.fill();if(player){ctx.fillStyle='#48c8ff';ctx.beginPath();ctx.arc(px(player.position.x),pz(player.position.z),4,0,Math.PI*2);ctx.fill()}}
 function throwGrenade(){if(!running||grenades<=0)return;grenades--;$('#grenades').textContent=grenades;const dir=new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);const start=player.position.clone().add(new THREE.Vector3(0,1.5,0));const mesh=new THREE.Mesh(new THREE.SphereGeometry(.17,8,8),dark);mesh.position.copy(start);scene.add(mesh);const velocity=dir.clone().normalize().multiplyScalar(13);velocity.y+=6.5;projectiles.push({mesh,dir:dir.clone().normalize(),velocity,life:2.2,speed:19,kind:'grenade',owner:'player',bounces:0});say('GRANADA LANÇADA!')}
-function shoot(){if(!running||ended||reloading||fireCooldown>0||driving)return;const mag=currentAmmo();if(mag<=0){say('SEM MUNIÇÃO — pressione R');return}setAmmo(mag-1);shots++;fireCooldown=weaponData[weapon].rate;updateHUD();sound(weapon==='launcher'?55:weapon==='sniper'?95:weapon==='shotgun'?80:weapon==='pistol'?260:150,weapon==='shotgun'?.22:.09,weapon==='sniper'||weapon==='launcher'?'sawtooth':'square',weapon==='shotgun'?.045:.025);if(weapon==='launcher'){const r=new THREE.Raycaster();r.setFromCamera(new THREE.Vector2(0,0),camera);const dir=r.ray.direction.clone();const mesh=new THREE.Mesh(new THREE.SphereGeometry(.18,8,8),mat(0xffa34d));mesh.position.copy(player.position).add(new THREE.Vector3(0,1.5,0));scene.add(mesh);projectiles.push({mesh,dir,life:2.5,speed:25,kind:'rocket'});alarmTriggered=true;say('FOGUETE DISPARADO — POSIÇÃO REVELADA');return}const suppressedShot=suppressorEquipped&&['rifle','pistol','smg'].includes(weapon);if(suppressedShot){quietShotUntil=dayClock+5;say('DISPARO SILENCIOSO — MENOS DETECTÁVEL')}else{alarmTriggered=true}
+function shoot(){if(!running||ended||reloading||fireCooldown>0||driving)return;const mag=currentAmmo();if(mag<=0){say('SEM MUNIÇÃO — pressione R');return}setAmmo(mag-1);shots++;fireCooldown=weaponData[weapon].rate;weaponRecoil=Math.min(.34,weaponRecoil+({rifle:.075,pistol:.055,shotgun:.14,sniper:.18,smg:.04,launcher:.22}[weapon]||.06)*(foregripEquipped?.68:1));weaponKickTime=.12;updateHUD();sound(weapon==='launcher'?55:weapon==='sniper'?95:weapon==='shotgun'?80:weapon==='pistol'?260:150,weapon==='shotgun'?.22:.09,weapon==='sniper'||weapon==='launcher'?'sawtooth':'square',weapon==='shotgun'?.045:.025);if(weapon==='launcher'){const r=new THREE.Raycaster();r.setFromCamera(new THREE.Vector2(0,0),camera);const dir=r.ray.direction.clone();const mesh=new THREE.Mesh(new THREE.SphereGeometry(.18,8,8),mat(0xffa34d));mesh.position.copy(player.position).add(new THREE.Vector3(0,1.5,0));scene.add(mesh);projectiles.push({mesh,dir,life:2.5,speed:25,kind:'rocket'});alarmTriggered=true;say('FOGUETE DISPARADO — POSIÇÃO REVELADA');return}const suppressedShot=suppressorEquipped&&['rifle','pistol','smg'].includes(weapon);if(suppressedShot){quietShotUntil=dayClock+5;say('DISPARO SILENCIOSO — MENOS DETECTÁVEL')}else{if(!alarmEverRaised){alarmEverRaised=true;alarmsRaised++;say('ALARME ACIONADO — GUARDAS FORAM ALERTADOS');for(const guard of enemies){if(guard.alive&&guard.mesh.position.distanceTo(player.position)<50){guard.alert=true;guard.alertPosition=player.position.clone()}}}alarmTriggered=true}
 const hearingRadius=suppressedShot?10:(weapon==='pistol'?30:42);
 for(const nearby of enemies){if(nearby.alive&&nearby.mesh.position.distanceTo(player.position)<=hearingRadius){nearby.alert=true;nearby.alertPosition=player.position.clone()}}
-const origin=camera.position.clone();const ndc=new THREE.Vector2(0,0);const ray=new THREE.Raycaster();ray.setFromCamera(ndc,camera);const dir=ray.ray.direction.clone();const start=player.position.clone().add(new THREE.Vector3(0,1.45,0));spawnEffect(start.clone().add(new THREE.Vector3(.35,0,0)),0xffc85c,.09,.06);
-const targets=[];for(const e of enemies)if(e.alive){for(const part of e.mesh.children){part.userData.enemyRoot=e.mesh;targets.push(part)}}for(const d of destructibles)if(d.alive&&!gulagActive)targets.push(d.mesh);const effectiveRange=weaponData[weapon].range*(redDotEquipped?1.2:1);const hit=new THREE.Raycaster(origin,dir,0,effectiveRange).intersectObjects(targets,false)[0];let impact=origin.clone().add(dir.clone().multiplyScalar(effectiveRange));if(hit){impact.copy(hit.point);const target=enemies.find(e=>e.alive&&e.mesh===hit.object.parent);if(target){
+const origin=camera.position.clone();const ndc=new THREE.Vector2(0,0);const ray=new THREE.Raycaster();ray.setFromCamera(ndc,camera);const dir=ray.ray.direction.clone();const start=player.position.clone().add(new THREE.Vector3(0,1.45,0));spawnEffect(start.clone().add(dir.clone().multiplyScalar(1.1)),0xffd58b,.055,.045);if(weapon!=='launcher'){const casing=new THREE.Mesh(new THREE.CylinderGeometry(.018,.018,.06,6),gearMetal);casing.position.copy(start).add(new THREE.Vector3(.28,.1,.04));casing.rotation.x=Math.PI/2;scene.add(casing);const cv=new THREE.Vector3(2.5+Math.random()*1.5,1.8+Math.random(),(Math.random()-.5)*1.2).applyAxisAngle(new THREE.Vector3(0,1,0),yaw);projectiles.push({mesh:casing,velocity:cv,life:.7,kind:'casing'})}
+const targets=[];for(const e of enemies)if(e.alive){e.mesh.traverse(part=>{if(!part.isMesh)return;part.userData.enemyRoot=e.mesh;part.userData.hitZone=part===e.mesh.userData.head?'head':part===e.mesh.userData.body?'torso':e.mesh.userData.legs.some(leg=>part.parent===leg)?'legs':'armor';targets.push(part)})}for(const d of destructibles)if(d.alive&&!gulagActive)targets.push(d.mesh);const effectiveRange=weaponData[weapon].range*(redDotEquipped?1.2:1);const hit=new THREE.Raycaster(origin,dir,0,effectiveRange).intersectObjects(targets,false)[0];let impact=origin.clone().add(dir.clone().multiplyScalar(effectiveRange));if(hit){impact.copy(hit.point);const target=enemies.find(e=>e.alive&&e.mesh===hit.object.userData.enemyRoot);if(target){
  target.alert=true;target.alertPosition=null;
- // A malha da cabeça é independente do tronco, então os headshots recebem multiplicador próprio.
- const isHeadshot=hit.object===target.mesh.userData.head;
- const damageMultiplier=isHeadshot?2.5:1;
- target.hp-=weaponData[weapon].damage*damageMultiplier;hits++;
- const marker=$('#hitmarker');marker.textContent=isHeadshot?'HEADSHOT':'×';marker.style.color=isHeadshot?'#ffcf56':'#ff6854';marker.classList.remove('hidden');
- setTimeout(()=>{marker.classList.add('hidden');marker.textContent='×';marker.style.color=''},isHeadshot?360:100);
- const damagedPart=isHeadshot?target.mesh.userData.head:target.mesh.userData.body;
- const originalMaterial=damagedPart.material;damagedPart.material=mat(0xffd2b4);
- setTimeout(()=>{if(target.alive)damagedPart.material=originalMaterial},100);
- if(target.hp<=0){target.alive=false;scene.remove(target.mesh);kills++;updateHUD();sound(520,.06,'triangle');saveGame();say(isHeadshot?'HEADSHOT — HOSTIL NEUTRALIZADO':'HOSTIL NEUTRALIZADO');refreshMissionHUD()}
- else if(isHeadshot){sound(620,.055,'triangle');say('TIRO NA CABEÇA! DANO x2,5')}
+ const localHit=target.mesh.worldToLocal(hit.point.clone());let hitZone=hit.object.userData.hitZone||'torso';if(hitZone==='armor'&&localHit.y>1.78&&Math.abs(localHit.x)<.38)hitZone='head';else if(hitZone==='armor'&&localHit.y<.74)hitZone='legs';else if(hitZone==='armor'&&localHit.y>.72&&localHit.y<1.72&&Math.abs(localHit.x)>.42)hitZone='arms';
+ const isHeadshot=hitZone==='head';const damageMultiplier=isHeadshot?2.5:hitZone==='legs'?.65:hitZone==='arms'?.8:hitZone==='armor'?.78:1;
+ target.hp-=weaponData[weapon].damage*damageMultiplier;hits++;if(isHeadshot)headshots++;else if(hitZone==='legs'){legHits++;target.injuredLegUntil=missionElapsed+7}else if(hitZone==='arms'){armHits++;target.injuredArmUntil=missionElapsed+7}else bodyHits++;
+ const marker=$('#hitmarker');marker.textContent=isHeadshot?'HEADSHOT':hitZone==='legs'?'LEG SHOT':hitZone==='arms'?'ARM SHOT':'×';marker.style.color=isHeadshot?'#ffcf56':hitZone==='legs'?'#8cd8ff':hitZone==='arms'?'#b6baff':'#ff6854';marker.classList.remove('hidden');
+ setTimeout(()=>{marker.classList.add('hidden');marker.textContent='×';marker.style.color=''},isHeadshot?360:140);
+ const damagedPart=isHeadshot?target.mesh.userData.head:target.mesh.userData.body;const originalMaterial=damagedPart.material;damagedPart.material=mat(isHeadshot?0xffb24d:0xffd2b4);setTimeout(()=>{if(target.alive)damagedPart.material=originalMaterial},100);spawnEffect(hit.point,isHeadshot?0xff4350:0xffa24d,.09,.12);
+ if(target.hp<=0){target.alive=false;scene.remove(target.mesh);kills++;updateHUD();sound(520,.06,'triangle');saveGame();say(isHeadshot?'HEADSHOT — HOSTIL NEUTRALIZADO':'HOSTIL NEUTRALIZADO');refreshMissionHUD()}else if(isHeadshot){sound(620,.055,'triangle');say('TIRO NA CABEÇA! DANO x2,5')}else if(hitZone==='legs')say('TIRO NA PERNA — MOBILIDADE INIMIGA REDUZIDA');else if(hitZone==='arms')say('TIRO NO BRAÇO — PRECISÃO INIMIGA REDUZIDA')
  }else{const prop=destructibles.find(d=>d.alive&&d.mesh===hit.object);if(prop){prop.alive=false;scene.remove(prop.mesh);detonate(prop.mesh.position.clone().add(new THREE.Vector3(0,.7,0)));say(prop.type==='vehicle'?'VEÍCULO DESTRUÍDO':'BARRIL EXPLOSIVO DETONADO');refreshMissionHUD()}else spawnEffect(impact,0xffa24d,.15,.2)}}
 // Brief tracer to make shots readable.
 const tracer=new THREE.Mesh(new THREE.CylinderGeometry(.025,.025,Math.min(impact.distanceTo(start),effectiveRange),5),new THREE.MeshBasicMaterial({color:0xffd18a,transparent:true,opacity:.65}));tracer.position.copy(start).add(impact).multiplyScalar(.5);tracer.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),impact.clone().sub(start).normalize());scene.add(tracer);effects.push({mesh:tracer,life:.055})}
@@ -726,6 +722,39 @@ for(const enemy of enemies){
  updateHUD();saveGame();refreshMissionHUD();
 }
 }player.position.copy(vehicle.position)}else if(move.lengthSq()>0){move.normalize().multiplyScalar((keys.ShiftLeft||keys.ShiftRight?8.5:keys.KeyC?2.1:4.7)*(lightArmorEquipped?1.12:1)*dt);const nx=THREE.MathUtils.clamp(player.position.x+move.x,-44,44),nz=THREE.MathUtils.clamp(player.position.z+move.z,-44,44);if(!blocked(nx,player.position.z))player.position.x=nx;if(!blocked(player.position.x,nz))player.position.z=nz;player.userData.legs.forEach((l,i)=>l.rotation.x=Math.sin(walkTime*10+i*Math.PI)*.55)}else player.userData.legs.forEach(l=>l.rotation.x=0);
+// O companheiro acompanha o jogador, pode segurar posição e dispara contra alvos visíveis.
+if(companion&&companion.visible){
+ companionAttackCooldown=Math.max(0,companionAttackCooldown-dt);
+ const forwardBuddy=new THREE.Vector3(-Math.sin(yaw),0,-Math.cos(yaw));
+ const rightBuddy=new THREE.Vector3(Math.cos(yaw),0,-Math.sin(yaw));
+ if(companionMode==='follow'){
+  const desired=player.position.clone().addScaledVector(forwardBuddy,-2.4).addScaledVector(rightBuddy,-1.7);
+  const delta=desired.sub(companion.position);delta.y=0;
+  if(delta.length()>1.5){
+   delta.normalize().multiplyScalar(3.9*dt);
+   const ax=THREE.MathUtils.clamp(companion.position.x+delta.x,-43,43),az=THREE.MathUtils.clamp(companion.position.z+delta.z,-43,43);
+   if(!blocked(ax,companion.position.z,.48))companion.position.x=ax;
+   if(!blocked(companion.position.x,az,.48))companion.position.z=az;
+   companion.userData.legs.forEach((leg,i)=>leg.rotation.x=Math.sin(walkTime*8+i*Math.PI)*.36);
+   companion.rotation.y=Math.atan2(-delta.x,-delta.z);
+  }else companion.userData.legs.forEach(leg=>leg.rotation.x=0);
+ }else companion.userData.legs.forEach(leg=>leg.rotation.x=0);
+ if(companionAttackCooldown<=0){
+  const threats=enemies.filter(e=>e.alive&&e.mesh.position.distanceTo(companion.position)<27).sort((a,b)=>a.mesh.position.distanceTo(companion.position)-b.mesh.position.distanceTo(companion.position));
+  const target=threats.find(e=>canSee(companion.position,e.mesh.position));
+  if(target){
+   companionAttackCooldown=1.05;
+   target.alert=true;target.alertPosition=null;target.hp-=target.type==='heavy'?.7:1.15;
+   const from=companion.position.clone().add(new THREE.Vector3(0,1.35,0)),to=target.mesh.position.clone().add(new THREE.Vector3(0,1.25,0));
+   const beam=new THREE.Mesh(new THREE.CylinderGeometry(.018,.018,from.distanceTo(to),5),new THREE.MeshBasicMaterial({color:0x75cfff,transparent:true,opacity:.75}));
+   beam.position.copy(from).add(to).multiplyScalar(.5);beam.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),to.clone().sub(from).normalize());scene.add(beam);effects.push({mesh:beam,life:.07});
+   spawnEffect(to,0x75cfff,.06,.08);sound(175,.035,'square',.009);
+   if(target.hp<=0){target.alive=false;scene.remove(target.mesh);kills++;updateHUD();saveGame();refreshMissionHUD();say('ALIADO: HOSTIL NEUTRALIZADO')}
+  }
+ }
+ $('#allyPrompt').classList.toggle('hidden',!running);
+ $('#allyPrompt').textContent='ALIADO: '+(companionMode==='follow'?'SEGUINDO · V SEGURA POSIÇÃO':'SEGURANDO POSIÇÃO · V SEGUE');
+}
 const enemyTactics={
 rifle:{detect:22,min:9,max:16,fireRange:28},
 cover:{detect:25,min:13,max:20,fireRange:28},
@@ -805,6 +834,8 @@ firstPersonRig.visible=firstPersonMode;
 if(firstPersonMode){
  const moving=keys.KeyW||keys.KeyA||keys.KeyS||keys.KeyD;
  const bob=!keys.KeyC&&moving?Math.sin(walkTime*10)*.025:0;
+ weaponRecoil=Math.max(0,weaponRecoil-dt*(foregripEquipped?2.6:1.8));
+ const reloadDip=reloading?.32:0;firstPersonRig.position.set(Math.sin(walkTime*7)*.012,-reloadDip+(moving?Math.abs(Math.sin(walkTime*10))*.018:0),weaponRecoil);firstPersonRig.rotation.set(-weaponRecoil*1.45+reloadDip*.6,Math.sin(walkTime*4)*.012,Math.sin(walkTime*8)*.008);
  const eyeHeight=(keys.KeyC?1.28:1.67)+bob;
  const camPosition=player.position.clone().add(new THREE.Vector3(0,eyeHeight,0));
  camera.position.copy(camPosition);
