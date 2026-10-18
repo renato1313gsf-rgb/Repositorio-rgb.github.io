@@ -82,6 +82,7 @@ scene.add(camera);
 const ambientLight=new THREE.HemisphereLight(0xc8e0ff,0x252b31,1.8);scene.add(ambientLight);const rainGeo=new THREE.BufferGeometry();const rainArr=new Float32Array(700*3);for(let i=0;i<700;i++){rainArr[i*3]=(Math.random()-.5)*70;rainArr[i*3+1]=Math.random()*45;rainArr[i*3+2]=(Math.random()-.5)*70}rainGeo.setAttribute('position',new THREE.BufferAttribute(rainArr,3));const rainPoints=new THREE.Points(rainGeo,new THREE.PointsMaterial({color:0xb7d7eb,size:.055,transparent:true,opacity:.5}));rainPoints.visible=false;scene.add(rainPoints);
 const sun=new THREE.DirectionalLight(0xffe2c0,2.5);sun.position.set(-20,35,18);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.left=-55;sun.shadow.camera.right=55;sun.shadow.camera.top=55;sun.shadow.camera.bottom=-55;scene.add(sun);
 const mat=(c,r=.85,m=0)=>new THREE.MeshStandardMaterial({color:c,roughness:r,metalness:m});
+const hitFlashMaterials={body:mat(0xffd2b4),head:mat(0xffb24d)};
 const concrete=mat(0x48515a),dark=mat(0x202a32),metal=mat(0x596773,.45,.6),yellow=mat(0xe0a43a),red=mat(0xc74438),blue=mat(0x347cba),skin=mat(0xb5a08a),black=mat(0x11171d),green=mat(0x526e5a),glass=mat(0x4b7481,.25,.25);
 const floor=new THREE.Mesh(new THREE.PlaneGeometry(120,120),mat(0x535e61));floor.rotation.x=-Math.PI/2;floor.receiveShadow=true;scene.add(floor);const grid=new THREE.GridHelper(120,60,0x81908d,0x64736f);grid.position.y=.015;scene.add(grid);
 // Manchas de óleo, marcas de pneu e riscos dão mais textura visual ao pátio industrial.
@@ -723,7 +724,13 @@ const targets=[];for(const e of enemies)if(e.alive){e.mesh.traverse(part=>{if(!p
  target.hp-=weaponData[weapon].damage*damageMultiplier;hits++;if(isHeadshot)headshots++;else if(hitZone==='legs'){legHits++;target.injuredLegUntil=missionElapsed+7}else if(hitZone==='arms'){armHits++;target.injuredArmUntil=missionElapsed+7}else bodyHits++;
  const marker=$('#hitmarker');marker.textContent=isHeadshot?'HEADSHOT':hitZone==='legs'?'LEG SHOT':hitZone==='arms'?'ARM SHOT':'×';marker.style.color=isHeadshot?'#ffcf56':hitZone==='legs'?'#8cd8ff':hitZone==='arms'?'#b6baff':'#ff6854';marker.classList.remove('hidden');
  setTimeout(()=>{marker.classList.add('hidden');marker.textContent='×';marker.style.color=''},isHeadshot?360:140);
- const damagedPart=isHeadshot?target.mesh.userData.head:target.mesh.userData.body;const originalMaterial=damagedPart.material;damagedPart.material=mat(isHeadshot?0xffb24d:0xffd2b4);setTimeout(()=>{if(target.alive)damagedPart.material=originalMaterial},100);spawnEffect(hit.point,isHeadshot?0xff4350:0xffa24d,.09,.12);
+ const damagedPart=isHeadshot?target.mesh.userData.head:target.mesh.userData.body;
+  // Não capture o material do flash anterior em tiros rápidos: guarde sempre o material-base.
+  const originalMaterial=damagedPart.userData.originalHitMaterial||(damagedPart.userData.originalHitMaterial=damagedPart.material);
+  const flashToken=(damagedPart.userData.hitFlashToken||0)+1;damagedPart.userData.hitFlashToken=flashToken;
+  damagedPart.material=isHeadshot?hitFlashMaterials.head:hitFlashMaterials.body;
+  setTimeout(()=>{if(damagedPart.userData.hitFlashToken===flashToken)damagedPart.material=originalMaterial},115);
+  spawnEffect(hit.point,isHeadshot?0xff4350:0xffa24d,.09,.12);
  if(target.hp<=0){target.alive=false;scene.remove(target.mesh);kills++;updateHUD();sound(520,.06,'triangle');saveGame();say(isHeadshot?'HEADSHOT — HOSTIL NEUTRALIZADO':'HOSTIL NEUTRALIZADO');refreshMissionHUD()}else if(isHeadshot){sound(620,.055,'triangle');say('TIRO NA CABEÇA! DANO x2,5')}else if(hitZone==='legs')say('TIRO NA PERNA — MOBILIDADE INIMIGA REDUZIDA');else if(hitZone==='arms')say('TIRO NO BRAÇO — PRECISÃO INIMIGA REDUZIDA')
  }else{const prop=destructibles.find(d=>d.alive&&d.mesh===hit.object);if(prop){if(prop.type==='crate'){prop.hp=(prop.hp??3)-1;spawnEffect(impact,0xffc36b,.12,.13);if(prop.hp<=0){destroyProp(prop,false);say('COBERTURA DESTRUIDA — NOVA LINHA DE TIRO');refreshMissionHUD()}else say('CAIXA DANIFICADA ('+prop.hp+' impactos restantes)')}else{destroyProp(prop,true);detonate(prop.mesh.position.clone().add(new THREE.Vector3(0,.7,0)));say(prop.type==='vehicle'?'VEÍCULO DESTRUÍDO':'BARRIL EXPLOSIVO DETONADO');refreshMissionHUD()}}else spawnEffect(impact,0xffa24d,.15,.2)}}
 // Brief tracer to make shots readable.
