@@ -208,8 +208,74 @@ const gulagMarkers=[
 const gulagIntelMarkers=[makeMissionMarker(-4,-17,0x4bdfff),makeMissionMarker(9,0,0x4bdfff),makeMissionMarker(8,30.5,0x4bdfff)];
 let gulagIntel=[false,false,false],gulagShieldTaken=false,prisonerRescued=false;
 window.__bootStage='Cenário construído; preparando lógica da missão';
-function soldier(isEnemy=false){const g=new THREE.Group();const body=new THREE.Mesh(new THREE.CapsuleGeometry(.43,.85,4,8),isEnemy?red:blue);body.position.y=1.25;body.castShadow=true;g.add(body);const head=new THREE.Mesh(new THREE.SphereGeometry(.28,10,8),skin);head.position.y=2.02;head.castShadow=true;g.add(head);const helmet=new THREE.Mesh(new THREE.SphereGeometry(.32,10,7,0,Math.PI*2,0,Math.PI/2),isEnemy?dark:green);helmet.position.y=2.13;g.add(helmet);const pack=new THREE.Mesh(new THREE.BoxGeometry(.48,.55,.25),isEnemy?dark:green);pack.position.set(0,1.3,.38);g.add(pack);const gun=new THREE.Mesh(new THREE.BoxGeometry(.15,.15,1.0),black);gun.position.set(.43,1.45,-.42);g.add(gun);const legs=[];for(const x of [-.2,.2]){const leg=new THREE.Mesh(new THREE.BoxGeometry(.22,.62,.27),dark);leg.position.set(x,.42,0);g.add(leg);legs.push(leg)}g.userData={legs,body,gun,isEnemy,head,helmet,pack};return g}
-const pricePrisoner=soldier(false);pricePrisoner.position.set(8,0,31.3);pricePrisoner.userData.body.material=mat(0x707a82,.95);pricePrisoner.userData.gun.visible=false;pricePrisoner.userData.pack.material=mat(0x383f45);pricePrisoner.visible=false;scene.add(pricePrisoner);
+// Materiais táticos compartilhados: bastante detalhe sem criar uma textura pesada para cada soldado.
+const gearOlive=mat(0x414b3d,.94),gearDark=mat(0x20272b,.92),gearFabric=mat(0x5b6250,.98),gearMetal=mat(0x68757b,.4,.72),gearRubber=mat(0x15191b,.98),gearLens=mat(0x192e35,.24,.22),gearPatch=mat(0x8d332b,.8),gearTan=mat(0x827960,.98);
+const soldierGeo={
+ torso:new THREE.CapsuleGeometry(.43,.85,4,8),head:new THREE.SphereGeometry(.28,12,10),helmet:new THREE.SphereGeometry(.32,12,8,0,Math.PI*2,0,Math.PI/2),
+ arm:new THREE.CapsuleGeometry(.135,.42,3,7),hand:new THREE.SphereGeometry(.14,8,6),leg:new THREE.BoxGeometry(.23,.62,.27),
+ boot:new THREE.BoxGeometry(.27,.18,.42),knee:new THREE.BoxGeometry(.28,.20,.13),boxSmall:new THREE.BoxGeometry(1,1,1),
+ cyl:new THREE.CylinderGeometry(.05,.05,1,8),goggle:new THREE.SphereGeometry(.075,8,6)
+};
+function soldier(isEnemy=false,role='rifle'){
+ const g=new THREE.Group();
+ const cloth=isEnemy?mat(0x414744,.98):mat(0x465443,.98);
+ const body=new THREE.Mesh(soldierGeo.torso,cloth);body.position.y=1.25;body.castShadow=true;body.receiveShadow=true;g.add(body);
+ const head=new THREE.Mesh(soldierGeo.head,skin);head.position.set(0,2.02,-.015);head.castShadow=true;g.add(head);
+ const faceCover=new THREE.Mesh(new THREE.BoxGeometry(.34,.17,.20),isEnemy?gearDark:gearFabric);faceCover.position.set(0,1.88,-.215);g.add(faceCover);
+ const eyes=[];
+ for(const x of [-.095,.095]){const eye=new THREE.Mesh(soldierGeo.goggle,gearDark);eye.scale.set(1,.62,.42);eye.position.set(x,2.045,-.265);g.add(eye);eyes.push(eye)}
+ const nose=new THREE.Mesh(new THREE.BoxGeometry(.065,.11,.07),skin);nose.position.set(0,1.99,-.283);g.add(nose);
+ const helmet=new THREE.Mesh(soldierGeo.helmet,isEnemy?gearOlive:green);helmet.position.set(0,2.17,.01);helmet.castShadow=true;g.add(helmet);
+ const helmetRim=new THREE.Mesh(new THREE.BoxGeometry(.55,.065,.42),gearDark);helmetRim.position.set(0,2.17,-.04);g.add(helmetRim);
+ const helmetMount=new THREE.Mesh(new THREE.BoxGeometry(.12,.12,.14),gearMetal);helmetMount.position.set(0,2.20,-.26);g.add(helmetMount);
+ const goggleBand=new THREE.Mesh(new THREE.BoxGeometry(.47,.11,.07),gearDark);goggleBand.position.set(0,2.035,-.255);g.add(goggleBand);
+ const headset=new THREE.Group();g.add(headset);
+ for(const x of [-1,1]){const cup=new THREE.Mesh(new THREE.BoxGeometry(.09,.20,.13),gearDark);cup.position.set(x*.29,2.03,-.015);headset.add(cup)}
+ const neck=new THREE.Mesh(new THREE.CylinderGeometry(.13,.15,.18,8),gearTan);neck.position.set(0,1.78,0);g.add(neck);
+ const gear=new THREE.Group();g.add(gear);
+ const plate=new THREE.Mesh(new THREE.BoxGeometry(.64,.57,.20),role==='heavy'||role==='boss'?gearDark:gearOlive);plate.position.set(0,1.39,-.245);plate.castShadow=true;gear.add(plate);
+ const plateInsert=new THREE.Mesh(new THREE.BoxGeometry(.42,.35,.045),gearFabric);plateInsert.position.set(0,1.43,-.354);gear.add(plateInsert);
+ const collar=new THREE.Mesh(new THREE.BoxGeometry(.34,.14,.28),gearDark);collar.position.set(0,1.70,-.12);gear.add(collar);
+ // Alças cruzadas e cinto modular.
+ for(const side of [-1,1]){const strap=new THREE.Mesh(new THREE.BoxGeometry(.085,.65,.075),gearFabric);strap.position.set(side*.20,1.43,-.365);strap.rotation.z=side*.20;gear.add(strap)}
+ const belt=new THREE.Mesh(new THREE.BoxGeometry(.73,.13,.43),gearDark);belt.position.set(0,1.01,-.015);gear.add(belt);
+ const buckle=new THREE.Mesh(new THREE.BoxGeometry(.13,.11,.045),gearMetal);buckle.position.set(0,1.01,-.245);gear.add(buckle);
+ for(const side of [-1,1]){
+   for(const k=0;k<3;k++){const pouch=new THREE.Mesh(new THREE.BoxGeometry(.145,.17,.105),k===1?gearDark:gearFabric);pouch.position.set(side*(.105+k*.16),1.26,-.375);gear.add(pouch);const flap=new THREE.Mesh(new THREE.BoxGeometry(.13,.045,.025),gearOlive);flap.position.set(side*(.105+k*.16),1.32,-.438);gear.add(flap)}
+   const shoulder=new THREE.Mesh(new THREE.BoxGeometry(.27,.17,.34),gearOlive);shoulder.position.set(side*.43,1.56,-.04);shoulder.rotation.z=side*.1;gear.add(shoulder);
+   const upper=new THREE.Mesh(soldierGeo.arm,cloth);upper.position.set(side*.53,1.36,-.13);upper.rotation.x=-.72;upper.rotation.z=side*-.13;upper.castShadow=true;g.add(upper);
+   const elbow=new THREE.Mesh(new THREE.SphereGeometry(.145,8,6),gearDark);elbow.position.set(side*.60,1.08,-.32);g.add(elbow);
+   const forearm=new THREE.Mesh(soldierGeo.arm,cloth);forearm.position.set(side*.49,1.02,-.48);forearm.rotation.x=-1.03;forearm.rotation.z=side*.13;forearm.castShadow=true;g.add(forearm);
+   const glove=new THREE.Mesh(soldierGeo.hand,gearRubber);glove.scale.set(1,.8,1.15);glove.position.set(side*.43,.82,-.67);g.add(glove);
+   const thighPocket=new THREE.Mesh(new THREE.BoxGeometry(.20,.25,.12),gearFabric);thighPocket.position.set(side*.21,.65,-.17);g.add(thighPocket);
+   const knee=new THREE.Mesh(soldierGeo.knee,gearDark);knee.position.set(side*.20,.43,-.19);g.add(knee);
+   const kneePlate=new THREE.Mesh(new THREE.BoxGeometry(.17,.10,.035),gearMetal);kneePlate.position.set(side*.20,.43,-.265);g.add(kneePlate);
+   const leg=new THREE.Mesh(soldierGeo.leg,cloth);leg.position.set(side*.20,.42,0);leg.castShadow=true;g.add(leg);
+   const boot=new THREE.Mesh(soldierGeo.boot,gearRubber);boot.position.set(side*.20,.11,-.08);boot.castShadow=true;g.add(boot);
+   const bootToe=new THREE.Mesh(new THREE.BoxGeometry(.25,.08,.20),gearDark);bootToe.position.set(side*.20,.13,-.27);g.add(bootToe);
+   const shinStrap=new THREE.Mesh(new THREE.BoxGeometry(.24,.07,.29),gearFabric);shinStrap.position.set(side*.20,.31,0);g.add(shinStrap);
+   if(isEnemy){const armband=new THREE.Mesh(new THREE.BoxGeometry(.22,.085,.27),gearPatch);armband.position.set(side*.57,1.38,-.20);armband.rotation.z=side*-.13;g.add(armband)}
+ }
+ const pack=new THREE.Mesh(new THREE.BoxGeometry(.49,.58,.27),isEnemy?gearDark:gearOlive);pack.position.set(0,1.34,.39);pack.castShadow=true;g.add(pack);
+ const packTop=new THREE.Mesh(new THREE.BoxGeometry(.34,.14,.24),gearFabric);packTop.position.set(0,1.67,.37);g.add(packTop);
+ const radio=new THREE.Mesh(new THREE.BoxGeometry(.15,.21,.10),gearDark);radio.position.set(.18,1.58,.20);g.add(radio);
+ const antenna=new THREE.Mesh(soldierGeo.cyl,gearMetal);antenna.position.set(.20,1.80,.20);antenna.rotation.z=-.10;g.add(antenna);
+ const canteen=new THREE.Mesh(new THREE.CylinderGeometry(.09,.09,.27,8),gearDark);canteen.position.set(-.36,1.18,.26);canteen.rotation.z=.16;g.add(canteen);
+ const weaponAssembly=new THREE.Group();weaponAssembly.position.set(.38,1.47,-.42);g.add(weaponAssembly);
+ const gunReceiver=new THREE.Mesh(new THREE.BoxGeometry(.15,.15,.48),gearDark);gunReceiver.position.z=-.02;weaponAssembly.add(gunReceiver);
+ const handguard=new THREE.Mesh(new THREE.BoxGeometry(.115,.12,.34),gearOlive);handguard.position.set(0,.015,-.36);weaponAssembly.add(handguard);
+ const barrel=new THREE.Mesh(new THREE.CylinderGeometry(.035,.04,.62,8),gearMetal);barrel.rotation.x=Math.PI/2;barrel.position.set(0,.02,-.70);weaponAssembly.add(barrel);
+ const muzzle=new THREE.Mesh(new THREE.CylinderGeometry(.052,.052,.11,8),gearDark);muzzle.rotation.x=Math.PI/2;muzzle.position.set(0,.02,-1.04);weaponAssembly.add(muzzle);
+ const stock=new THREE.Mesh(new THREE.BoxGeometry(.12,.12,.29),gearDark);stock.position.set(0,-.005,.32);weaponAssembly.add(stock);
+ const magazine=new THREE.Mesh(new THREE.BoxGeometry(.105,.27,.13),gearDark);magazine.position.set(0,-.19,-.055);magazine.rotation.x=-.1;weaponAssembly.add(magazine);
+ const optic=new THREE.Mesh(new THREE.BoxGeometry(.12,.10,.15),gearMetal);optic.position.set(0,.13,-.14);weaponAssembly.add(optic);
+ const opticGlass=new THREE.Mesh(new THREE.BoxGeometry(.095,.065,.015),gearLens);opticGlass.position.set(0,.135,-.218);weaponAssembly.add(opticGlass);
+ const foregrip=new THREE.Mesh(new THREE.BoxGeometry(.075,.15,.085),gearDark);foregrip.position.set(0,-.10,-.37);weaponAssembly.add(foregrip);
+ const muzzleLight=new THREE.Mesh(new THREE.SphereGeometry(.025,6,5),new THREE.MeshBasicMaterial({color:0xffcf86}));muzzleLight.position.set(0,.02,-1.10);weaponAssembly.add(muzzleLight);
+ g.userData={legs:[],body,gun:weaponAssembly,weaponAssembly,isEnemy,head,helmet,pack,gear,headset,role,eyes};
+ return g;
+}
+const pricePrisoner=soldier(false,'prisoner');pricePrisoner.position.set(8,0,31.3);pricePrisoner.userData.body.material=mat(0x707a82,.95);pricePrisoner.userData.gun.visible=false;pricePrisoner.userData.gear.visible=false;pricePrisoner.userData.helmet.visible=false;pricePrisoner.userData.headset.visible=false;pricePrisoner.userData.pack.material=mat(0x383f45);pricePrisoner.visible=false;scene.add(pricePrisoner);
 let player,enemies=[],projectiles=[],effects=[],health=100,armor=50,ammo=30,reserve=150,pistolAmmo=12,pistolReserve=48,smgAmmo=45,smgReserve=225,launcherAmmo=3,launcherReserve=12,grenades=2,kills=0,shots=0,hits=0,running=false,ended=false,reloading=false,clock=new THREE.Clock(),fireCooldown=0,walkTime=0,toastTimer=0,weapon='rifle',yaw=0,pitch=-.05,mouseLocked=false,mission=1,mouseSensitivity=.0012,volumeLevel=.55,graphicsLevel='high',stealthMode=false,alarmTriggered=false,armorUpgrade=0,helmetEquipped=true,rainEnabled=false;
 const keys={};const weaponData={rifle:{mag:30,damage:1,rate:.12,range:55,name:'FUZIL'},pistol:{mag:12,damage:1,rate:.28,range:35,name:'PISTOLA'},shotgun:{mag:8,damage:2,rate:.65,range:19,name:'ESCOPETA'},sniper:{mag:5,damage:4,rate:1.05,range:110,name:'PRECISÃO MK II'},smg:{mag:45,damage:1,rate:.065,range:43,name:'SUBMETRALHADORA'},launcher:{mag:3,damage:5,rate:.8,range:70,name:'LANÇA-FOGUETES'}};let shotgunAmmo=8,shotgunReserve=40,sniperAmmo=5,sniperReserve=25,medkits=2;let audioCtx=null,audioEnabled=true,musicGain=null,musicStarted=false,missionStage=1,vehicle=null,driving=false,dayClock=0,saveTick=0,rain=null,windSoundAt=0,enemyDifficulty='veterano',suppressorEquipped=false,redDotEquipped=false,extendedMagEquipped=false,quietShotUntil=0;
 const enemyDifficultyData={recruta:{speed:.9,damage:.7,fireInterval:1.25},normal:{speed:1.15,damage:1,fireInterval:1},veterano:{speed:1.5,damage:1.2,fireInterval:.9},pesadelo:{speed:1.9,damage:1.45,fireInterval:.75}};
@@ -301,7 +367,7 @@ const floorPalette={1:0x535e61,2:0x716653,3:0x4a6670,4:0x292f3c,5:0x594d50,6:0x3
 const standardSpots=[[-10,-4],[10,-7],[-22,0],[22,2],[4,-19],[-5,-24],[34,12],[-35,-12],[0,14],[15,29],[30,-8],[-34,2],[34,-2],[-7,-35],[7,35],[-18,34],[19,-35]];
 const gulagSpots=[[-28,-27],[-19,-27],[-10,-26],[10,-26],[19,-26],[28,-26],[-28,-18],[-20,-18],[-12,-17],[12,-18],[20,-18],[28,-17],[-28,-7],[-19,-7],[-9,-7],[9,-7],[19,-7],[28,-6],[-28,4],[-19,4],[-9,5],[9,4],[19,5],[28,6],[-26,15],[-16,16],[-5,17],[5,16],[16,16],[26,17],[-12,27],[0,26],[18,27]];
 const spots=missionStage===6?gulagSpots:standardSpots;
-spots.forEach((p,i)=>{if(i===(missionStage===6?spots.length-1:10)&&missionStage<5)return;const mesh=soldier(true);const type=i===(missionStage===6?spots.length-1:10)?'boss':i%5===0?'heavy':i%4===0?'sniper':i%3===0?'cover':'rifle';if(type==='heavy'||type==='boss')mesh.userData.body.material=mat(type==='boss'?0x8b2424:0x4b4f55);if(type==='sniper')mesh.userData.body.material=mat(0x777b55);mesh.position.set(p[0],0,p[1]);const alive=!(saved&&saved.missionStage===missionStage&&i<kills);if(alive)scene.add(mesh);enemies.push({mesh,type,hp:Math.ceil((type==='boss'?24+missionStage*3:type==='heavy'?9+missionStage*1.5:type==='sniper'?5+missionStage*1.3:i%4===0?6+missionStage:4+Math.min(missionStage-1,2))*(1+(missionStage-1)*.12)),speed:(type==='sniper'?.72:type==='heavy'?.9:type==='boss'?.9:1.18+(i%3)*.19)*(1+Math.min(missionStage-1,4)*.16)*enemyDifficultyData[enemyDifficulty].speed,attack:1+Math.random(),alive,strafe:i%2?1:-1,alert:false,state:'patrol',home:p.map(v=>v),patrol:p.map((v,j)=>v+(j===0?((i%3)-1)*9:((i%2)*14-7)))})});
+spots.forEach((p,i)=>{if(i===(missionStage===6?spots.length-1:10)&&missionStage<5)return;const type=i===(missionStage===6?spots.length-1:10)?'boss':i%5===0?'heavy':i%4===0?'sniper':i%3===0?'cover':'rifle';const mesh=soldier(true,type);if(type==='heavy'||type==='boss')mesh.userData.body.material=mat(type==='boss'?0x8b2424:0x4b4f55);if(type==='sniper')mesh.userData.body.material=mat(0x777b55);mesh.position.set(p[0],0,p[1]);const alive=!(saved&&saved.missionStage===missionStage&&i<kills);if(alive)scene.add(mesh);enemies.push({mesh,type,hp:Math.ceil((type==='boss'?24+missionStage*3:type==='heavy'?9+missionStage*1.5:type==='sniper'?5+missionStage*1.3:i%4===0?6+missionStage:4+Math.min(missionStage-1,2))*(1+(missionStage-1)*.12)),speed:(type==='sniper'?.72:type==='heavy'?.9:type==='boss'?.9:1.18+(i%3)*.19)*(1+Math.min(missionStage-1,4)*.16)*enemyDifficultyData[enemyDifficulty].speed,attack:1+Math.random(),alive,strafe:i%2?1:-1,alert:false,state:'patrol',home:p.map(v=>v),patrol:p.map((v,j)=>v+(j===0?((i%3)-1)*9:((i%2)*14-7)))})});
 updateHUD();refreshMissionHUD();document.body.classList.add('game-running');$('#start').classList.add('hidden');['display','visibility','opacity','z-index'].forEach(p=>$('#start').style.removeProperty(p));$('#end').classList.add('hidden');$('#hud').classList.remove('hidden');$('#crosshair').classList.remove('hidden');$('#vehiclePrompt').classList.add('hidden');running=true;clock.start();sound(440,.15,'sawtooth');startMusic();say('OPERAÇÃO INICIADA — SINAL HOSTIL DETECTADO');saveGame()}
 function finish(win,reportStage=missionStage){
  if(ended)return;ended=true;running=false;document.exitPointerLock?.();$('#crosshair').classList.add('hidden');
