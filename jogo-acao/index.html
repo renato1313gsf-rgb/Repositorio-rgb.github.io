@@ -101,7 +101,47 @@ const campaign2BlacksiteCollision=[];
 let gulagActive=false,gulagPhase=0,campaign2Active=false,campaign2BlacksiteActive=false,missionMapActive=false,missionMapCollision=[],activeMissionMap=null;
 function box(x,y,z,sx,sy,sz,material,solid=true){const o=new THREE.Mesh(new THREE.BoxGeometry(sx,sy,sz),material);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;scene.add(o);if(solid)obstacles.push({x,y,z,hx:sx/2,hy:sy/2,hz:sz/2,minY:y-sy/2,maxY:y+sy/2,top:sy});return o}
 function cylinder(x,y,z,r1,r2,h,material,segments=8){const o=new THREE.Mesh(new THREE.CylinderGeometry(r1,r2,h,segments),material);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;scene.add(o);return o}
-function building(x,z,w,h,d){box(x,h/2,z,w,h,d,concrete);for(let y=2;y<h-1;y+=3){for(let xx=x-w/2+1.5;xx<x+w/2-1;xx+=3)box(xx,y,z-d/2-.045,1.1,1,.08,dark,false)}box(x,h+.15,z,w+.4,.3,d+.4,dark,false);for(let xx=x-w/2+2;xx<x+w/2-1;xx+=4)box(xx,h*.65,z-d/2-.09,1.2,1.1,.05,glass,false)}
+function building(x,z,w,h,d){
+ // Base estrutural sólida e fachada com camadas visíveis.
+ box(x,h/2,z,w,h,d,concrete);
+ const facadeZ=z-d/2-.09;
+ const sillMat=mat(0x333c41,.82,.28),frameMat=mat(0x242c31,.65,.35);
+ const glassDark=mat(0x182a33,.2,.32),glassLit=mat(0x596c70,.28,.18);
+ // Faixas de concreto e colunas estruturais para quebrar o visual de cubo liso.
+ for(let y=1.1;y<h;y+=3.2){
+  box(x,y,z-d/2-.13,w+.12,.16,.16,dark,false);
+  box(x,y+.13,z-d/2-.15,w+.16,.055,.19,sillMat,false);
+ }
+ for(let xx=x-w/2+.45;xx<x+w/2-.2;xx+=3.6){
+  box(xx,h/2,facadeZ,.14,h-.25,.18,frameMat,false);
+ }
+ // Janelas profundas em várias fileiras, com caixilhos e peitoris.
+ for(let y=2;y<h-1;y+=3){
+  for(let xx=x-w/2+1.5;xx<x+w/2-1;xx+=3){
+   box(xx,y,facadeZ-.025,1.25,1.25,.10,frameMat,false);
+   box(xx,y,facadeZ-.085,1.02,.98,.035,((Math.floor(xx*3+y)%4)===0)?glassLit:glassDark,false);
+   box(xx,y-.61,facadeZ-.12,1.38,.10,.22,sillMat,false);
+   box(xx,y+.61,facadeZ-.12,1.38,.08,.22,sillMat,false);
+   box(xx,y,facadeZ-.14,.055,.98,.07,frameMat,false);
+  }
+ }
+ // Beiral e platibanda no topo.
+ box(x,h+.08,z,w+.65,.22,d+.65,dark,false);
+ box(x,h+.22,z-d/2-.1,w+.2,.12,.25,sillMat,false);
+ // Equipamento técnico no telhado, com bases e ventilação.
+ const roofY=h+.25;
+ for(const [rx,rz,rw,rd,rh] of [[x-w*.22,z,1.6,1.1,.65],[x+w*.22,z+d*.12,1.2,.9,.5],[x,z+d*.25,.65,.65,.8]]){
+  box(rx,roofY+rh/2,rz,rw,rh,rd,frameMat,false);
+  box(rx,roofY+rh+.04,rz,rw+.12,.08,rd+.12,sillMat,false);
+  for(let k=-1;k<=1;k++)box(rx+k*rw*.22,roofY+rh*.55,rz-rd/2-.035,.045,rh*.55,.045,metal,false);
+ }
+ // Tubos de drenagem e caixas elétricas nos cantos da fachada.
+ for(const side of [-1,1]){
+  const px=x+side*(w/2-.22);
+  box(px,h/2,facadeZ-.18,.09,h-.4,.12,metal,false);
+  box(px-side*.18,1.2,facadeZ-.22,.32,.48,.18,frameMat,false);
+ }
+}
 for(let i=-48;i<=48;i+=8){box(i,2,-48,7,4,.8,concrete);box(i,2,48,7,4,.8,concrete);box(-48,2,i,.8,4,7,concrete);box(48,2,i,.8,4,7,concrete)}
 building(-27,-25,17,11,13);building(27,-26,18,14,14);building(-29,25,13,8,18);building(28,25,17,10,15);
 const destructibles=[];
