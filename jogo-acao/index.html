@@ -111,40 +111,102 @@ function makeMissionMarker(x,z,color){
 }
 const intelMarker=makeMissionMarker(4,17,0x45d7ff);
 const relayMarkers=[makeMissionMarker(-22,6,0xffc247),makeMissionMarker(22,6,0xffc247),makeMissionMarker(0,-20,0xffc247)];
-// Missão 06: complexo penitenciário original, com perímetro, torres e alas celulares.
+// Missão 06: mapa de prisão original, inspirado em um resgate militar cinematográfico.
+const gulagBaseMapObjects=scene.children.filter(o=>o!==floor&&o!==rainPoints&&!o.isLight);
 const gulagGroup=new THREE.Group();scene.add(gulagGroup);gulagGroup.visible=false;
-const gulagMaterial=mat(0x46515b,.78,.28),gulagDark=mat(0x171d22,.56,.42),gulagBars=mat(0x929da3,.42,.65),gulagRed=mat(0x9c302a,.4,.25);
+const gulagMaterial=mat(0x46515b,.78,.28),gulagDark=mat(0x171d22,.56,.42),gulagBars=mat(0x929da3,.42,.65),gulagRed=mat(0x9c302a,.4,.25),gulagFloor=mat(0x343c42,.94,.02);
+const gulagIntelGlow=new THREE.MeshBasicMaterial({color:0x4bdfff});
 function gulagBox(x,y,z,sx,sy,sz,material){const m=new THREE.Mesh(new THREE.BoxGeometry(sx,sy,sz),material);m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;gulagGroup.add(m);return m}
 function gulagBlocker(x,y,z,sx,sy,sz){gulagCollision.push({x,y,z,hx:sx/2,hy:sy/2,hz:sz/2,minY:y-sy/2,maxY:y+sy/2,top:sy})}
 function gulagWall(x,y,z,sx,sy,sz){gulagBox(x,y,z,sx,sy,sz,gulagMaterial);gulagBlocker(x,y,z,sx,sy,sz)}
-// Muro de contenção com uma abertura de entrada ao sul.
-gulagWall(-22,2,-1,1,4,56);gulagWall(22,2,-1,1,4,56);gulagWall(0,2,27,44,4,1);
-gulagWall(-13.5,2,-29,17,4,1);gulagWall(13.5,2,-29,17,4,1);
-for(const [x,z] of [[-22,-27],[22,-27],[-22,26],[22,26]]){
- gulagBox(x,4.3,z,3.6,8,3.6,gulagDark);
- gulagBox(x,8.5,z,4.2,.35,4.2,gulagBars);
- for(let k=0;k<4;k++)gulagBox(x-1.1+k*.73,6.8,z,.09,3.3,.09,gulagBars);
- const search=new THREE.SpotLight(0xffd7a0,35,27,Math.PI/5,.5,1.4);search.position.set(x,7.8,z);search.target.position.set(x*.25,0,z*.25);gulagGroup.add(search,search.target);
+function setGulagWorld(active){
+ gulagActive=active;gulagGroup.visible=active;
+ for(const o of gulagBaseMapObjects)o.visible=!active;
+ floor.visible=true;grid.visible=!active;floor.material.color.setHex(active?0x343c42:0x535e61);
+ rainPoints.visible=active?true:rainEnabled;
+ if(active){scene.fog.near=18;scene.fog.far=92;scene.fog.color.setHex(0x1d2931);scene.background.setHex(0x1d2931)}
+ else{scene.fog.near=35;scene.fog.far=100}
 }
-function gulagCell(x,z){
- gulagBox(x,1.6,z,7.2,.25,5,gulagDark);
- for(const side of [-1,1])gulagBox(x+side*3.55,1.65,z,.18,3.3,5,gulagBars);
- gulagBox(x,1.65,z-2.42,7.2,3.3,.16,gulagDark);
- gulagBox(x,1.65,z+2.42,2.4,3.3,.16,gulagDark);
- for(let bx=x-2.1;bx<=x+2.15;bx+=.42)gulagBox(bx,1.65,z+2.42,.065,3.3,.065,gulagBars);
- gulagBox(x,3.35,z,7.2,.12,5,gulagBars);
+// O oceano e o heliporto ficam ao norte, antes do portão de contenção.
+const sea=new THREE.Mesh(new THREE.PlaneGeometry(100,22),new THREE.MeshStandardMaterial({color:0x123043,roughness:.32,metalness:.35}));
+sea.rotation.x=-Math.PI/2;sea.position.set(0,.03,-49);gulagGroup.add(sea);
+for(let z=-57;z<=-41;z+=3){const wave=gulagBox(0,.05,z,88,.015,.035,new THREE.MeshBasicMaterial({color:0x47798e,transparent:true,opacity:.45}));}
+gulagBox(0,.14,-41,15,.25,12,gulagDark);
+gulagBox(-7,.22,-41,1,.12,12,gulagRed);gulagBox(7,.22,-41,1,.12,12,gulagRed);
+for(const x of [-4.5,-1.5,1.5,4.5])gulagBox(x,.24,-41,.1,.12,9,gulagBars);
+// Heliporto estilizado e o contorno do Little Bird.
+const heliPad=new THREE.Mesh(new THREE.CircleGeometry(4.6,32),new THREE.MeshStandardMaterial({color:0x4d575c,roughness:.8}));
+heliPad.rotation.x=-Math.PI/2;heliPad.position.set(0,.29,-41);gulagGroup.add(heliPad);
+for(const x of [-2.2,2.2])gulagBox(x,.34,-41,.13,.035,5,gulagRed);
+const heliBody=gulagBox(0,1.25,-41,2.1,.65,4.1,gulagDark);
+gulagBox(0,1.7,-41.6,1.55,.45,1.5,glass);
+gulagBox(0,1.65,-43.25,4.7,.08,.12,gulagBars);
+gulagBox(0,1.65,-38.75,4.7,.08,.12,gulagBars);
+gulagBox(0,1.85,-41,7,.07,.08,gulagBars);
+// Torres e muralha com portão ao norte e brecha de fuga ao sul.
+gulagWall(-37,2,0,1,4,68);gulagWall(37,2,0,1,4,68);
+gulagWall(-21,2,-34,30,4,1);gulagWall(21,2,-34,30,4,1);
+gulagWall(-20,2,34,32,4,1);gulagWall(20,2,34,32,4,1);
+for(const [x,z] of [[-33,-32],[33,-32],[-33,31],[33,31]]){
+ gulagBox(x,4.2,z,4,8,4,gulagDark);gulagBox(x,8.35,z,4.5,.3,4.5,gulagBars);
+ for(let k=0;k<5;k++)gulagBox(x-1.45+k*.72,6.6,z,.08,3.5,.08,gulagBars);
+ const search=new THREE.SpotLight(0xffd7a0,42,36,Math.PI/5,.45,1.4);search.position.set(x,8,z);search.target.position.set(x*.2,0,z*.4);gulagGroup.add(search,search.target);
 }
-gulagCell(-10,-3);gulagCell(0,-3);gulagCell(10,-3);
-for(const [x,z] of [[-17,-13],[17,-13],[-17,13],[17,13]]){
- gulagBox(x,1.65,z,5.4,3.3,.24,gulagDark);gulagBox(x,3.36,z,5.6,.15,.5,gulagBars);
- for(let bx=x-2.2;bx<=x+2.21;bx+=.5)gulagBox(bx,1.65,z+.18,.07,3.3,.08,gulagBars);
+// Pátio externo: barreiras de concreto, caixas militares e sacos de areia.
+for(const [x,z,w,d] of [[-16,-27,7,2.3],[16,-27,7,2.3],[-24,-22,3,4],[24,-22,3,4],[-10,-23,3,2],[10,-23,3,2],[0,-25,5,1.4]]){
+ gulagBox(x,1,z,w,2,d,gulagDark);gulagBox(x,2.05,z,w+.12,.12,d+.1,gulagBars);
 }
-for(const [x,z] of [[-7,-19],[7,-19],[-7,19],[7,19]]){gulagBox(x,2.4,z,1.2,4.8,.9,gulagDark);gulagBox(x,4.9,z,1.5,.2,1.2,gulagRed)}
+for(let x=-30;x<=30;x+=3){gulagBox(x,4.25,-34,.13,.55,.13,gulagBars);gulagBox(x,4.25,34,.13,.55,.13,gulagBars)}
+// Sala de controle com console e mesa de inteligência.
+gulagBox(-8,1.8,-18,1,3.6,10,gulagMaterial);gulagBox(8,1.8,-18,1,3.6,10,gulagMaterial);
+gulagBox(0,3.4,-23,17,.3,1,gulagMaterial);gulagBox(-4,3.4,-13,9,.3,1,gulagMaterial);gulagBox(6,3.4,-13,4,.3,1,gulagMaterial);
+gulagBox(0,.8,-17,4,.85,1.4,gulagDark);gulagBox(0,1.28,-17,3.5,.12,1.05,gulagIntelGlow);
+for(const x of [-4,-2,2,4])gulagBox(x,.22,-15,.09,.2,.09,gulagRed);
+// Bloco celular em anel: baias radiais, passarela e grades.
+const cellRing=new THREE.Mesh(new THREE.TorusGeometry(13,.28,8,64),gulagBars);cellRing.rotation.x=Math.PI/2;cellRing.position.set(0,.16,0);gulagGroup.add(cellRing);
+const innerRing=new THREE.Mesh(new THREE.TorusGeometry(7.3,.18,8,48),gulagDark);innerRing.rotation.x=Math.PI/2;innerRing.position.set(0,.17,0);gulagGroup.add(innerRing);
+for(let i=0;i<12;i++){
+ const a=i*Math.PI/6,x=Math.sin(a)*10,z=Math.cos(a)*10;
+ const cell=gulagBox(x,1.55,z,4.6,3.1,2.8,gulagDark);cell.rotation.y=a;
+ for(let j=-2;j<=2;j++)gulagBox(x+Math.cos(a)*1.7+j*.28,1.55,z-Math.sin(a)*1.7,.065,3,.065,gulagBars);
+}
+for(const [x,z] of [[-15,-2],[15,-2],[-2,-15],[2,15]]){gulagBox(x,1.2,z,2.3,2.4,.55,gulagDark);gulagBox(x,2.45,z,2.5,.12,.7,gulagBars)}
+// Descida, armaria e escudos antimotim que recuperam proteção ao interagir.
+for(const [x,z] of [[-5,8],[5,8],[-5,12],[5,12]]){gulagBox(x,.65,z,1.2,1.3,1.7,gulagDark);gulagBox(x,.95,z-.9,1.3,.12,.1,gulagRed)}
+const riotShieldLeft=gulagBox(-2,1.15,9,.82,1.8,.16,gulagBars);
+const riotShieldRight=gulagBox(2,1.15,9,.82,1.8,.16,gulagBars);
+gulagBox(-2,1.15,8.89,.6,1.5,.04,gulagDark);gulagBox(2,1.15,8.89,.6,1.5,.04,gulagDark);
+for(const x of [-2,2])gulagBox(x,1.15,8.84,.08,1.5,.08,gulagRed);
+// Chuveiros: azulejos, divisórias e canos.
+for(const x of [-10,-5,0,5,10]){
+ gulagBox(x,.04,19,3.7,.08,9,gulagMaterial);
+ gulagBox(x-1.8,1.25,19,.12,2.5,8,gulagBars);
+ gulagBox(x+1.8,1.25,19,.12,2.5,8,gulagBars);
+ gulagBox(x,2.5,19,.15,.1,8,gulagBars);
+ for(const z of [16,19,22]){gulagBox(x,2.25,z,.3,.08,.3,gulagRed)}
+}
+gulagBox(0,3,19,25,.16,.16,gulagBars);
+// Túneis de serviço e tubulações aparentes.
+for(const x of [-7,-3,3,7]){gulagBox(x,2.8,27,.18,.18,15,gulagBars);gulagBox(x,2.55,27,.08,.08,15,gulagRed)}
+gulagBox(0,3.7,27,16,.18,.18,gulagBars);gulagBox(0,1.9,27,16,.12,.12,gulagDark);
+// Cela especial do prisioneiro e parede de brecha.
+gulagBox(8,1.6,29,9,3.2,.28,gulagDark);gulagBox(12.5,1.6,31, .25,3.2,4,gulagDark);gulagBox(3.5,1.6,31,.25,3.2,4,gulagDark);
+for(let x=4.3;x<12.2;x+=.42)gulagBox(x,1.6,29.12,.07,3.1,.07,gulagBars);
+gulagBox(8,2.9,30.8,9,.18,4,gulagBars);
+gulagBox(8,1.65,32.95,8,.18,.18,gulagRed);
+// Zona de extração de emergência com guincho e gancho de içamento.
+const gulagExtract=new THREE.Group();gulagExtract.position.set(0,0,42);gulagGroup.add(gulagExtract);
+const extractRing=new THREE.Mesh(new THREE.TorusGeometry(4,.18,8,40),new THREE.MeshBasicMaterial({color:0x61e39b,transparent:true,opacity:.95}));extractRing.rotation.x=Math.PI/2;extractRing.position.y=.12;gulagExtract.add(extractRing);
+const extractBeam=new THREE.Mesh(new THREE.CylinderGeometry(3.7,3.7,4,32,1,true),new THREE.MeshBasicMaterial({color:0x61e39b,transparent:true,opacity:.10,side:THREE.DoubleSide}));extractBeam.position.y=2;gulagExtract.add(extractBeam);
+gulagBox(-6,3.4,40, .25,6,.25,gulagBars);gulagBox(6,3.4,40,.25,6,.25,gulagBars);gulagBox(0,6.4,40,12,.22,.22,gulagBars);gulagBox(0,4.4,42,.12,4,.12,gulagRed);
+// Objective markers: breach, control room, circular cells, armory, showers/tunnel, prisoner, extraction.
 const gulagMarkers=[
- makeMissionMarker(0,-33,0xffc247),makeMissionMarker(-18,-10,0xff765f),
- makeMissionMarker(17,-5,0x43d9ff),makeMissionMarker(16,15,0xff765f),
- makeMissionMarker(17,22,0x61e39b)
+ makeMissionMarker(0,-34,0xffc247),makeMissionMarker(0,-17,0xff765f),
+ makeMissionMarker(0,0,0x43d9ff),makeMissionMarker(0,10,0xffc247),
+ makeMissionMarker(0,21,0xff765f),makeMissionMarker(8,29,0x61e39b)
 ];
+const gulagIntelMarkers=[makeMissionMarker(-4,-17,0x4bdfff),makeMissionMarker(9,0,0x4bdfff),makeMissionMarker(8,30.5,0x4bdfff)];
+let gulagIntel=[false,false,false],gulagShieldTaken=false,prisonerRescued=false;
 window.__bootStage='Cenário construído; preparando lógica da missão';
 function soldier(isEnemy=false){const g=new THREE.Group();const body=new THREE.Mesh(new THREE.CapsuleGeometry(.43,.85,4,8),isEnemy?red:blue);body.position.y=1.25;body.castShadow=true;g.add(body);const head=new THREE.Mesh(new THREE.SphereGeometry(.28,10,8),skin);head.position.y=2.02;head.castShadow=true;g.add(head);const helmet=new THREE.Mesh(new THREE.SphereGeometry(.32,10,7,0,Math.PI*2,0,Math.PI/2),isEnemy?dark:green);helmet.position.y=2.13;g.add(helmet);const pack=new THREE.Mesh(new THREE.BoxGeometry(.48,.55,.25),isEnemy?dark:green);pack.position.set(0,1.3,.38);g.add(pack);const gun=new THREE.Mesh(new THREE.BoxGeometry(.15,.15,1.0),black);gun.position.set(.43,1.45,-.42);g.add(gun);const legs=[];for(const x of [-.2,.2]){const leg=new THREE.Mesh(new THREE.BoxGeometry(.22,.62,.27),dark);leg.position.set(x,.42,0);g.add(leg);legs.push(leg)}g.userData={legs,body,gun,isEnemy,head,helmet,pack};return g}
 let player,enemies=[],projectiles=[],effects=[],health=100,armor=50,ammo=30,reserve=150,pistolAmmo=12,pistolReserve=48,smgAmmo=45,smgReserve=225,launcherAmmo=3,launcherReserve=12,grenades=2,kills=0,shots=0,hits=0,running=false,ended=false,reloading=false,clock=new THREE.Clock(),fireCooldown=0,walkTime=0,toastTimer=0,weapon='rifle',yaw=0,pitch=-.05,mouseLocked=false,mission=1,mouseSensitivity=.0012,volumeLevel=.55,graphicsLevel='high',stealthMode=false,alarmTriggered=false,armorUpgrade=0,helmetEquipped=true,rainEnabled=false;
