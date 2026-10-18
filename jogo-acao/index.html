@@ -236,7 +236,7 @@ function finish(win,reportStage=missionStage){
  if(ended)return;ended=true;running=false;document.exitPointerLock?.();$('#crosshair').classList.add('hidden');
  $('#endTag').textContent=win?'RELATÓRIO DA MISSÃO':'SINAL PERDIDO';
  $('#endTitle').innerHTML=win?'MISSÃO <span class="red">CONCLUÍDA</span>':'MISSÃO <span class="red">FALHOU</span>';
- $('#endText').textContent=win?(campaignComplete?'Todas as cinco operações foram concluídas. Campanha finalizada!':'Objetivos concluídos na missão '+reportStage+'. Próximo destino: missão '+(reportStage+1)+'.'):'Você foi abatido. Reagrupe e tente novamente.';
+ $('#endText').textContent=win?(campaignComplete?'Todas as seis operações foram concluídas. Campanha finalizada!':'Objetivos concluídos na missão '+reportStage+'. Próximo destino: missão '+(reportStage+1)+'.'):'Você foi abatido. Reagrupe e tente novamente.';
  $('#nextMissionBtn').textContent=campaignComplete?'REINICIAR CAMPANHA ↻':'PRÓXIMA MISSÃO ▶';
  $('#nextMissionBtn').style.display=win?'inline-block':'none';
  $('#statsText').textContent='Hostis neutralizados: '+kills+' · Disparos: '+shots+' · Precisão: '+(shots?Math.round(hits/shots*100):0)+'%';
