@@ -97,7 +97,8 @@ for(let z=-36;z<=36;z+=8){const stripe=new THREE.Mesh(new THREE.BoxGeometry(.12,
 const obstacles=[];
 const gulagCollision=[];
 const campaign2Collision=[];
-let gulagActive=false,gulagPhase=0,campaign2Active=false;
+const campaign2BlacksiteCollision=[];
+let gulagActive=false,gulagPhase=0,campaign2Active=false,campaign2BlacksiteActive=false,missionMapActive=false,missionMapCollision=[],activeMissionMap=null;
 function box(x,y,z,sx,sy,sz,material,solid=true){const o=new THREE.Mesh(new THREE.BoxGeometry(sx,sy,sz),material);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;scene.add(o);if(solid)obstacles.push({x,y,z,hx:sx/2,hy:sy/2,hz:sz/2,minY:y-sy/2,maxY:y+sy/2,top:sy});return o}
 function cylinder(x,y,z,r1,r2,h,material,segments=8){const o=new THREE.Mesh(new THREE.CylinderGeometry(r1,r2,h,segments),material);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;scene.add(o);return o}
 function building(x,z,w,h,d){box(x,h/2,z,w,h,d,concrete);for(let y=2;y<h-1;y+=3){for(let xx=x-w/2+1.5;xx<x+w/2-1;xx+=3)box(xx,y,z-d/2-.045,1.1,1,.08,dark,false)}box(x,h+.15,z,w+.4,.3,d+.4,dark,false);for(let xx=x-w/2+2;xx<x+w/2-1;xx+=4)box(xx,h*.65,z-d/2-.09,1.2,1.1,.05,glass,false)}
@@ -286,9 +287,9 @@ makeGulagGateLeaf(-5.8,1);makeGulagGateLeaf(5.8,-1);
 function setGulagGateState(open){
  gulagGateOpen=!!open;gulagGateAnimating=false;gulagGateProgress=open?1:0;
  gulagGatePivots[0].rotation.y=open?Math.PI/2:0;gulagGatePivots[1].rotation.y=open?-Math.PI/2:0;
- const index=gulagCollision.indexOf(gulagGateBlocker);
- if(open&&index>=0)gulagCollision.splice(index,1);
- if(!open&&index<0)gulagCollision.push(gulagGateBlocker);
+ const list=campaign2BlacksiteActive?campaign2BlacksiteCollision:gulagCollision,index=list.indexOf(gulagGateBlocker);
+ if(open&&index>=0)list.splice(index,1);
+ if(!open&&index<0)list.push(gulagGateBlocker);
 }
 for(const [x,z] of [[-33,-32],[33,-32],[-33,31],[33,31]]){
  gulagBox(x,4.2,z,4,8,4,gulagDark);gulagBox(x,8.35,z,4.5,.3,4.5,gulagBars);
@@ -357,7 +358,130 @@ const c2CoreRing=new THREE.Mesh(new THREE.TorusGeometry(1.2,.055,8,32),c2Signal)
 for(const x of [-1.7,1.7]){const panel=new THREE.Mesh(new THREE.BoxGeometry(.2,2.4,.22),c2Warning);panel.position.set(x,1.45,-17);campaign2FinalOverlay.add(panel)}
 const c2CoreLight=new THREE.PointLight(0x32bfff,8,18,2);c2CoreLight.position.set(0,2.4,-17);campaign2FinalOverlay.add(c2CoreLight);
 let gulagIntel=[false,false,false],gulagShieldTaken=false,prisonerRescued=false;
-window.__bootStage='Cenário construído; preparando lógica da missão';
+
+/* Cenários únicos para as missões 02–05: cada grupo tem geometria, coberturas e colisores próprios. */
+const missionMapRegistry=Object.create(null);
+const mapMat={stone:mat(0x62645f,.96,.02),concrete:mat(0x465158,.9,.16),dark:mat(0x202a31,.86,.28),steel:mat(0x788993,.46,.58),rust:mat(0x824b34,.86,.18),sand:mat(0x95836a,.98,.01),snow:mat(0xd4e0e5,.98,.01),ice:mat(0x6a9db7,.26,.19),blue:mat(0x3dbbe8,.3,.22),amber:mat(0xd9a64c,.55,.22),red:new THREE.MeshStandardMaterial({color:0xa12f2a,emissive:0x5a0a08,emissiveIntensity:.6}),olive:mat(0x46513e,.96,.02),black:mat(0x12181d,.9,.1),white:mat(0xb6c6ce,.98,.02)};
+function buildMissionMap(spec){
+ const group=new THREE.Group();group.name='MAPA '+spec.title;scene.add(group);group.visible=false;const collision=[];
+ const b=(x,z,w,d,h,material,solid=true,y=h/2,rotY=0)=>{const mesh=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material);mesh.position.set(x,y,z);mesh.rotation.y=rotY;mesh.castShadow=true;mesh.receiveShadow=true;group.add(mesh);if(solid)collision.push({x,y,z,hx:w/2,hy:h/2,hz:d/2,minY:Math.max(0,y-h/2),maxY:y+h/2,top:h,rotY});return mesh};
+ const patch=(x,z,w,d,color,opacity=1)=>{const mesh=new THREE.Mesh(new THREE.PlaneGeometry(w,d),new THREE.MeshStandardMaterial({color,roughness:.94,transparent:opacity<1,opacity,depthWrite:opacity>=1}));mesh.rotation.x=-Math.PI/2;mesh.position.set(x,.038,z);mesh.receiveShadow=true;group.add(mesh)};
+ const rock=(x,z,r,h,color=mapMat.stone)=>{const mesh=new THREE.Mesh(new THREE.ConeGeometry(r,h,6),color);mesh.position.set(x,h/2,z);mesh.rotation.y=(x-z)*.07;mesh.castShadow=true;mesh.receiveShadow=true;group.add(mesh);collision.push({x,z,hx:r*.78,hz:r*.78,minY:0,maxY:h,top:h})};
+ const pole=(x,z,h=7,color=mapMat.blue)=>{b(x,z,.2,.2,h,mapMat.steel,false,h/2);b(x,z,.55,.16,.14,color,false,h*.75);b(x,z,.14,.55,.14,color,false,h*.75);const l=new THREE.PointLight(spec.lampColor||0xffbd62,6,13,2);l.position.set(x,h*.85,z);group.add(l)};
+ const container=(x,z,color=mapMat.rust)=>{b(x,z,5.2,2.4,2.6,color,true,1.3);b(x,z,5.25,2.45,.12,mapMat.dark,false,2.66);for(let i=-2;i<=2;i++)b(x+i*.88,z-1.22,.045,.045,2.45,mapMat.dark,false,1.3)};
+ const tower=(x,z,h=8)=>{b(x,z,2.5,2.5,h,mapMat.dark,true,h/2);b(x,z,2.8,2.8,.2,mapMat.steel,false,h+.1);for(const dx of [-.8,.8])for(const dz of [-.8,.8])b(x+dx,z+dz,.07,.07,h*.72,mapMat.steel,false,h*.58);const l=new THREE.PointLight(spec.lampColor||0xff624e,5,14,2);l.position.set(x,h,z);group.add(l)};
+ const mast=(x,z,h=9,color=mapMat.amber)=>{b(x,z,.28,.28,h,mapMat.steel,true,h/2);b(x,z,.9,.12,.12,color,false,h*.72);b(x,z,.12,.9,.12,color,false,h*.72);for(let k=1;k<=3;k++)b(x,z,.6,.08,.08,mapMat.dark,false,h*k/4)};
+ const perimeter=(exitPositive)=>{b(-45,0,.8,90,4,mapMat.dark,true,2);b(45,0,.8,90,4,mapMat.dark,true,2);const far=exitPositive?-46:46,exit=exitPositive?46:-46;b(0,far,90,.8,4,mapMat.dark,true,2);b(-24,exit,38,.8,4,mapMat.dark,true,2);b(24,exit,38,.8,4,mapMat.dark,true,2);for(const x of [-5.25,5.25]){b(x,exit,.38,.9,3.8,mapMat.steel,true,1.9);b(x,exit,.48,1,.18,mapMat.amber,false,3.95)}b(0,exit,10.1,.8,.2,mapMat.steel,false,4.05)};
+ const barricades=(coords,material=mapMat.dark)=>coords.forEach(([x,z])=>{b(x,z,3.8,1.5,1.25,material,true,.625);b(x,z,3.9,1.6,.12,mapMat.steel,false,1.31)});
+ patch(0,0,92,92,spec.groundColor);perimeter(spec.exitPositive);
+ if(spec.kind==='quarry'){
+  patch(-3,0,16,85,0x514c43);patch(-3,0,7,84,0x6a6253,.94);
+  for(const [x,z,r,h] of [[-35,-29,6,11],[-34,-5,7,13],[-34,21,6,10],[35,-28,7,13],[34,1,6,10],[33,29,7,12],[-17,-34,4,7],[17,32,5,8]])rock(x,z,r,h);
+  for(const [x,z] of [[-23,-27],[-22,-17],[-22,5],[24,-15],[24,9],[18,25]])b(x,z,6,2,2,mapMat.sand,true,1);
+  b(-7,3,1,26,7,mapMat.rust,true,3.5);b(-7,3,1.35,28,.22,mapMat.amber,false,7.12);b(-16,3,.3,.3,7,mapMat.steel,false,3.5);b(-15,-5,2.7,2.7,4,mapMat.dark,true,2);
+  for(let z=-30;z<=30;z+=10)b(0,z,5.2,.22,.12,mapMat.amber,false,.07);barricades([[-8,-25],[3,-20],[8,8],[13,22]]);
+ }else if(spec.kind==='harbor'){
+  patch(32,0,23,90,0x174257);patch(19,0,7,88,0x394c52);patch(0,0,5,80,0x7e6f5b);
+  for(const z of [-30,-15,0,15,30]){b(21,z,18,2.5,1.8,mapMat.sand,true,.9);b(28,z,1,3.2,3.4,mapMat.steel,true,1.7)}
+  for(const [x,z,c] of [[-20,-26,mapMat.rust],[-20,-21,mapMat.olive],[-20,0,mapMat.red],[-20,5,mapMat.dark],[8,-25,mapMat.blue],[8,-20,mapMat.rust],[8,24,mapMat.olive]])container(x,z,c);
+  for(const z of [-28,-14,0,14,28]){b(28,z,.22,.22,5,mapMat.steel,false,2.5);b(23,z,10,.2,.2,mapMat.amber,false,5.1)}
+  b(32,12,14,3.4,2.4,mapMat.dark,true,1.2);b(32,12,11,.18,.15,mapMat.blue,false,2.45);barricades([[-10,-11],[-7,-4],[9,7],[15,26]],mapMat.rust);
+ }else if(spec.kind==='comms'){
+  patch(0,0,90,90,0x242c32);patch(0,-3,13,76,0x111a22);patch(-18,0,1.2,90,0xc69a44,.8);patch(18,0,1.2,90,0xc69a44,.8);
+  for(const [x,z] of [[-34,-27],[34,-27],[-34,27],[34,27]])tower(x,z,7);
+  b(-12,-18,16,9,5,mapMat.concrete,true,2.5);b(12,-18,16,9,5,mapMat.concrete,true,2.5);b(-12,-18,16.5,9.5,.2,mapMat.dark,false,5.1);b(12,-18,16.5,9.5,.2,mapMat.dark,false,5.1);
+  mast(-22,6,8,mapMat.amber);mast(22,6,8,mapMat.amber);mast(0,-20,9,mapMat.red);barricades([[-12,8],[12,8],[-12,25],[12,25]]);
+  for(let x=-30;x<=30;x+=5){b(x,0,.09,78,3.8,mapMat.steel,false,1.9);b(x,0,.07,78,.07,mapMat.amber,false,3.8)}
+  barricades([[-5,-8],[5,10],[-7,26],[7,29]]);
+ }else if(spec.kind==='fortress'){
+  patch(0,0,90,90,0x3b3638);patch(18,-8,30,28,0x292427);
+  for(const [x,z,h] of [[-34,-31,11],[34,-31,11],[-34,31,9],[34,31,12]])tower(x,z,h);
+  b(0,-33,50,2.6,6,mapMat.concrete,true,3);b(0,33,50,2.6,6,mapMat.concrete,true,3);b(-33,0,2.6,64,6,mapMat.concrete,true,3);b(33,0,2.6,64,6,mapMat.concrete,true,3);
+  b(-25,-8,12,15,5,mapMat.dark,true,2.5);b(-25,-8,12.5,15.5,.18,mapMat.red,false,5.1);b(24,-17,17,10,5,mapMat.concrete,true,2.5);
+  for(let x=-25;x<=25;x+=5){b(x,-31,.7,.7,1.1,mapMat.steel,false,6.55);b(x,31,.7,.7,1.1,mapMat.steel,false,6.55)}
+  barricades([[-8,-4],[8,-4],[-8,14],[8,14],[20,2],[31,4]]);b(30,-18,12,7,3.4,mapMat.dark,true,1.7);b(30,-18,12.3,7.3,.15,mapMat.red,false,3.48);
+ }else if(spec.kind==='iceRoad'){
+  patch(0,0,92,92,0xd4dfe4);patch(0,0,12,92,0x516e7c);patch(0,0,6,92,0x9ed2e5,.92);
+  for(const [x,z,r,h] of [[-36,-32,7,16],[-37,-8,7,18],[-34,17,8,17],[-29,36,7,14],[36,-30,8,18],[37,-4,7,16],[34,23,8,18]])rock(x,z,r,h,mapMat.white);
+  for(const z of [-32,-24,-16,-8,0,8,16,24,32]){b(-7,z,1.2,3,1.1,mapMat.amber,true,.55);b(7,z,1.2,3,1.1,mapMat.amber,true,.55)}
+  for(const [x,z] of [[-18,-28],[18,-27],[-18,26],[18,25]]){b(x,z,5,2.6,2.5,mapMat.dark,true,1.25);b(x,z,5.2,2.7,.12,mapMat.red,false,2.56)}
+  b(0,-39,13,2,1.6,mapMat.dark,true,.8);b(0,36,13,2,1.6,mapMat.dark,true,.8);for(const [x,z] of [[-30,-20],[30,14],[-28,30],[28,-30]])pole(x,z,4,mapMat.blue);barricades([[-10,-12],[10,-6],[-10,14],[10,20]]);
+ }else if(spec.kind==='archive'){
+  patch(0,0,92,92,0x414b54);patch(0,0,17,86,0x222a31);patch(-17,0,1,82,0x3a5965,.95);patch(17,0,1,82,0x3a5965,.95);
+  b(-34,0,5,76,6,mapMat.dark,true,3);b(34,0,5,76,6,mapMat.dark,true,3);b(0,-37,64,4,5,mapMat.concrete,true,2.5);b(0,37,64,4,5,mapMat.concrete,true,2.5);
+  for(const x of [-25,-19,-13,13,19,25])for(const z of [-25,-13,-1,11,23]){b(x,z,2.1,5.2,2.7,mapMat.black,true,1.35);b(x,z-1.8,2.2,.08,2.4,mapMat.blue,false,1.35);b(x,z-2.5,2.1,.1,.1,mapMat.red,false,2.73)}
+  b(4,17,3.2,2,1.7,mapMat.dark,false,.85);b(4,17,2.5,.15,1.3,mapMat.blue,false,1.75);b(0,-5,12,1.3,1.1,mapMat.concrete,true,.55);b(0,5,12,1.3,1.1,mapMat.concrete,true,.55);
+  for(let z=-33;z<=32;z+=5)b(0,z,.12,.12,.22,mapMat.amber,false,.04);
+ }else if(spec.kind==='mountainRelay'){
+  patch(0,0,92,92,0xaebfc8);patch(0,0,14,90,0x455864);patch(0,0,7,90,0x9cb9c8);
+  for(const [x,z,r,h] of [[-36,-31,9,20],[-38,-5,10,24],[-35,24,10,22],[36,-30,10,21],[38,0,10,25],[35,29,10,22]])rock(x,z,r,h,mapMat.white);
+  for(const [x,z] of [[-22,6],[22,6],[0,-20]]){mast(x,z,10,mapMat.red);b(x,z,2.1,2.1,.3,mapMat.dark,false,10.1);for(let k=0;k<3;k++)b(x,z,1.4+k*.5,.08,.08,mapMat.blue,false,4+k*2)}
+  b(-9,-25,12,8,4,mapMat.concrete,true,2);b(-9,-25,12.4,8.4,.2,mapMat.dark,false,4.1);b(12,25,14,8,4,mapMat.concrete,true,2);b(12,25,14.4,8.4,.2,mapMat.dark,false,4.1);barricades([[-20,-19],[19,-18],[-18,25],[20,30]]);
+ }else if(spec.kind==='commandBunker'){
+  patch(0,0,92,92,0x444d54);patch(0,0,18,85,0x30383e);for(const [x,z] of [[-36,-31],[36,-31],[-36,31],[36,31]])tower(x,z,9);
+  b(-29,0,3.2,68,5,mapMat.concrete,true,2.5);b(29,0,3.2,68,5,mapMat.concrete,true,2.5);b(-15,-33,28,2.2,5,mapMat.dark,true,2.5);b(15,-33,28,2.2,5,mapMat.dark,true,2.5);b(-15,33,28,2.2,5,mapMat.dark,true,2.5);b(15,33,28,2.2,5,mapMat.dark,true,2.5);
+  b(-13,-12,12,10,5,mapMat.black,true,2.5);b(13,-12,12,10,5,mapMat.black,true,2.5);b(0,24,22,10,6,mapMat.dark,true,3);b(0,24,22.4,10.4,.18,mapMat.red,false,6.1);
+  for(const x of [-21,-14,-7,7,14,21]){b(x,13,2,1.4,2.1,mapMat.steel,true,1.05);b(x,13,2.1,1.5,.1,mapMat.amber,false,2.14)}barricades([[-8,8],[8,8],[-8,-22],[8,-22]]);
+ }
+ return {key:spec.key,title:spec.title,group,collision,fogColor:spec.fogColor,groundColor:spec.groundColor,exitPositive:spec.exitPositive,spawns:spec.spawns};
+}
+const missionMapSpecs=[
+ {key:'c1-2',title:'PEDREIRA / COMBOIO',kind:'quarry',groundColor:0x777167,fogColor:0x4a4a48,exitPositive:false,spawns:[[-30,-30],[-24,-12],[-10,-27],[5,-30],[26,-25],[32,-5],[-28,15],[-12,23],[10,20],[22,8],[30,-8],[-35,2],[0,4],[6,34],[-18,34],[19,34],[35,22]]},
+ {key:'c1-3',title:'PORTO SOB CERCO',kind:'harbor',groundColor:0x5a686d,fogColor:0x203946,exitPositive:false,spawns:[[-31,-30],[-18,-17],[-8,-28],[3,-30],[18,-26],[34,-15],[-30,1],[-12,9],[10,10],[23,23],[30,-8],[-35,25],[0,30],[7,-8],[-18,33],[19,34],[36,28]]},
+ {key:'c1-4',title:'COMPLEXO DE COMUNICAÇÕES',kind:'comms',groundColor:0x343b40,fogColor:0x0c151d,exitPositive:false,spawns:[[-31,-31],[-20,-14],[-7,-28],[7,-30],[25,-27],[34,-11],[-31,4],[-12,12],[12,12],[27,21],[30,-8],[-33,25],[0,31],[8,-5],[-18,34],[19,34],[36,30]]},
+ {key:'c1-5',title:'FORTALEZA VERMELHA',kind:'fortress',groundColor:0x554a4a,fogColor:0x211b20,exitPositive:false,spawns:[[-31,-30],[-20,-20],[-7,-29],[8,-30],[25,-27],[35,-12],[-28,3],[-12,12],[10,17],[20,10],[30,-8],[-32,25],[0,29],[7,-5],[-18,34],[19,34],[36,29]]},
+ {key:'c2-2',title:'RODOVIA CONGELADA',kind:'iceRoad',groundColor:0xb7c8d0,fogColor:0x193546,exitPositive:true,spawns:[[-34,-30],[-22,-13],[-10,-30],[8,-30],[25,-25],[34,-12],[-31,0],[-14,10],[12,9],[26,24],[0,14],[-32,25],[0,32],[7,-8],[-18,34],[19,34],[36,29]]},
+ {key:'c2-3',title:'ARQUIVO SUBTERRÂNEO',kind:'archive',groundColor:0x4c565e,fogColor:0x101b25,exitPositive:true,spawns:[[-28,-30],[-22,-15],[-10,-27],[10,-30],[27,-27],[31,-14],[-29,1],[-12,8],[12,8],[28,24],[0,14],[-30,25],[0,32],[7,-8],[-18,34],[19,34],[36,29]]},
+ {key:'c2-4',title:'MONTANHA DE ANTENAS',kind:'mountainRelay',groundColor:0xa7b7c0,fogColor:0x1b2b38,exitPositive:true,spawns:[[-32,-30],[-22,-14],[-10,-29],[9,-30],[27,-25],[34,-13],[-30,0],[-13,10],[12,10],[26,24],[0,14],[-32,25],[0,32],[7,-8],[-18,34],[19,34],[36,29]]},
+ {key:'c2-5',title:'BUNKER DO COMANDO',kind:'commandBunker',groundColor:0x505960,fogColor:0x101922,exitPositive:true,spawns:[[-31,-30],[-22,-18],[-9,-30],[9,-30],[25,-26],[35,-12],[-29,0],[-12,9],[12,9],[25,28],[0,14],[-31,25],[0,33],[7,-8],[-18,34],[19,34],[36,29]]}
+];
+for(const spec of missionMapSpecs)missionMapRegistry[spec.key]=buildMissionMap(spec);
+function blacksiteBox(x,y,z,sx,sy,sz,material,solid=true,rotY=0){
+ const mesh=new THREE.Mesh(new THREE.BoxGeometry(sx,sy,sz),material);mesh.position.set(x,y,z);mesh.rotation.y=rotY;mesh.castShadow=true;mesh.receiveShadow=true;campaign2FinalOverlay.add(mesh);
+ if(solid)campaign2BlacksiteCollision.push({x,y,z,hx:sx/2,hy:sy/2,hz:sz/2,minY:Math.max(0,y-sy/2),maxY:y+sy/2,top:sy,rotY});
+ return mesh;
+}
+const c2InteriorFloor=new THREE.Mesh(new THREE.PlaneGeometry(72,72),new THREE.MeshStandardMaterial({color:0x27333c,roughness:.9,metalness:.12}));c2InteriorFloor.rotation.x=-Math.PI/2;c2InteriorFloor.position.set(0,.04,0);campaign2FinalOverlay.add(c2InteriorFloor);
+for(const x of [-36,36])blacksiteBox(x,2,0,.8,4,70,c2Dark,true);
+for(const [x,z,w] of [[-21,-34,30],[21,-34,30],[-20,34,32],[20,34,32]])blacksiteBox(x,2,z,w,4,.9,c2Wall,true);
+for(const x of [-6,6]){blacksiteBox(x,2,-34,.52,4,.78,c2Warning,true);blacksiteBox(x,2,34,.52,4,.78,c2Signal,true)}
+blacksiteBox(0,4.15,-34,12.4,.18,.8,c2Metal,false);blacksiteBox(0,4.1,34,12.4,.18,.8,c2Metal,false);
+for(const [x,z] of [[-14,-22],[14,-22],[-14,5],[14,5],[-14,24],[14,24]]){blacksiteBox(x,1.45,z,4.8,2.9,2.8,c2Dark,true);blacksiteBox(x,2.95,z,4.95,.12,2.95,c2Signal,false);for(let k=-1;k<=1;k++)blacksiteBox(x+k*1.2,1.5,z-1.43,.12,2.6,.08,c2Metal,false)}
+for(const [x,z] of [[-5,-10],[5,-10],[-5,7],[5,7],[-5,25],[5,25]]){blacksiteBox(x,1.2,z,1.1,2.4,2.4,c2Wall,true);blacksiteBox(x,2.45,z,1.2,.12,2.5,c2Warning,false)}
+blacksiteBox(-22,1.8,-3,7,3.6,8,c2Wall,true);blacksiteBox(22,1.8,-3,7,3.6,8,c2Wall,true);
+for(let z=-28;z<=28;z+=7){blacksiteBox(0,.08,z,60,.06,.12,c2Signal,false);blacksiteBox(-31,.08,z,.12,.06,.12,c2Warning,false);blacksiteBox(31,.08,z,.12,.06,.12,c2Warning,false)}
+const c2BlacksiteLamp1=new THREE.PointLight(0xff4539,7,28,2);c2BlacksiteLamp1.position.set(0,3.3,0);campaign2FinalOverlay.add(c2BlacksiteLamp1);
+const c2BlacksiteLamp2=new THREE.PointLight(0x3ccfff,8,22,2);c2BlacksiteLamp2.position.set(0,3,-24);campaign2FinalOverlay.add(c2BlacksiteLamp2);
+function setMissionMap(){
+ activeMissionMap=missionMapRegistry['c'+campaignNumber+'-'+missionStage]||null;missionMapActive=!!activeMissionMap;
+ for(const map of Object.values(missionMapRegistry))map.group.visible=false;
+ campaign2BlacksiteActive=campaignNumber===2&&missionStage===6;
+ if(campaign2BlacksiteActive){
+  missionMapActive=false;activeMissionMap=null;missionMapCollision=[];
+  for(const o of gulagGroup.children)o.visible=o===campaign2FinalOverlay||gulagGatePivots.includes(o)||gulagMarkers.includes(o)||gulagIntelMarkers.includes(o)||o===gulagExtract;
+  campaign2FinalOverlay.visible=true;gulagGroup.visible=true;
+  for(let i=campaign2BlacksiteCollision.length-1;i>=0;i--)if(campaign2BlacksiteCollision[i]===gulagGateBlocker)campaign2BlacksiteCollision.splice(i,1);
+  setGulagGateState(gulagGateOpen);floor.material.color.setHex(0x27333c);grid.visible=false;rainPoints.visible=false;
+  scene.fog.near=10;scene.fog.far=78;scene.fog.color.setHex(0x141e28);scene.background.setHex(0x141e28);extraction.visible=false;if(vehicle)vehicle.visible=false;
+  for(const o of gulagBaseMapObjects)o.visible=false;
+  return;
+ }
+ campaign2FinalOverlay.visible=false;missionMapCollision=[];
+ if(!missionMapActive){if(vehicle)vehicle.visible=!gulagActive&&!campaign2Active;return}
+ campaign2Group.visible=false;gulagGroup.visible=false;for(const o of gulagBaseMapObjects)o.visible=false;
+ activeMissionMap.group.visible=true;missionMapCollision=activeMissionMap.collision.slice();
+ for(const d of destructibles){
+  const show=d.alive&&(missionStage===2||d.type!=='vehicle');d.mesh.visible=show;if(show&&!d.mesh.parent)scene.add(d.mesh);
+  if(d.extras)d.extras.forEach(o=>{o.visible=show;if(show&&!o.parent)scene.add(o)});
+  if(show&&d.campaign2Obstacle&&!missionMapCollision.includes(d.campaign2Obstacle))missionMapCollision.push(d.campaign2Obstacle);
+ }
+ floor.visible=true;grid.visible=false;floor.material.color.setHex(activeMissionMap.groundColor);rainPoints.visible=campaignNumber===2;
+ extraction.visible=true;extraction.position.set(0,.06,campaign2Active?42:-40);
+ const fog=new THREE.Color(activeMissionMap.fogColor);scene.fog.color.copy(fog);scene.background.copy(fog);scene.fog.near=15;scene.fog.far=88;
+ if(vehicle)vehicle.visible=false;intelMarker.visible=missionStage===3&&!intelRecovered;relayMarkers.forEach((m,i)=>m.visible=missionStage===4&&!relaysDisabled[i]);optionalMarker.visible=!optionalObjectiveFound;
+}
+
+window.__bootStage='Cenário construído; preparando lógica da missão';window.__bootStage='Cenário construído; preparando lógica da missão';
 // Uniformes camuflados e equipamento tático: texturas geradas localmente, sem downloads adicionais.
 function makeCamoTexture(palette,seed){
  const canvas=document.createElement('canvas');canvas.width=128;canvas.height=128;
@@ -747,7 +871,7 @@ function refreshMissionHUD(){
 }
 function clearWorld(){for(const e of enemies)scene.remove(e.mesh);for(const p of projectiles)scene.remove(p.mesh);for(const e of effects)scene.remove(e.mesh);if(player)scene.remove(player);if(companion)scene.remove(companion);companion=null;enemies=[];projectiles=[];effects=[]}
 function reset(fromSave=false,chosenStage=null,chosenCampaign=null){clearWorld();$('#missionPanel').classList.add('hidden');player=soldier(false);player.position.set(-40,0,-40);scene.add(player);health=100;armor=(lightArmorEquipped?30:50)+armorUpgrade*10;ammo=30;reserve=150;pistolAmmo=12;pistolReserve=48;smgAmmo=45;smgReserve=225;launcherAmmo=3;launcherReserve=12;shotgunAmmo=8;shotgunReserve=40;sniperAmmo=5;sniperReserve=25;grenades=2;medkits=2;stealthMode=false;lightsOut=false;distractionCharges=2;alarmTriggered=false;alarmEverRaised=false;kills=0;shots=0;hits=0;headshots=0;bodyHits=0;armHits=0;legHits=0;alarmsRaised=0;missionElapsed=0;optionalObjectiveFound=false;extractionStarted=false;extractionTimer=0;weaponRecoil=0;weaponKickTime=0;companionMode='follow';companionAttackCooldown=0;companionHealth=100;companionDown=false;$('#evacTimer').classList.add('hidden');$('#allyStatus').classList.add('hidden');ended=false;reloading=false;weapon='rifle';updateFirstPersonWeapon();yaw=-Math.PI*0.75;pitch=-.05;driving=false;createVehicle();if(chosenCampaign!==null&&chosenCampaign!==undefined)campaignNumber=Number(chosenCampaign)===2?2:1;const saved=fromSave?loadSave(campaignNumber):null;if(fromSave&&saved)campaignNumber=Number(saved.campaignNumber)===2?2:campaignNumber;if(!saved)missionStage=chosenStage||1;if(saved){missionStage=saved.missionStage||1;suppressorEquipped=saved.suppressorEquipped??suppressorEquipped;redDotEquipped=saved.redDotEquipped??redDotEquipped;extendedMagEquipped=saved.extendedMagEquipped??extendedMagEquipped;foregripEquipped=saved.foregripEquipped??foregripEquipped;lightArmorEquipped=saved.lightArmorEquipped??lightArmorEquipped;lightsOut=!!saved.lightsOut;distractionCharges=saved.distractionCharges??2;optionalObjectiveFound=!!(saved.optionalObjectiveFound&&saved.missionStage===missionStage);headshots=saved.headshots??0;bodyHits=saved.bodyHits??0;armHits=saved.armHits??0;legHits=saved.legHits??0;alarmsRaised=saved.alarmsRaised??0;missionElapsed=saved.missionElapsed??0;for(const k of ['health','armor','ammo','reserve','pistolAmmo','pistolReserve','smgAmmo','smgReserve','launcherAmmo','launcherReserve','shotgunAmmo','shotgunReserve','sniperAmmo','sniperReserve','grenades','medkits','kills','shots','hits','armorUpgrade','helmetEquipped'])if(saved[k]!==undefined)({health,armor,ammo,reserve,pistolAmmo,pistolReserve,shotgunAmmo,shotgunReserve,sniperAmmo,sniperReserve,grenades,kills,shots,hits}[k]=saved[k]);health=saved.health??health;armor=saved.armor??armor;ammo=saved.ammo??ammo;reserve=saved.reserve??reserve;pistolAmmo=saved.pistolAmmo??pistolAmmo;pistolReserve=saved.pistolReserve??pistolReserve;shotgunAmmo=saved.shotgunAmmo??shotgunAmmo;shotgunReserve=saved.shotgunReserve??shotgunReserve;sniperAmmo=saved.sniperAmmo??sniperAmmo;sniperReserve=saved.sniperReserve??sniperReserve;grenades=saved.grenades??grenades;medkits=saved.medkits??medkits;kills=Math.min(saved.kills??0,30);shots=saved.shots??0;hits=saved.hits??0;missionStage=saved.missionStage||1;/* O início de cada sessão/missão é sempre no canto seguro, mesmo ao continuar save. */}
-gulagActive=missionStage===6;campaign2Active=campaignNumber===2&&missionStage!==6;setGulagWorld(gulagActive);
+gulagActive=missionStage===6;campaign2Active=campaignNumber===2&&missionStage!==6;campaign2BlacksiteActive=campaignNumber===2&&missionStage===6;activeMissionMap=missionMapRegistry['c'+campaignNumber+'-'+missionStage]||null;missionMapActive=!!activeMissionMap;setGulagWorld(gulagActive);
 gulagPhase=(saved&&saved.missionStage===6)?Math.min(6,Number(saved.gulagPhase)||0):0;
 setGulagGateState(missionStage===6&&gulagPhase>0);
 gulagIntel=saved&&saved.missionStage===6&&Array.isArray(saved.gulagIntel)?[0,1,2].map(i=>!!saved.gulagIntel[i]):[false,false,false];
@@ -760,14 +884,14 @@ intelRecovered=!!(saved&&saved.missionStage===missionStage&&saved.intelRecovered
 relaysDisabled=saved&&saved.missionStage===missionStage&&Array.isArray(saved.relaysDisabled)?[0,1,2].map(i=>!!saved.relaysDisabled[i]):[false,false,false];
 const savedDestructibles=saved&&saved.missionStage===missionStage&&Array.isArray(saved.destructibleStatus)&&saved.destructibleStatus.length===destructibles.length?saved.destructibleStatus:null;
 destructibles.forEach((d,i)=>{d.alive=savedDestructibles?savedDestructibles[i]!==false:true;if(d.alive){d.mesh.visible=true;scene.add(d.mesh);if(d.extras)d.extras.forEach(o=>{o.visible=true;scene.add(o)});if(d.obstacle&&!obstacles.includes(d.obstacle))obstacles.push(d.obstacle)}else{scene.remove(d.mesh);if(d.extras)d.extras.forEach(o=>scene.remove(o))}if(d.campaign2Obstacle){const ci=campaign2Collision.indexOf(d.campaign2Obstacle);if(d.alive&&ci<0)campaign2Collision.push(d.campaign2Obstacle);else if(!d.alive&&ci>=0)campaign2Collision.splice(ci,1)}});
-setCampaign2World(campaign2Active);if(vehicle)vehicle.visible=!gulagActive&&!campaign2Active;campaign2FinalOverlay.visible=campaignNumber===2&&missionStage===6;
+setCampaign2World(campaign2Active);setMissionMap();if(vehicle)vehicle.visible=!gulagActive&&!campaign2Active&&!missionMapActive;campaign2FinalOverlay.visible=campaignNumber===2&&missionStage===6;
 campaignComplete=false;
 const floorPalette={1:0x535e61,2:0x716653,3:0x4a6670,4:0x292f3c,5:0x594d50,6:0x343b42};floor.material.color.setHex(campaign2Active?0xa8b8c0:(floorPalette[Math.min(missionStage,6)]||0x535e61));dayClock=campaign2Active?285:missionStage===4?150:missionStage===5?220:missionStage===6?280:missionStage*24;
 // A sexta missão usa uma distribuição própria para o combate dentro da prisão.
 const standardSpots=[[-10,-4],[10,-7],[-22,0],[22,2],[4,-19],[-5,-24],[34,12],[-35,-12],[0,14],[15,29],[30,-8],[-34,2],[34,-2],[-7,-35],[7,35],[-18,34],[19,-35]];
 const campaign2Spots=[[-36,-29],[-24,-15],[13,-34],[34,-24],[-33,-5],[-4,-8],[31,-3],[-31,12],[10,7],[30,17],[-8,28],[0,34],[18,32],[-38,20],[38,8],[4,-37],[-11,17]];
 const gulagSpots=[[-28,-27],[-21,-27],[-10,-26],[10,-26],[21,-26],[28,-26],[-28,-18],[-20,-18],[-12,-17],[12,-18],[20,-18],[28,-17],[-28,-7],[-19,-7],[-13,-7],[13,-7],[19,-7],[28,-6],[-28,4],[-19,4],[-13,5],[13,4],[19,5],[28,6],[-26,15],[-16,16],[-5,17],[5,16],[16,16],[26,17],[-12,27],[0,26],[18,27]];
-const spots=missionStage===6?gulagSpots:campaign2Active?campaign2Spots:standardSpots;
+const spots=missionStage===6?gulagSpots:activeMissionMap?activeMissionMap.spawns:(campaign2Active?campaign2Spots:standardSpots);
 spots.forEach((p,i)=>{if(i===(missionStage===6?spots.length-1:10)&&missionStage<5)return;const type=i===(missionStage===6?spots.length-1:10)?'boss':i%5===0?'heavy':i%4===0?'sniper':i%3===0?'cover':'rifle';const mesh=soldier(true,type);/* O papel de cada classe é preservado, mas a posição inicial não pode ficar dentro de uma parede. */const bodyRadius=(type==='heavy'||type==='boss')?.82:.72;const safeSpawn=findEnemySpawn(p[0],p[1],bodyRadius);mesh.position.set(safeSpawn.x,0,safeSpawn.z);const alive=!(saved&&saved.missionStage===missionStage&&i<kills);if(alive)scene.add(mesh);const patrolHome=[safeSpawn.x,safeSpawn.z];enemies.push({mesh,type,hp:Math.ceil((type==='boss'?24+missionStage*3:type==='heavy'?9+missionStage*1.5:type==='sniper'?5+missionStage*1.3:i%4===0?6+missionStage:4+Math.min(missionStage-1,2))*(1+(missionStage-1)*.12)),speed:(type==='sniper'?.72:type==='heavy'?.9:type==='boss'?.9:1.18+(i%3)*.19)*(1+Math.min(missionStage-1,4)*.16)*enemyDifficultyData[enemyDifficulty].speed,attack:1+Math.random(),alive,strafe:i%2?1:-1,alert:false,state:'patrol',home:patrolHome,patrol:patrolHome.map((v,j)=>v+(j===0?((i%3)-1)*9:((i%2)*14-7)))});});
 updateHUD();refreshMissionHUD();document.body.classList.add('game-running');$('#start').classList.add('hidden');['display','visibility','opacity','z-index'].forEach(p=>$('#start').style.removeProperty(p));$('#end').classList.add('hidden');$('#hud').classList.remove('hidden');$('#crosshair').classList.remove('hidden');$('#vehiclePrompt').classList.add('hidden');running=true;clock.start();sound(440,.15,'sawtooth');startMusic();say('OPERAÇÃO INICIADA — SINAL HOSTIL DETECTADO');saveGame()}
 function finish(win,reportStage=missionStage){
@@ -869,7 +993,7 @@ const targets=[];for(const e of enemies)if(e.alive){e.mesh.traverse(part=>{if(!p
 const tracer=new THREE.Mesh(new THREE.CylinderGeometry(.025,.025,Math.min(impact.distanceTo(start),effectiveRange),5),new THREE.MeshBasicMaterial({color:0xffd18a,transparent:true,opacity:.65}));tracer.position.copy(start).add(impact).multiplyScalar(.5);tracer.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),impact.clone().sub(start).normalize());scene.add(tracer);effects.push({mesh:tracer,life:.055})}
 function canSee(from,to){const origin=from.clone().add(new THREE.Vector3(0,1.4,0)),delta=to.clone().add(new THREE.Vector3(0,1,0)).sub(origin),distance=delta.length();const ray=new THREE.Raycaster(origin,delta.normalize(),0,distance);const visibleThroughAncestors=o=>{let n=o;while(n&&n!==scene){if(!n.visible)return false;n=n.parent}return true};return !ray.intersectObjects(scene.children,true).some(h=>!h.object.userData.ignoreSightRay&&visibleThroughAncestors(h.object)&&h.object!==floor&&h.object!==grid&&h.object!==player&&h.object.parent!==player&&h.distance>1.2&&h.distance<distance-.4&&h.object.material!==undefined&&h.object.material!==yellow)}
 function actorCollisionPenalty(x,z,r){
- const blockList=campaign2Active?campaign2Collision:(gulagActive?gulagCollision:obstacles);let total=0;
+ const blockList=missionMapActive?missionMapCollision:(campaign2Active?campaign2Collision:(campaign2BlacksiteActive?campaign2BlacksiteCollision:(gulagActive?gulagCollision:obstacles)));let total=0;
  for(const o of blockList){
   const dx=x-o.x,dz=z-o.z,rot=o.rotY||0,c=Math.cos(rot),sn=Math.sin(rot);
   const lx=dx*c-dz*sn,lz=dx*sn+dz*c;
@@ -893,7 +1017,7 @@ function moveActorSafe(position,dx,dz,r=.58,min=-44,max=44){
 }
 // Colisão dedicada dos inimigos: corpo circular contra caixas orientadas, não apenas o centro do personagem.
 function enemyWallHit(x,z,r){
- const list=campaign2Active?campaign2Collision:(gulagActive?gulagCollision:obstacles);
+ const list=missionMapActive?missionMapCollision:(campaign2Active?campaign2Collision:(campaign2BlacksiteActive?campaign2BlacksiteCollision:(gulagActive?gulagCollision:obstacles)));
  for(const o of list){
   const rot=o.rotY||0,c=Math.cos(rot),sn=Math.sin(rot),dx=x-o.x,dz=z-o.z;
   const lx=dx*c-dz*sn,lz=dx*sn+dz*c;
@@ -922,7 +1046,7 @@ function enemyBodyBlocked(x,z,r,self){
 }
 function enemyPositionBlocked(x,z,r,self){return enemyWallHit(x,z,r)||enemyBodyBlocked(x,z,r,self)}
 function pushEnemyOutOfWalls(position,r){
- const list=campaign2Active?campaign2Collision:(gulagActive?gulagCollision:obstacles);
+ const list=missionMapActive?missionMapCollision:(campaign2Active?campaign2Collision:(campaign2BlacksiteActive?campaign2BlacksiteCollision:(gulagActive?gulagCollision:obstacles)));
  for(let pass=0;pass<8;pass++){
   let moved=false;
   for(const o of list){
@@ -973,7 +1097,7 @@ function moveEnemySafe(e,dx,dz){
  }
 }
 function solidIntersectionDistance(from,to,padding=.08){
- const list=campaign2Active?campaign2Collision:(gulagActive?gulagCollision:obstacles),dx=to.x-from.x,dy=to.y-from.y,dz=to.z-from.z,segmentLength=Math.hypot(dx,dy,dz);
+ const list=missionMapActive?missionMapCollision:(campaign2Active?campaign2Collision:(campaign2BlacksiteActive?campaign2BlacksiteCollision:(gulagActive?gulagCollision:obstacles))),dx=to.x-from.x,dy=to.y-from.y,dz=to.z-from.z,segmentLength=Math.hypot(dx,dy,dz);
  if(segmentLength<1e-8)return Infinity;
  let nearest=Infinity;
  for(const o of list){
@@ -1015,7 +1139,7 @@ function projectileSegmentHitsActor(from,to,actor,radius=.56){
  }
  return exit>=0&&enter<=1;
 }
-function destroyProp(d,explosive=false){d.alive=false;scene.remove(d.mesh);if(d.extras)d.extras.forEach(o=>scene.remove(o));if(d.obstacle){const index=obstacles.indexOf(d.obstacle);if(index>=0)obstacles.splice(index,1)}if(d.campaign2Obstacle){const ci=campaign2Collision.indexOf(d.campaign2Obstacle);if(ci>=0)campaign2Collision.splice(ci,1)}if(d.type==='crate')spawnEffect(d.mesh.position.clone().add(new THREE.Vector3(0,.7,0)),0xffc36b,.35,.22);else if(explosive)spawnEffect(d.mesh.position.clone().add(new THREE.Vector3(0,.7,0)),0xff7b32,.7,.2)}
+function destroyProp(d,explosive=false){d.alive=false;scene.remove(d.mesh);if(d.extras)d.extras.forEach(o=>scene.remove(o));if(d.obstacle){const index=obstacles.indexOf(d.obstacle);if(index>=0)obstacles.splice(index,1)}if(d.campaign2Obstacle){const ci=campaign2Collision.indexOf(d.campaign2Obstacle);if(ci>=0)campaign2Collision.splice(ci,1);const mi=missionMapCollision.indexOf(d.campaign2Obstacle);if(mi>=0)missionMapCollision.splice(mi,1)}if(d.type==='crate')spawnEffect(d.mesh.position.clone().add(new THREE.Vector3(0,.7,0)),0xffc36b,.35,.22);else if(explosive)spawnEffect(d.mesh.position.clone().add(new THREE.Vector3(0,.7,0)),0xff7b32,.7,.2)}
 function detonate(pos){sound(48,.45,'sawtooth',.07);spawnEffect(pos,0xff7b32,1.5,.4);spawnEffect(pos,0xffd48a,2.2,.24);spawnEffect(pos.clone().add(new THREE.Vector3(.5,.5,0)),0x383d42,.9,.9);spawnEffect(pos.clone().add(new THREE.Vector3(-.4,.2,.5)),0x242a30,.75,1.1);for(let i=0;i<8;i++)spawnEffect(pos.clone().add(new THREE.Vector3((Math.random()-.5)*2,Math.random()*1.8,(Math.random()-.5)*2)),0xffb34d,.08,.25);for(const e of enemies){if(e.alive&&e.mesh.position.distanceTo(pos)<5.5){e.hp-=4;if(e.hp<=0){e.alive=false;scene.remove(e.mesh);kills++}}}if(!gulagActive)for(const d of destructibles){if(d.alive&&d.mesh.position.distanceTo(pos)<5){destroyProp(d,true);spawnEffect(d.mesh.position,0xff7b32,1,.25);for(const e of enemies){if(e.alive&&e.mesh.position.distanceTo(d.mesh.position)<4){e.hp-=3;if(e.hp<=0){e.alive=false;scene.remove(e.mesh);kills++}}}}}updateHUD();saveGame();refreshMissionHUD()}
 function damagePlayer(amount){if(armor>0){const absorbed=Math.min(armor,Math.ceil(amount*(lightArmorEquipped?.45:.7)));armor-=absorbed;amount-=absorbed}health=Math.max(0,health-amount);updateHUD();$('#hud').classList.add('damage');setTimeout(()=>$('#hud').classList.remove('damage'),180);if(health<=0)finish(false)}
 function update(dt){if(!running||ended)return;missionElapsed+=dt;fireCooldown=Math.max(0,fireCooldown-dt);walkTime+=dt;dayClock+=dt;saveTick+=dt;
@@ -1028,7 +1152,7 @@ function update(dt){if(!running||ended)return;missionElapsed+=dt;fireCooldown=Ma
    sound(440,.22,'triangle',.055);refreshMissionHUD();saveGame();
    say('PORTÃO ABERTO — ATRAVESSE O PÁTIO ATÉ A SALA DE CONTROLE');
   }
- }if(missionRequirementsMet()&&!extractionStarted){extractionStarted=true;extractionTimer=missionStage===6?90:75;alarmTriggered=true;alarmsRaised++;enemies.forEach(e=>{if(e.alive){e.alert=true;e.alertPosition=player.position.clone()}});$('#evacTimer').classList.remove('hidden');say('OBJETIVOS CUMPRIDOS — EXTRAÇÃO SOB PRESSÃO!')}if(extractionStarted){extractionTimer=Math.max(0,extractionTimer-dt);$('#evacTimerText').textContent=Math.ceil(extractionTimer);$('#evacTimer').classList.remove('hidden');if(extractionTimer<=0){$('#evacTimer').classList.add('hidden');say('EXTRAÇÃO PERDIDA — TEMPO ESGOTADO');finish(false);return}}if(saveTick>12){saveTick=0;saveGame()}const daylight=.5+.5*Math.sin(dayClock*.035);sun.intensity=lightsOut?.12:.65+daylight*2.1;ambientLight.intensity=lightsOut?.35:1.8;if(rainPoints&&rainEnabled){const a=rainPoints.geometry.attributes.position;for(let i=0;i<a.count;i++){a.array[i*3+1]-=dt*28;if(a.array[i*3+1]<0){a.array[i*3+1]=25+Math.random()*20;a.array[i*3]=player.position.x+(Math.random()-.5)*70;a.array[i*3+2]=player.position.z+(Math.random()-.5)*70}}a.needsUpdate=true}scene.fog.color.setRGB(.025+daylight*.43,.04+daylight*.49,.06+daylight*.53);scene.background.copy(scene.fog.color);if(campaign2Active){scene.fog.color.setHex(0x213746);scene.background.setHex(0x213746);sun.intensity=lightsOut?.05:.65;}else if(missionStage===6){scene.fog.color.setHex(0x1d2931);scene.background.setHex(0x1d2931);sun.intensity=lightsOut?.08:.8+daylight*.55;}player.rotation.y=yaw;
+ }if(missionRequirementsMet()&&!extractionStarted){extractionStarted=true;extractionTimer=missionStage===6?90:75;alarmTriggered=true;alarmsRaised++;enemies.forEach(e=>{if(e.alive){e.alert=true;e.alertPosition=player.position.clone()}});$('#evacTimer').classList.remove('hidden');say('OBJETIVOS CUMPRIDOS — EXTRAÇÃO SOB PRESSÃO!')}if(extractionStarted){extractionTimer=Math.max(0,extractionTimer-dt);$('#evacTimerText').textContent=Math.ceil(extractionTimer);$('#evacTimer').classList.remove('hidden');if(extractionTimer<=0){$('#evacTimer').classList.add('hidden');say('EXTRAÇÃO PERDIDA — TEMPO ESGOTADO');finish(false);return}}if(saveTick>12){saveTick=0;saveGame()}const daylight=.5+.5*Math.sin(dayClock*.035);sun.intensity=lightsOut?.12:.65+daylight*2.1;ambientLight.intensity=lightsOut?.35:1.8;if(rainPoints&&rainEnabled){const a=rainPoints.geometry.attributes.position;for(let i=0;i<a.count;i++){a.array[i*3+1]-=dt*28;if(a.array[i*3+1]<0){a.array[i*3+1]=25+Math.random()*20;a.array[i*3]=player.position.x+(Math.random()-.5)*70;a.array[i*3+2]=player.position.z+(Math.random()-.5)*70}}a.needsUpdate=true}scene.fog.color.setRGB(.025+daylight*.43,.04+daylight*.49,.06+daylight*.53);scene.background.copy(scene.fog.color);if(missionMapActive&&activeMissionMap){const mapFog=new THREE.Color(activeMissionMap.fogColor);scene.fog.color.copy(mapFog);scene.background.copy(mapFog);sun.intensity=lightsOut?.05:.7;}else if(campaign2BlacksiteActive){scene.fog.color.setHex(0x141e28);scene.background.setHex(0x141e28);sun.intensity=lightsOut?.04:.45;}else if(campaign2Active){scene.fog.color.setHex(0x213746);scene.background.setHex(0x213746);sun.intensity=lightsOut?.05:.65;}else if(missionStage===6){scene.fog.color.setHex(0x1d2931);scene.background.setHex(0x1d2931);sun.intensity=lightsOut?.08:.8+daylight*.55;}player.rotation.y=yaw;
 const forward=new THREE.Vector3(-Math.sin(yaw),0,-Math.cos(yaw)),right=new THREE.Vector3(Math.cos(yaw),0,-Math.sin(yaw));let move=new THREE.Vector3();if(keys.KeyW||keys.ArrowUp)move.add(forward);if(keys.KeyS||keys.ArrowDown)move.sub(forward);if(keys.KeyD||keys.ArrowRight)move.add(right);if(keys.KeyA||keys.ArrowLeft)move.sub(right);
 if(player&&!driving){const crouch=keys.KeyC?1:0;player.userData.body.position.y=crouch?.94:1.25;player.userData.head.position.y=crouch?1.62:2.02;player.userData.equipment.position.y=-.3*crouch}if(driving&&vehicle){const vMove=new THREE.Vector3();if(keys.KeyW)vMove.z-=1;if(keys.KeyS)vMove.z+=1;if(keys.KeyA)vMove.x-=1;if(keys.KeyD)vMove.x+=1;if(vMove.lengthSq()>0){vMove.normalize().multiplyScalar(10*dt).applyAxisAngle(new THREE.Vector3(0,1,0),vehicle.rotation.y);const nx=THREE.MathUtils.clamp(vehicle.position.x+vMove.x,-43,43),nz=THREE.MathUtils.clamp(vehicle.position.z+vMove.z,-43,43);if(!blocked(nx,vehicle.position.z,1.4))vehicle.position.x=nx;if(!blocked(vehicle.position.x,nz,1.5))vehicle.position.z=nz;const targetYaw=Math.atan2(-vMove.x,-vMove.z);let yawDiff=targetYaw-vehicle.rotation.y;while(yawDiff>Math.PI)yawDiff-=Math.PI*2;while(yawDiff<-Math.PI)yawDiff+=Math.PI*2;vehicle.rotation.y+=yawDiff*Math.min(1,dt*1.8);sound(75,.03,'sawtooth',.006);
 for(const enemy of enemies){
@@ -1097,7 +1221,7 @@ for(const e of enemies){
  const moveTarget=e.alertPosition||player.position;
  const to=moveTarget.clone().sub(p),dist=to.length();
  if(e.seekingCoverUntil>missionElapsed){
-  const coverList=campaign2Active?campaign2Collision:(gulagActive?gulagCollision:obstacles);let chosenCover=null,bestCover=Infinity;
+  const coverList=missionMapActive?missionMapCollision:(campaign2Active?campaign2Collision:(campaign2BlacksiteActive?campaign2BlacksiteCollision:(gulagActive?gulagCollision:obstacles)));let chosenCover=null,bestCover=Infinity;
   for(const cover of coverList){const dx=cover.x-p.x,dz=cover.z-p.z,d=Math.hypot(dx,dz);if(d<.8||d>12)continue;const score=d+Math.hypot(player.position.x-cover.x,player.position.z-cover.z)*.08;if(score<bestCover){bestCover=score;chosenCover=cover}}
   if(chosenCover){const away=new THREE.Vector3(p.x-chosenCover.x,0,p.z-chosenCover.z).normalize();const hideX=chosenCover.x+away.x*(Math.max(chosenCover.hx,chosenCover.hz)+.65),hideZ=chosenCover.z+away.z*(Math.max(chosenCover.hx,chosenCover.hz)+.65);to.set(hideX-p.x,0,hideZ-p.z)}
  }else if(e.type==='cover'&&e.alert&&!e.alertPosition&&dist>profile.min+3){const lateral=new THREE.Vector3(-playerDelta.z,0,playerDelta.x).normalize().multiplyScalar(e.strafe*4);to.add(lateral)}
