@@ -288,7 +288,7 @@ gulagPhase=(saved&&saved.missionStage===6)?Math.min(6,Number(saved.gulagPhase)||
 gulagIntel=saved&&saved.missionStage===6&&Array.isArray(saved.gulagIntel)?[0,1,2].map(i=>!!saved.gulagIntel[i]):[false,false,false];
 gulagShieldTaken=!!(saved&&saved.missionStage===6&&saved.gulagShieldTaken);
 prisonerRescued=!!(saved&&saved.missionStage===6&&saved.prisonerRescued);
-if(missionStage===6){player.position.set(0,0,-42);yaw=Math.PI;}
+if(missionStage===6){player.position.set(-4.3,0,-41.5);yaw=Math.PI;}
 intelRecovered=!!(saved&&saved.missionStage===missionStage&&saved.intelRecovered);
 relaysDisabled=saved&&saved.missionStage===missionStage&&Array.isArray(saved.relaysDisabled)?[0,1,2].map(i=>!!saved.relaysDisabled[i]):[false,false,false];
 const savedDestructibles=saved&&saved.missionStage===missionStage&&Array.isArray(saved.destructibleStatus)?saved.destructibleStatus:null;
