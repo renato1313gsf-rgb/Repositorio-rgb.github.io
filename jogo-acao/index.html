@@ -595,15 +595,15 @@ function completeCurrentMission(){
  const previous={stage:missionStage,kills,intelRecovered,relays:[...relaysDisabled],destructibles:destructibles.map(d=>d.alive),pos:player.position.toArray(),optionalObjectiveFound,headshots,bodyHits,armHits,legHits,alarmsRaised,missionElapsed,shots,hits};
  if(completedStage<6){
    missionStage=completedStage+1;kills=0;intelRecovered=false;relaysDisabled=[false,false,false];optionalObjectiveFound=false;headshots=0;bodyHits=0;armHits=0;legHits=0;alarmsRaised=0;missionElapsed=0;shots=0;hits=0;extractionStarted=false;extractionTimer=0;
-   destructibles.forEach(d=>{d.alive=true;scene.add(d.mesh)});
+   destructibles.forEach(d=>{d.alive=true;scene.add(d.mesh);if(d.extras)d.extras.forEach(o=>scene.add(o))});
    player.position.set(0,0,5);saveGame();
    missionStage=previous.stage;kills=previous.kills;intelRecovered=previous.intelRecovered;relaysDisabled=previous.relays;optionalObjectiveFound=previous.optionalObjectiveFound;headshots=previous.headshots;bodyHits=previous.bodyHits;armHits=previous.armHits;legHits=previous.legHits;alarmsRaised=previous.alarmsRaised;missionElapsed=previous.missionElapsed;shots=previous.shots;hits=previous.hits;
-   destructibles.forEach((d,i)=>{d.alive=previous.destructibles[i];if(d.alive)scene.add(d.mesh);else scene.remove(d.mesh)});
+   destructibles.forEach((d,i)=>{d.alive=previous.destructibles[i];if(d.alive){scene.add(d.mesh);if(d.extras)d.extras.forEach(o=>scene.add(o))}else{scene.remove(d.mesh);if(d.extras)d.extras.forEach(o=>scene.remove(o))}});
    player.position.fromArray(previous.pos);campaignComplete=false;
  }else{
    campaignComplete=true;
    const oldKills=kills;kills=0;intelRecovered=false;relaysDisabled=[false,false,false];
-   destructibles.forEach(d=>{d.alive=true;scene.add(d.mesh)});
+   destructibles.forEach(d=>{d.alive=true;scene.add(d.mesh);if(d.extras)d.extras.forEach(o=>scene.add(o))});
    saveGame();kills=oldKills;
  }
  finish(true,completedStage);
