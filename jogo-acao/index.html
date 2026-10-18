@@ -68,6 +68,8 @@ $('#continueBtn').addEventListener('click',()=>{closeSub();const m=$('#start .mo
 const renderer=new THREE.WebGLRenderer({canvas,antialias:true, powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio,1.6));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.12;window.__bootStage='WebGL criado; construindo cenário 3D';
 const scene=new THREE.Scene();scene.background=new THREE.Color(0x778896);scene.fog=new THREE.Fog(0x778896,35,100);
 const camera=new THREE.PerspectiveCamera(68,innerWidth/innerHeight,.1,180);
+const firstPersonRig=new THREE.Group();camera.add(firstPersonRig);
+scene.add(camera);
 scene.add(new THREE.HemisphereLight(0xc8e0ff,0x252b31,1.8));const rainGeo=new THREE.BufferGeometry();const rainArr=new Float32Array(700*3);for(let i=0;i<700;i++){rainArr[i*3]=(Math.random()-.5)*70;rainArr[i*3+1]=Math.random()*45;rainArr[i*3+2]=(Math.random()-.5)*70}rainGeo.setAttribute('position',new THREE.BufferAttribute(rainArr,3));const rainPoints=new THREE.Points(rainGeo,new THREE.PointsMaterial({color:0xb7d7eb,size:.055,transparent:true,opacity:.5}));rainPoints.visible=false;scene.add(rainPoints);
 const sun=new THREE.DirectionalLight(0xffe2c0,2.5);sun.position.set(-20,35,18);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.left=-55;sun.shadow.camera.right=55;sun.shadow.camera.top=55;sun.shadow.camera.bottom=-55;scene.add(sun);
 const mat=(c,r=.85,m=0)=>new THREE.MeshStandardMaterial({color:c,roughness:r,metalness:m});
@@ -344,7 +346,35 @@ function soldier(isEnemy=false,role='rifle'){
  mergeMeshesByMaterial(equipment,true);
  g.userData={legs,body,gun:weaponAssembly,weaponAssembly,isEnemy,head,helmet,pack,gear,headset:headRig,headDetails,arms,neck,equipment,role,eyes};
  return g;
-}const pricePrisoner=soldier(false,'prisoner');pricePrisoner.position.set(8,0,31.3);pricePrisoner.userData.body.material=mat(0x707a82,.95);pricePrisoner.userData.equipment.visible=false;const prisonerCloth=mat(0x646d73,.97);pricePrisoner.userData.legs.forEach(l=>{l.children.forEach(p=>{if(p.material!==gearRubber)p.material=prisonerCloth})});pricePrisoner.visible=false;scene.add(pricePrisoner);
+}
+// Arma e braços em primeira pessoa, usados exclusivamente na missão final.
+function buildFirstPersonView(){
+ const add=(geometry,material,position,rotation=[0,0,0])=>{
+  const mesh=new THREE.Mesh(geometry,material);
+  mesh.position.set(...position);mesh.rotation.set(...rotation);
+  mesh.castShadow=false;mesh.receiveShadow=false;firstPersonRig.add(mesh);return mesh;
+ };
+ // Braços avançados segurando o fuzil; o corpo do soldado fica fora da câmera.
+ add(new THREE.CapsuleGeometry(.145,.55,3,7),allyCloth,[-.34,-.42,-.66],[-.96,0,-.28]);
+ add(new THREE.CapsuleGeometry(.145,.55,3,7),allyCloth,[.39,-.43,-.51],[-.94,0,.34]);
+ add(new THREE.BoxGeometry(.23,.075,.22),gearFabric,[-.05,-.31,-.91],[.08,0,-.12]);
+ add(new THREE.BoxGeometry(.22,.075,.22),gearFabric,[.38,-.32,-.54],[.08,0,.1]);
+ add(new THREE.SphereGeometry(.115,8,6),gearRubber,[-.02,-.29,-.93]);
+ add(new THREE.SphereGeometry(.115,8,6),gearRubber,[.38,-.30,-.56]);
+ // Fuzil de assalto em perspectiva, com coronha, carregador, óptica e cano.
+ add(new THREE.BoxGeometry(.14,.14,.48),gearDark,[.28,-.255,-.70],[.02,0,0]);
+ add(new THREE.BoxGeometry(.115,.12,.31),gearOlive,[.28,-.24,-.98]);
+ add(new THREE.CylinderGeometry(.032,.038,.58,8),gearMetal,[.28,-.235,-1.28],[Math.PI/2,0,0]);
+ add(new THREE.CylinderGeometry(.047,.047,.10,8),gearDark,[.28,-.235,-1.58],[Math.PI/2,0,0]);
+ add(new THREE.BoxGeometry(.12,.12,.25),gearDark,[.28,-.245,-.43]);
+ add(new THREE.BoxGeometry(.095,.24,.12),gearDark,[.28,-.38,-.72],[-.10,0,0]);
+ add(new THREE.BoxGeometry(.105,.09,.16),gearMetal,[.28,-.155,-.69]);
+ add(new THREE.BoxGeometry(.08,.05,.012),gearLens,[.28,-.15,-.775]);
+ add(new THREE.BoxGeometry(.07,.13,.08),gearDark,[.28,-.34,-.98]);
+}
+buildFirstPersonView();
+firstPersonRig.visible=false;
+const pricePrisoner=soldier(false,'prisoner');pricePrisoner.position.set(8,0,31.3);pricePrisoner.userData.body.material=mat(0x707a82,.95);pricePrisoner.userData.equipment.visible=false;const prisonerCloth=mat(0x646d73,.97);pricePrisoner.userData.legs.forEach(l=>{l.children.forEach(p=>{if(p.material!==gearRubber)p.material=prisonerCloth})});pricePrisoner.visible=false;scene.add(pricePrisoner);
 let player,enemies=[],projectiles=[],effects=[],health=100,armor=50,ammo=30,reserve=150,pistolAmmo=12,pistolReserve=48,smgAmmo=45,smgReserve=225,launcherAmmo=3,launcherReserve=12,grenades=2,kills=0,shots=0,hits=0,running=false,ended=false,reloading=false,clock=new THREE.Clock(),fireCooldown=0,walkTime=0,toastTimer=0,weapon='rifle',yaw=0,pitch=-.05,mouseLocked=false,mission=1,mouseSensitivity=.0012,volumeLevel=.55,graphicsLevel='high',stealthMode=false,alarmTriggered=false,armorUpgrade=0,helmetEquipped=true,rainEnabled=false;
 const keys={};const weaponData={rifle:{mag:30,damage:1,rate:.12,range:55,name:'FUZIL'},pistol:{mag:12,damage:1,rate:.28,range:35,name:'PISTOLA'},shotgun:{mag:8,damage:2,rate:.65,range:19,name:'ESCOPETA'},sniper:{mag:5,damage:4,rate:1.05,range:110,name:'PRECISÃO MK II'},smg:{mag:45,damage:1,rate:.065,range:43,name:'SUBMETRALHADORA'},launcher:{mag:3,damage:5,rate:.8,range:70,name:'LANÇA-FOGUETES'}};let shotgunAmmo=8,shotgunReserve=40,sniperAmmo=5,sniperReserve=25,medkits=2;let audioCtx=null,audioEnabled=true,musicGain=null,musicStarted=false,missionStage=1,vehicle=null,driving=false,dayClock=0,saveTick=0,rain=null,windSoundAt=0,enemyDifficulty='veterano',suppressorEquipped=false,redDotEquipped=false,extendedMagEquipped=false,quietShotUntil=0;
 const enemyDifficultyData={recruta:{speed:.9,damage:.7,fireInterval:1.25},normal:{speed:1.15,damage:1,fireInterval:1},veterano:{speed:1.5,damage:1.2,fireInterval:.9},pesadelo:{speed:1.9,damage:1.45,fireInterval:.75}};
@@ -643,7 +673,24 @@ for(const e of enemies){
 }
 for(let i=projectiles.length-1;i>=0;i--){const p=projectiles[i];p.life-=dt;if(p.kind==='rocket'){p.mesh.position.addScaledVector(p.dir,p.speed*dt);spawnEffect(p.mesh.position.clone(),0xff8d38,.035,.06);const close=enemies.some(e=>e.alive&&e.mesh.position.distanceTo(p.mesh.position)<.8);if(close||p.life<=0||blocked(p.mesh.position.x,p.mesh.position.z,.12)){const pos=p.mesh.position.clone();scene.remove(p.mesh);projectiles.splice(i,1);detonate(pos);continue}continue}if(p.kind==='grenade'){const v=p.velocity;v.y-=18*dt;const next=p.mesh.position.clone().addScaledVector(v,dt);if(next.y<=.18){next.y=.18;if(v.y < -2 && p.bounces<3){v.y=-v.y*.38;v.x*=.72;v.z*=.72;p.bounces++;spawnEffect(next,0xc5c9c9,.07,.06)}else{v.y=0;v.x*=Math.pow(.12,dt);v.z*=Math.pow(.12,dt)}}if(blocked(next.x,next.z,.17)){v.x*=-.35;v.z*=-.35;next.x=p.mesh.position.x+v.x*dt;next.z=p.mesh.position.z+v.z*dt}p.mesh.position.copy(next);p.mesh.rotation.x+=dt*5;p.mesh.rotation.z+=dt*4;if(p.life<=0){const pos=p.mesh.position.clone();pos.y=Math.max(.18,pos.y);scene.remove(p.mesh);projectiles.splice(i,1);detonate(pos);continue}continue}const previous=p.mesh.position.clone(),next=previous.clone().addScaledVector(p.dir,p.speed*dt);if(p.kind==='enemy'&&projectileHitsSolid(previous,next)){spawnEffect(previous.clone().lerp(next,.5),0xff8d38,.06,.07);scene.remove(p.mesh);projectiles.splice(i,1);continue}p.mesh.position.copy(next);if(p.kind==='enemy'&&p.mesh.position.distanceTo(player.position.clone().add(new THREE.Vector3(0,1,0)))<.75){damagePlayer(p.damage||8);spawnEffect(p.mesh.position,0xff4d35,.18,.15);scene.remove(p.mesh);projectiles.splice(i,1);continue}if(p.life<=0){scene.remove(p.mesh);projectiles.splice(i,1)}}
 for(let i=effects.length-1;i>=0;i--){effects[i].life-=dt;if(effects[i].life<=0){scene.remove(effects[i].mesh);effects.splice(i,1)}}
-const camTarget=player.position.clone().add(new THREE.Vector3(0,driving?2.3:1.5,0));const offset=new THREE.Vector3(0,driving?5:3.0,driving?10:7.1).applyAxisAngle(new THREE.Vector3(0,1,0),yaw);camera.position.lerp(camTarget.clone().add(offset),1-Math.pow(.001,dt));const look=camTarget.clone().add(new THREE.Vector3(-Math.sin(yaw)*2,pitch*7,-Math.cos(yaw)*2));camera.lookAt(look);
+const firstPersonMode=missionStage===6&&!driving;
+player.visible=!firstPersonMode&&!driving;
+firstPersonRig.visible=firstPersonMode;
+if(firstPersonMode){
+ const moving=keys.KeyW||keys.KeyA||keys.KeyS||keys.KeyD;
+ const bob=!keys.KeyC&&moving?Math.sin(walkTime*10)*.025:0;
+ const eyeHeight=(keys.KeyC?1.28:1.67)+bob;
+ const camPosition=player.position.clone().add(new THREE.Vector3(0,eyeHeight,0));
+ camera.position.copy(camPosition);
+ const look=camPosition.clone().add(new THREE.Vector3(-Math.sin(yaw)*2,pitch*7,-Math.cos(yaw)*2));
+ camera.lookAt(look);
+}else{
+ const camTarget=player.position.clone().add(new THREE.Vector3(0,driving?2.3:1.5,0));
+ const offset=new THREE.Vector3(0,driving?5:3.0,driving?10:7.1).applyAxisAngle(new THREE.Vector3(0,1,0),yaw);
+ camera.position.lerp(camTarget.clone().add(offset),1-Math.pow(.001,dt));
+ const look=camTarget.clone().add(new THREE.Vector3(-Math.sin(yaw)*2,pitch*7,-Math.cos(yaw)*2));
+ camera.lookAt(look);
+}
 
 if(vehicle&&player){const near=player.position.distanceTo(vehicle.position)<4;$('#vehiclePrompt').classList.toggle('hidden',!running||(!near&&!driving));$('#vehiclePrompt').textContent=driving?'PRESSIONE F PARA SAIR DO JIPE':'PRESSIONE F PARA ENTRAR NO JIPE'}updateMini();if(toastTimer>0){toastTimer-=dt;if(toastTimer<=0)$('#toast').classList.add('hidden')}}
 window.__bootStage='Lógica da missão pronta; registrando controles';
