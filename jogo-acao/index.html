@@ -231,8 +231,8 @@ for(const x of [-2,2])gulagBox(x,1.15,8.84,.08,1.5,.08,gulagRed);
 // Chuveiros: azulejos, divisórias e canos.
 for(const x of [-10,-5,0,5,10]){
  gulagBox(x,.04,19,3.7,.08,9,gulagMaterial);
- gulagBox(x-1.8,1.25,19,.12,2.5,8,gulagBars);
- gulagBox(x+1.8,1.25,19,.12,2.5,8,gulagBars);
+ gulagSolidBox(x-1.8,1.25,19,.12,2.5,8,gulagBars);
+ gulagSolidBox(x+1.8,1.25,19,.12,2.5,8,gulagBars);
  gulagBox(x,2.5,19,.15,.1,8,gulagBars);
  for(const z of [16,19,22]){gulagBox(x,2.25,z,.3,.08,.3,gulagRed)}
 }
