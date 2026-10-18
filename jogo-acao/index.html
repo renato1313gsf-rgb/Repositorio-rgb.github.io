@@ -1630,7 +1630,7 @@ window.__gameAPI={
     say('CONFIGURAÇÕES SALVAS');
   },
   startMission(stage){reset(false,Number(stage)||1)},
-  startCampaign(number){const n=Number(number)===2?2:1;const saved=loadSave(n);if(n===2&&saved&&Number(saved.missionStage)===1)saved.missionStage=2;reset(!!saved,n===1?1:2,n);say(n===2?'CAMPANHA 02 — OPERAÇÃO NOITE ZERO. ESTAÇÃO POLAR HOSTIL.':'CAMPANHA 01 — OPERAÇÃO RUPTURA.');},
+  startCampaign(number){const n=Number(number)===2?2:1;reset(false,n===1?1:2,n);say(n===2?'CAMPANHA 02 — OPERAÇÃO NOITE ZERO. ESTAÇÃO POLAR HOSTIL.':'CAMPANHA 01 — OPERAÇÃO RUPTURA.');},
   getCampaign(){return campaignNumber},
   continueCampaign(){if(loadSave())reset(true);else{say('NENHUM PROGRESSO SALVO');reset(false)}},
   hasPlayer(){return !!player},
