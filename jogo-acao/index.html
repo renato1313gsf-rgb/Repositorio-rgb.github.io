@@ -279,7 +279,8 @@ const gearOlive=mat(0x414b3d,.94),gearDark=mat(0x20272b,.92),gearFabric=mat(0x5b
 const allyCloth=new THREE.MeshStandardMaterial({map:allyCamo,roughness:.98,metalness:0});
 const enemyCloth=new THREE.MeshStandardMaterial({map:enemyCamo,roughness:.98,metalness:0});
 const soldierGeo={
- torso:new THREE.CapsuleGeometry(.43,.85,4,8),head:new THREE.SphereGeometry(.28,12,10),helmet:new THREE.SphereGeometry(.32,12,8,0,Math.PI*2,0,Math.PI/2),
+ // Tronco visual em proporção humana; a colisão de movimento é matemática (XZ) e não precisa de um cilindro visível.
+ torso:new THREE.CapsuleGeometry(.31,.56,5,8),head:new THREE.SphereGeometry(.28,12,10),helmet:new THREE.SphereGeometry(.32,12,8,0,Math.PI*2,0,Math.PI/2),
  arm:new THREE.CapsuleGeometry(.135,.42,3,7),hand:new THREE.SphereGeometry(.14,8,6),leg:new THREE.BoxGeometry(.23,.62,.27),
  boot:new THREE.BoxGeometry(.27,.18,.42),knee:new THREE.BoxGeometry(.28,.20,.13),boxSmall:new THREE.BoxGeometry(1,1,1),
  cyl:new THREE.CylinderGeometry(.05,.05,1,8),goggle:new THREE.SphereGeometry(.075,8,6)
