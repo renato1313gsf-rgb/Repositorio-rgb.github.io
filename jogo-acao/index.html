@@ -67,7 +67,7 @@ window.addEventListener('error',e=>{const t=$('#toast');if(t){t.textContent='ERR
 window.addEventListener('unhandledrejection',e=>{const t=$('#toast');if(t){t.textContent='ERRO DE INICIALIZAÇÃO: '+(e.reason?.message||String(e.reason||'erro desconhecido'));t.classList.remove('hidden')}});
 $('#startBtn').addEventListener('click',()=>{closeSub();const m=$('#start .modal');let d=$('#startupError');if(!d){d=document.createElement('p');d.id='startupError';d.style.cssText='color:#ff765f;background:#321512;border:1px solid #ff624d;padding:12px;margin-top:14px;font-size:13px;font-weight:800;overflow-wrap:anywhere';m.appendChild(d)}d.textContent='INICIANDO...';try{reset(false)}catch(e){console.error(e);$('#start').classList.remove('hidden');$('#hud').classList.add('hidden');$('#crosshair').classList.add('hidden');d.textContent='FALHA AO INICIAR: '+(e?.stack||e?.message||String(e));d.style.display='block'}});
 $('#continueBtn').addEventListener('click',()=>{closeSub();const m=$('#start .modal');let d=$('#startupError');if(!d){d=document.createElement('p');d.id='startupError';d.style.cssText='color:#ff765f;background:#321512;border:1px solid #ff624d;padding:12px;margin-top:14px;font-size:13px;font-weight:800;overflow-wrap:anywhere';m.appendChild(d)}d.textContent='CARREGANDO CAMPANHA...';try{if(loadSave())reset(true);else{say('NENHUM PROGRESSO SALVO');reset(false)}}catch(e){console.error(e);$('#start').classList.remove('hidden');$('#hud').classList.add('hidden');$('#crosshair').classList.add('hidden');d.textContent='FALHA AO CONTINUAR: '+(e?.stack||e?.message||String(e));d.style.display='block'}});
-const renderer=new THREE.WebGLRenderer({canvas,antialias:true, powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio,1.6));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.12;window.__bootStage='WebGL criado; construindo cenário 3D';
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true, powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio,1.75));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.02;window.__bootStage='WebGL criado; construindo cenário 3D';
 const scene=new THREE.Scene();scene.background=new THREE.Color(0x778896);scene.fog=new THREE.Fog(0x778896,35,100);
 const camera=new THREE.PerspectiveCamera(68,innerWidth/innerHeight,.1,180);
 // A arma e os braços usam uma cena de sobreposição própria para nunca sumirem atrás
@@ -76,11 +76,11 @@ const firstPersonScene=new THREE.Scene();
 const firstPersonCamera=new THREE.PerspectiveCamera(68,innerWidth/innerHeight,.01,20);
 const firstPersonRig=new THREE.Group();
 firstPersonScene.add(firstPersonCamera,firstPersonRig);
-firstPersonScene.add(new THREE.HemisphereLight(0xffffff,0x68717b,2.0));
-const firstPersonLight=new THREE.DirectionalLight(0xffffff,2.2);
+firstPersonScene.add(new THREE.HemisphereLight(0xdce5ec,0x41484e,1.25));
+const firstPersonLight=new THREE.DirectionalLight(0xffffff,1.65);
 firstPersonLight.position.set(-1,2,3);firstPersonScene.add(firstPersonLight);
 scene.add(camera);
-const ambientLight=new THREE.HemisphereLight(0xc8e0ff,0x252b31,1.8);scene.add(ambientLight);const rainGeo=new THREE.BufferGeometry();const rainArr=new Float32Array(700*3);for(let i=0;i<700;i++){rainArr[i*3]=(Math.random()-.5)*70;rainArr[i*3+1]=Math.random()*45;rainArr[i*3+2]=(Math.random()-.5)*70}rainGeo.setAttribute('position',new THREE.BufferAttribute(rainArr,3));const rainPoints=new THREE.Points(rainGeo,new THREE.PointsMaterial({color:0xb7d7eb,size:.055,transparent:true,opacity:.5}));rainPoints.visible=false;scene.add(rainPoints);
+const ambientLight=new THREE.HemisphereLight(0xb8c8d4,0x171c21,1.15);scene.add(ambientLight);const rainGeo=new THREE.BufferGeometry();const rainArr=new Float32Array(700*3);for(let i=0;i<700;i++){rainArr[i*3]=(Math.random()-.5)*70;rainArr[i*3+1]=Math.random()*45;rainArr[i*3+2]=(Math.random()-.5)*70}rainGeo.setAttribute('position',new THREE.BufferAttribute(rainArr,3));const rainPoints=new THREE.Points(rainGeo,new THREE.PointsMaterial({color:0xb7d7eb,size:.055,transparent:true,opacity:.5}));rainPoints.visible=false;scene.add(rainPoints);
 const sun=new THREE.DirectionalLight(0xffe2c0,2.5);sun.position.set(-20,35,18);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.left=-55;sun.shadow.camera.right=55;sun.shadow.camera.top=55;sun.shadow.camera.bottom=-55;scene.add(sun);
 const mat=(c,r=.85,m=0)=>new THREE.MeshStandardMaterial({color:c,roughness:r,metalness:m});
 const hitFlashMaterials={body:mat(0xffd2b4),head:mat(0xffb24d)};
@@ -149,7 +149,7 @@ function setGulagWorld(active){
   ambientLight.intensity=.72;sun.intensity=.42;sun.color.setHex(0x8b9ba5);
  }else{
   scene.fog.near=35;scene.fog.far=100;
-  ambientLight.intensity=1.8;sun.intensity=2.5;sun.color.setHex(0xffe2c0);
+  ambientLight.intensity=1.8;sun.intensity=2.05;sun.color.setHex(0xd9e0e3);
  }
 }
 // Campanha 02: posto militar ártico do projeto Noite Zero.
@@ -497,6 +497,41 @@ function buildMissionMap(spec){
   b(-29,0,3.2,68,5,mapMat.concrete,true,2.5);b(29,0,3.2,68,5,mapMat.concrete,true,2.5);b(-15,-33,28,2.2,5,mapMat.dark,true,2.5);b(15,-33,28,2.2,5,mapMat.dark,true,2.5);b(-15,33,28,2.2,5,mapMat.dark,true,2.5);b(15,33,28,2.2,5,mapMat.dark,true,2.5);
   b(-13,-12,12,10,5,mapMat.black,true,2.5);b(13,-12,12,10,5,mapMat.black,true,2.5);b(0,24,22,10,6,mapMat.dark,true,3);b(0,24,22.4,10.4,.18,mapMat.red,false,6.1);
   for(const x of [-21,-14,-7,7,14,21]){b(x,13,2,1.4,2.1,mapMat.steel,true,1.05);b(x,13,2.1,1.5,.1,mapMat.amber,false,2.14)}barricades([[-8,8],[8,8],[-8,-22],[8,-22]]);
+ }
+ // Passe de ambientação de nível AAA (referência estética militar da era 2009, sem copiar mapas/ativos):
+ // placas de concreto, manchas úmidas, marcas de pneu, pequenas lascas e sinalização desgastada.
+ const grimeMat=new THREE.MeshStandardMaterial({color:0x171d20,roughness:.98,transparent:true,opacity:.27,depthWrite:false});
+ const wetMat=new THREE.MeshStandardMaterial({color:0x26353b,roughness:.22,metalness:.08,transparent:true,opacity:.34,depthWrite:false});
+ const chipMat=new THREE.MeshStandardMaterial({color:0x2b3032,roughness:.96});
+ const wornPaint=new THREE.MeshStandardMaterial({color:0xb5a06c,roughness:.94,transparent:true,opacity:.48,depthWrite:false});
+ // Lajes/juntas quebram a aparência de uma placa lisa sem introduzir colisões novas.
+ for(let z=-40;z<=40;z+=8){
+  const seam=new THREE.Mesh(new THREE.PlaneGeometry(88,.035),grimeMat);
+  seam.rotation.x=-Math.PI/2;seam.position.set(0,.044,z);group.add(seam);
+ }
+ for(let x=-40;x<=40;x+=8){
+  const seam=new THREE.Mesh(new THREE.PlaneGeometry(.035,88),grimeMat);
+  seam.rotation.x=-Math.PI/2;seam.position.set(x,.045,0);group.add(seam);
+ }
+ const weatherSpots=[
+  [-31,-25,3.4,1.4],[-22,-7,2.2,1.05],[-8,-31,4.1,1.25],[12,-24,2.8,1.2],
+  [29,-17,3.2,1.4],[-29,7,2.5,1.1],[-12,18,3.8,1.3],[7,27,2.6,1.1],
+  [25,29,3.5,1.25],[32,5,1.8,1.4],[2,5,2.3,1.05],[-3,-14,1.6,1.1]
+ ];
+ for(let i=0;i<weatherSpots.length;i++){
+  const [x,z,w,d]=weatherSpots[i];
+  const stain=new THREE.Mesh(new THREE.PlaneGeometry(w,d),i%3===0?wetMat:grimeMat);
+  stain.rotation.x=-Math.PI/2;stain.rotation.z=(i%5)*.31;stain.position.set(x,.052+(i%2)*.001,z);group.add(stain);
+ }
+ // Pedras, fragmentos e sucata encostados nas bordas do espaço jogável.
+ for(const [x,z,scale] of [[-39,-27,.22],[39,-18,.28],[-37,19,.18],[36,31,.25],[-19,-39,.2],[17,39,.24],[-40,4,.16],[40,2,.2],[-5,40,.18],[5,-40,.22]]){
+  const debris=new THREE.Mesh(new THREE.DodecahedronGeometry(scale,0),chipMat);
+  debris.position.set(x,scale*.55,z);debris.rotation.set(scale,scale*2,scale*.7);debris.castShadow=true;group.add(debris);
+ }
+ // Linhas de circulação parcialmente apagadas, só em pequenos trechos de perímetro.
+ for(const [x,z,w,d,rot] of [[-35,-8,3.2,.12,0],[35,8,3.2,.12,0],[-16,-35,2.2,.12,0],[16,35,2.2,.12,0]]){
+  const mark=new THREE.Mesh(new THREE.PlaneGeometry(w,d),wornPaint);
+  mark.rotation.x=-Math.PI/2;mark.rotation.z=rot;mark.position.set(x,.058,z);group.add(mark);
  }
  return {key:spec.key,title:spec.title,group,collision,fogColor:spec.fogColor,groundColor:spec.groundColor,exitPositive:spec.exitPositive,spawns:spec.spawns};
 }
@@ -1467,7 +1502,7 @@ function frame(){requestAnimationFrame(frame);const dt=Math.min(clock.getDelta()
  }
 }frame();
 window.__bootStage='Jogo inicializado; aguardando JOGAR';
-addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();firstPersonCamera.aspect=innerWidth/innerHeight;firstPersonCamera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,1.6))});
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();firstPersonCamera.aspect=innerWidth/innerHeight;firstPersonCamera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,1.75))});
 /* Só troca para o menu normal depois de confirmar a inicialização completa. */
 window.__gameReady=true;
 const realMenu=document.getElementById('start');
