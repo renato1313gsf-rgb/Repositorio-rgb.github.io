@@ -174,8 +174,8 @@ for(let z=-43;z<=43;z+=3){
  c2Box(46,1.8,z,.085,3.6,.085,c2Metal);
 }
 c2Box(0,1.8,-46,88,.12,.18,c2Dark);
-c2Box(-23,1.8,46,46,3.6,.22,c2Wall,true);
-c2Box(23,1.8,46,46,3.6,.22,c2Wall,true);
+c2Box(-27,1.8,46,38,3.6,.22,c2Wall,true);
+c2Box(27,1.8,46,38,3.6,.22,c2Wall,true);
 c2Box(0,.15,43.4,13,.12,4.8,c2Metal,false);
 for(const x of [-6,-3,0,3,6])c2Box(x,.24,43.4,.12,.08,4.5,c2Warning);
 for(const [x,z,w,h,d] of [[-28,-25,15,9,13],[27,-25,13,8,12],[-29,25,13,7,13],[28,25,14,9,14]]){
@@ -753,7 +753,7 @@ setGulagGateState(missionStage===6&&gulagPhase>0);
 gulagIntel=saved&&saved.missionStage===6&&Array.isArray(saved.gulagIntel)?[0,1,2].map(i=>!!saved.gulagIntel[i]):[false,false,false];
 gulagShieldTaken=!!(saved&&saved.missionStage===6&&saved.gulagShieldTaken);
 prisonerRescued=!!(saved&&saved.missionStage===6&&saved.prisonerRescued);
-if(missionStage===6){player.position.set(-4.3,0,-41.5);yaw=Math.PI;}else if(campaign2Active){player.position.set(-40,0,40);yaw=-Math.PI/4;}
+if(missionStage===6){player.position.set(-4.3,0,-41.5);yaw=Math.PI;}else if(campaign2Active){player.position.set(-40,0,36);yaw=-Math.PI/4;}
 const optionalSpots={1:[-5,-31],2:[-27,12],3:[-5,-34],4:[8,32],5:[0,30],6:[14,21]};optionalMarker.position.set(...optionalSpots[missionStage]);optionalMarker.visible=!optionalObjectiveFound;
 companion=soldier(false,'rifle');const buddyForward=new THREE.Vector3(-Math.sin(yaw),0,-Math.cos(yaw)),buddyRight=new THREE.Vector3(Math.cos(yaw),0,-Math.sin(yaw));companion.position.copy(player.position).addScaledVector(buddyForward,-2.6).addScaledVector(buddyRight,-1.4);companion.rotation.y=yaw;scene.add(companion);
 intelRecovered=!!(saved&&saved.missionStage===missionStage&&saved.intelRecovered);
