@@ -393,7 +393,21 @@ function soldier(isEnemy=false,role='rifle'){
  const foregrip=new THREE.Mesh(new THREE.BoxGeometry(.075,.15,.085),gearDark);foregrip.position.set(0,-.10,-.37);weaponAssembly.add(foregrip);
  const muzzleLight=new THREE.Mesh(new THREE.SphereGeometry(.025,6,5),new THREE.MeshBasicMaterial({color:0xffcf86}));muzzleLight.position.set(0,.02,role==='sniper'?-1.49:-1.10);weaponAssembly.add(muzzleLight);
  mergeMeshesByMaterial(equipment,true);
- g.userData={legs,body,gun:weaponAssembly,weaponAssembly,isEnemy,head,helmet,pack,gear,headset:headRig,headDetails,arms,neck,equipment,role,eyes};
+ // Hitboxes invisíveis e independentes para os braços: as peças visuais do equipamento são combinadas por material, então não servem como zonas anatômicas confiáveis.
+ const armHitboxGeometry=new THREE.CapsuleGeometry(.18,.58,4,8);
+ const armHitboxMaterial=new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:0,depthWrite:false,colorWrite:false,side:THREE.DoubleSide});
+ const armHitboxes=[];
+ for(const side of [-1,1]){
+  const armHitbox=new THREE.Mesh(armHitboxGeometry,armHitboxMaterial);
+  armHitbox.name=side<0?'left-arm-hitbox':'right-arm-hitbox';
+  armHitbox.position.set(side*.55,1.20,-.43);
+  armHitbox.rotation.x=-.82;
+  armHitbox.userData.hitZone='arms';
+  armHitbox.userData.ignoreSightRay=true;
+  armHitbox.castShadow=false;armHitbox.receiveShadow=false;
+  g.add(armHitbox);armHitboxes.push(armHitbox);
+ }
+ g.userData={legs,body,gun:weaponAssembly,weaponAssembly,isEnemy,head,helmet,pack,gear,headset:headRig,headDetails,arms,armHitboxes,neck,equipment,role,eyes};
  return g;
 }
 // Modelos de primeira pessoa: braços e cada tipo de arma têm modelos próprios.
@@ -718,7 +732,7 @@ function shoot(){if(!running||ended||reloading||fireCooldown>0||driving)return;c
 const hearingRadius=suppressedShot?10:(weapon==='pistol'?30:42);
 for(const nearby of enemies){if(nearby.alive&&nearby.mesh.position.distanceTo(player.position)<=hearingRadius){nearby.alert=true;nearby.alertPosition=player.position.clone()}}
 const origin=camera.position.clone();const ndc=new THREE.Vector2(0,0);const ray=new THREE.Raycaster();ray.setFromCamera(ndc,camera);const dir=ray.ray.direction.clone();const start=player.position.clone().add(new THREE.Vector3(0,1.45,0));spawnEffect(start.clone().add(dir.clone().multiplyScalar(1.1)),0xffd58b,.055,.045);if(weapon!=='launcher'){const casing=new THREE.Mesh(new THREE.CylinderGeometry(.018,.018,.06,6),gearMetal);casing.position.copy(start).add(new THREE.Vector3(.28,.1,.04));casing.rotation.x=Math.PI/2;scene.add(casing);const cv=new THREE.Vector3(2.5+Math.random()*1.5,1.8+Math.random(),(Math.random()-.5)*1.2).applyAxisAngle(new THREE.Vector3(0,1,0),yaw);projectiles.push({mesh:casing,velocity:cv,life:.7,kind:'casing'})}
-const targets=[];for(const e of enemies)if(e.alive){e.mesh.traverse(part=>{if(!part.isMesh)return;part.userData.enemyRoot=e.mesh;part.userData.hitZone=part===e.mesh.userData.head?'head':part===e.mesh.userData.body?'torso':e.mesh.userData.legs.some(leg=>part.parent===leg)?'legs':'armor';targets.push(part)})}for(const d of destructibles)if(d.alive&&!gulagActive)targets.push(d.mesh);const effectiveRange=weaponData[weapon].range*(redDotEquipped?1.2:1);const rawHit=new THREE.Raycaster(origin,dir,0,effectiveRange).intersectObjects(targets,false)[0];const solidDistance=solidIntersectionDistance(origin,origin.clone().addScaledVector(dir,effectiveRange),.025);const hit=rawHit&&solidDistance+.13<rawHit.distance?null:rawHit;let impact=origin.clone().add(dir.clone().multiplyScalar(hit?hit.distance:Math.min(effectiveRange,solidDistance)));if(hit){impact.copy(hit.point);const target=enemies.find(e=>e.alive&&e.mesh===hit.object.userData.enemyRoot);if(target){
+const targets=[];for(const e of enemies)if(e.alive){e.mesh.traverse(part=>{if(!part.isMesh)return;part.userData.enemyRoot=e.mesh;part.userData.hitZone=part.userData.hitZone||(part===e.mesh.userData.head?'head':part===e.mesh.userData.body?'torso':e.mesh.userData.legs.some(leg=>part.parent===leg)?'legs':'armor');targets.push(part)})}for(const d of destructibles)if(d.alive&&!gulagActive)targets.push(d.mesh);const effectiveRange=weaponData[weapon].range*(redDotEquipped?1.2:1);const rawHit=new THREE.Raycaster(origin,dir,0,effectiveRange).intersectObjects(targets,false)[0];const solidDistance=solidIntersectionDistance(origin,origin.clone().addScaledVector(dir,effectiveRange),.025);const hit=rawHit&&solidDistance+.13<rawHit.distance?null:rawHit;let impact=origin.clone().add(dir.clone().multiplyScalar(hit?hit.distance:Math.min(effectiveRange,solidDistance)));if(hit){impact.copy(hit.point);const target=enemies.find(e=>e.alive&&e.mesh===hit.object.userData.enemyRoot);if(target){
  target.alert=true;target.alertPosition=null;target.seekingCoverUntil=missionElapsed+4;
  const localHit=target.mesh.worldToLocal(hit.point.clone());let hitZone=hit.object.userData.hitZone||'torso';if(hitZone==='armor'&&localHit.y>1.78&&Math.abs(localHit.x)<.38)hitZone='head';else if(hitZone==='armor'&&localHit.y<.74)hitZone='legs';else if(hitZone==='armor'&&localHit.y>.72&&localHit.y<1.72&&Math.abs(localHit.x)>.42)hitZone='arms';
  const isHeadshot=hitZone==='head';const damageMultiplier=isHeadshot?2.5:hitZone==='legs'?.65:hitZone==='arms'?.8:hitZone==='armor'?.78:1;
@@ -734,7 +748,7 @@ const targets=[];for(const e of enemies)if(e.alive){e.mesh.traverse(part=>{if(!p
  }else{const prop=destructibles.find(d=>d.alive&&d.mesh===hit.object);if(prop){if(prop.type==='crate'){prop.hp=(prop.hp??3)-1;spawnEffect(impact,0xffc36b,.12,.13);if(prop.hp<=0){destroyProp(prop,false);say('COBERTURA DESTRUIDA — NOVA LINHA DE TIRO');refreshMissionHUD()}else say('CAIXA DANIFICADA ('+prop.hp+' impactos restantes)')}else{destroyProp(prop,true);detonate(prop.mesh.position.clone().add(new THREE.Vector3(0,.7,0)));say(prop.type==='vehicle'?'VEÍCULO DESTRUÍDO':'BARRIL EXPLOSIVO DETONADO');refreshMissionHUD()}}else spawnEffect(impact,0xffa24d,.15,.2)}}
 // Brief tracer to make shots readable.
 const tracer=new THREE.Mesh(new THREE.CylinderGeometry(.025,.025,Math.min(impact.distanceTo(start),effectiveRange),5),new THREE.MeshBasicMaterial({color:0xffd18a,transparent:true,opacity:.65}));tracer.position.copy(start).add(impact).multiplyScalar(.5);tracer.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),impact.clone().sub(start).normalize());scene.add(tracer);effects.push({mesh:tracer,life:.055})}
-function canSee(from,to){const origin=from.clone().add(new THREE.Vector3(0,1.4,0)),delta=to.clone().add(new THREE.Vector3(0,1,0)).sub(origin),distance=delta.length();const ray=new THREE.Raycaster(origin,delta.normalize(),0,distance);const visibleThroughAncestors=o=>{let n=o;while(n&&n!==scene){if(!n.visible)return false;n=n.parent}return true};return !ray.intersectObjects(scene.children,true).some(h=>visibleThroughAncestors(h.object)&&h.object!==floor&&h.object!==grid&&h.object!==player&&h.object.parent!==player&&h.distance>1.2&&h.distance<distance-.4&&h.object.material!==undefined&&h.object.material!==yellow)}
+function canSee(from,to){const origin=from.clone().add(new THREE.Vector3(0,1.4,0)),delta=to.clone().add(new THREE.Vector3(0,1,0)).sub(origin),distance=delta.length();const ray=new THREE.Raycaster(origin,delta.normalize(),0,distance);const visibleThroughAncestors=o=>{let n=o;while(n&&n!==scene){if(!n.visible)return false;n=n.parent}return true};return !ray.intersectObjects(scene.children,true).some(h=>!h.object.userData.ignoreSightRay&&visibleThroughAncestors(h.object)&&h.object!==floor&&h.object!==grid&&h.object!==player&&h.object.parent!==player&&h.distance>1.2&&h.distance<distance-.4&&h.object.material!==undefined&&h.object.material!==yellow)}
 function actorCollisionPenalty(x,z,r){
  const blockList=gulagActive?gulagCollision:obstacles;let total=0;
  for(const o of blockList){
