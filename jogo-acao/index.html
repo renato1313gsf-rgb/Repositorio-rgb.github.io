@@ -1769,7 +1769,7 @@ if(realMenu){
     if(which==='campaigns'){
       heading='SELECIONAR CAMPANHA';
       html='<p style="color:#b9c9d5;line-height:1.6">Duas operações independentes. Cada uma tem seis missões e save separado.</p>'+
-        btn('CAMPANHA 01 · OPERAÇÃO RUPTURA<br><span style="font-weight:500;color:#b9c9d5;font-size:12px">Comece na Base da Pedreira; depois avance ao porto, complexo noturno, fortaleza e prisão.</span>','campaign','data-campaign="1"')+
+        btn('CAMPANHA 01 · OPERAÇÃO RUPTURA<br><span style="font-weight:500;color:#b9c9d5;font-size:12px">Comece na Zona Industrial; depois avance à Base da Pedreira, ao porto, complexo noturno, fortaleza e prisão.</span>','campaign','data-campaign="1"')+
         btn('CAMPANHA 02 · OPERAÇÃO NOITE ZERO<br><span style="font-weight:500;color:#b9c9d5;font-size:12px">Comboio fantasma, recuperação de dados, sabotagem de rádio, comandante e extração no blacksite.</span>','campaign','data-campaign="2"');
     }else if(which==='missions'){
       heading='MISSÕES DA CAMPANHA '+String(api&&api.getCampaign?api.getCampaign():1).padStart(2,'0');
@@ -1781,6 +1781,7 @@ if(realMenu){
         ['5','COMANDANTE VÉSPERA','Elimine o comandante'],
         ['6','BLACKSITE: EXTRAÇÃO ZERO','Resgate a Dra. Vega e extraia']
       ]:[
+        ['1','ZONA INDUSTRIAL','Retome a estação de comunicações e alcance a extração'],
         ['2','BASE DA PEDREIRA','Destrua o jipe e o tanque'],
         ['3','PORTO SOB CERCO','Recupere inteligência'],
         ['4','COMPLEXO NOTURNO','Desative três transmissores'],
