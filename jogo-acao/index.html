@@ -458,7 +458,10 @@ for(const spec of missionMapSpecs){
  if(spec.key==='c2-1'){
   // A primeira missão da Campanha 02 é deliberadamente enorme: 20x largura e comprimento.
   const map=missionMapRegistry[spec.key],sx=20,sz=20;
+  // Escala visual e colisão alinhadas; as paredes do perímetro não bloqueiam o jogador
+  // por uma caixa de colisão gigantesca que pode parecer invisível.
   map.group.scale.set(sx,1,sz);
+  map.collision=map.collision.filter(c=>!(Math.abs(c.x)>=44||Math.abs(c.z)>=45));
   for(const c of map.collision){c.x*=sx;c.z*=sz;c.hx*=sx;c.hz*=sz}
   map.spawns=spec.spawns.map(([x,z])=>[x*sx,z*sz]);
  }
@@ -502,7 +505,8 @@ function setMissionMap(){
   if(d.extras)d.extras.forEach(o=>{o.visible=show;if(show&&!o.parent)scene.add(o)});
   if(show&&d.campaign2Obstacle&&!missionMapCollision.includes(d.campaign2Obstacle))missionMapCollision.push(d.campaign2Obstacle);
  }
- floor.visible=true;grid.visible=false;floor.material.color.setHex(activeMissionMap.groundColor);rainPoints.visible=campaignNumber===2;
+ // Não renderizar o chão global por baixo do terreno próprio do mapa: evita cintilação/z-fighting.
+ floor.visible=false;grid.visible=false;floor.material.color.setHex(activeMissionMap.groundColor);rainPoints.visible=campaignNumber===2;
  extraction.visible=true;extraction.position.set(0,.06,campaign2Active?42:-40);
  const fog=new THREE.Color(activeMissionMap.fogColor);scene.fog.color.copy(fog);scene.background.copy(fog);scene.fog.near=15;scene.fog.far=88;
  if(vehicle)vehicle.visible=false;intelMarker.visible=missionStage===3&&!intelRecovered;relayMarkers.forEach((m,i)=>m.visible=missionStage===4&&!relaysDisabled[i]);optionalMarker.visible=!optionalObjectiveFound;
