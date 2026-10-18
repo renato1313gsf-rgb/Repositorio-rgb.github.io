@@ -549,7 +549,7 @@ function refreshMissionHUD(){
    missionStage===4&&relaysDisabled.some(v=>!v)?'OBJETIVO: aproxime-se dos transmissores amarelos e pressione E para desativá-los. '+spec.detail:
    missionStage===6?missionProgressText():
    ready?'Vá ao círculo amarelo e pressione E para concluir a extração.':spec.detail;
- $('#status').textContent=ready?'EXTRAÇÃO LIBERADA':'OBJETIVOS EM ANDAMENTO';
+ $('#status').textContent=ready?'EXTRAÇÃO LIBERADA':'OBJETIVOS EM ANDAMENTO';if(typeof optionalMarker!=='undefined'&&optionalMarker.visible&&!optionalObjectiveFound)$('#hint').textContent+=' OBJETIVO OPCIONAL: marcador verde; pressione E para recolher suprimentos.';
  if(typeof intelMarker!=='undefined')intelMarker.visible=missionStage===3&&!intelRecovered;
  if(typeof relayMarkers!=='undefined')relayMarkers.forEach((m,i)=>{m.visible=missionStage===4&&!relaysDisabled[i]});
  if(typeof optionalMarker!=='undefined')optionalMarker.visible=!optionalObjectiveFound;
@@ -567,10 +567,10 @@ gulagShieldTaken=!!(saved&&saved.missionStage===6&&saved.gulagShieldTaken);
 prisonerRescued=!!(saved&&saved.missionStage===6&&saved.prisonerRescued);
 if(missionStage===6){player.position.set(-4.3,0,-41.5);yaw=Math.PI;}
 const optionalSpots={1:[-5,-31],2:[-27,12],3:[-5,-34],4:[8,32],5:[0,30],6:[14,21]};optionalMarker.position.set(...optionalSpots[missionStage]);optionalMarker.visible=!optionalObjectiveFound;
-companion=soldier(false,'rifle');companion.position.copy(player.position).add(new THREE.Vector3(1.6,0,1.4));companion.rotation.y=yaw;scene.add(companion);
+companion=soldier(false,'rifle');const buddyForward=new THREE.Vector3(-Math.sin(yaw),0,-Math.cos(yaw)),buddyRight=new THREE.Vector3(Math.cos(yaw),0,-Math.sin(yaw));companion.position.copy(player.position).addScaledVector(buddyForward,-2.6).addScaledVector(buddyRight,-1.4);companion.rotation.y=yaw;scene.add(companion);
 intelRecovered=!!(saved&&saved.missionStage===missionStage&&saved.intelRecovered);
 relaysDisabled=saved&&saved.missionStage===missionStage&&Array.isArray(saved.relaysDisabled)?[0,1,2].map(i=>!!saved.relaysDisabled[i]):[false,false,false];
-const savedDestructibles=saved&&saved.missionStage===missionStage&&Array.isArray(saved.destructibleStatus)?saved.destructibleStatus:null;
+const savedDestructibles=saved&&saved.missionStage===missionStage&&Array.isArray(saved.destructibleStatus)&&saved.destructibleStatus.length===destructibles.length?saved.destructibleStatus:null;
 destructibles.forEach((d,i)=>{d.alive=savedDestructibles?savedDestructibles[i]!==false:true;if(d.alive){scene.add(d.mesh);if(d.obstacle&&!obstacles.includes(d.obstacle))obstacles.push(d.obstacle)}else scene.remove(d.mesh)});
 campaignComplete=false;
 const floorPalette={1:0x535e61,2:0x716653,3:0x4a6670,4:0x292f3c,5:0x594d50,6:0x343b42};floor.material.color.setHex(floorPalette[Math.min(missionStage,6)]||0x535e61);dayClock=missionStage===4?150:missionStage===5?220:missionStage===6?280:missionStage*24;
@@ -592,12 +592,12 @@ function finish(win,reportStage=missionStage){
 }
 function completeCurrentMission(){
  const completedStage=missionStage;
- const previous={stage:missionStage,kills,intelRecovered,relays:[...relaysDisabled],destructibles:destructibles.map(d=>d.alive),pos:player.position.toArray()};
+ const previous={stage:missionStage,kills,intelRecovered,relays:[...relaysDisabled],destructibles:destructibles.map(d=>d.alive),pos:player.position.toArray(),optionalObjectiveFound,headshots,bodyHits,armHits,legHits,alarmsRaised,missionElapsed,shots,hits};
  if(completedStage<6){
-   missionStage=completedStage+1;kills=0;intelRecovered=false;relaysDisabled=[false,false,false];
+   missionStage=completedStage+1;kills=0;intelRecovered=false;relaysDisabled=[false,false,false];optionalObjectiveFound=false;headshots=0;bodyHits=0;armHits=0;legHits=0;alarmsRaised=0;missionElapsed=0;shots=0;hits=0;extractionStarted=false;extractionTimer=0;
    destructibles.forEach(d=>{d.alive=true;scene.add(d.mesh)});
    player.position.set(0,0,5);saveGame();
-   missionStage=previous.stage;kills=previous.kills;intelRecovered=previous.intelRecovered;relaysDisabled=previous.relays;
+   missionStage=previous.stage;kills=previous.kills;intelRecovered=previous.intelRecovered;relaysDisabled=previous.relays;optionalObjectiveFound=previous.optionalObjectiveFound;headshots=previous.headshots;bodyHits=previous.bodyHits;armHits=previous.armHits;legHits=previous.legHits;alarmsRaised=previous.alarmsRaised;missionElapsed=previous.missionElapsed;shots=previous.shots;hits=previous.hits;
    destructibles.forEach((d,i)=>{d.alive=previous.destructibles[i];if(d.alive)scene.add(d.mesh);else scene.remove(d.mesh)});
    player.position.fromArray(previous.pos);campaignComplete=false;
  }else{
