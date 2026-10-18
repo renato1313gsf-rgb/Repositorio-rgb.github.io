@@ -68,7 +68,15 @@ $('#continueBtn').addEventListener('click',()=>{closeSub();const m=$('#start .mo
 const renderer=new THREE.WebGLRenderer({canvas,antialias:true, powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio,1.6));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.12;window.__bootStage='WebGL criado; construindo cenário 3D';
 const scene=new THREE.Scene();scene.background=new THREE.Color(0x778896);scene.fog=new THREE.Fog(0x778896,35,100);
 const camera=new THREE.PerspectiveCamera(68,innerWidth/innerHeight,.1,180);
-const firstPersonRig=new THREE.Group();camera.add(firstPersonRig);
+// A arma e os braços usam uma cena de sobreposição própria para nunca sumirem atrás
+// do cenário ou serem cortados por objetos da prisão.
+const firstPersonScene=new THREE.Scene();
+const firstPersonCamera=new THREE.PerspectiveCamera(68,innerWidth/innerHeight,.01,20);
+const firstPersonRig=new THREE.Group();
+firstPersonScene.add(firstPersonCamera,firstPersonRig);
+firstPersonScene.add(new THREE.HemisphereLight(0xffffff,0x68717b,2.0));
+const firstPersonLight=new THREE.DirectionalLight(0xffffff,2.2);
+firstPersonLight.position.set(-1,2,3);firstPersonScene.add(firstPersonLight);
 scene.add(camera);
 scene.add(new THREE.HemisphereLight(0xc8e0ff,0x252b31,1.8));const rainGeo=new THREE.BufferGeometry();const rainArr=new Float32Array(700*3);for(let i=0;i<700;i++){rainArr[i*3]=(Math.random()-.5)*70;rainArr[i*3+1]=Math.random()*45;rainArr[i*3+2]=(Math.random()-.5)*70}rainGeo.setAttribute('position',new THREE.BufferAttribute(rainArr,3));const rainPoints=new THREE.Points(rainGeo,new THREE.PointsMaterial({color:0xb7d7eb,size:.055,transparent:true,opacity:.5}));rainPoints.visible=false;scene.add(rainPoints);
 const sun=new THREE.DirectionalLight(0xffe2c0,2.5);sun.position.set(-20,35,18);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.left=-55;sun.shadow.camera.right=55;sun.shadow.camera.top=55;sun.shadow.camera.bottom=-55;scene.add(sun);
@@ -753,9 +761,15 @@ $('#subContent').addEventListener('input',e=>{if(e.target.id==='sens')$('#sensVa
 $('#subContent').addEventListener('click',e=>{const missionButton=e.target.closest('[data-mission-stage]');if(missionButton){const stage=Number(missionButton.dataset.missionStage);closeSub();reset(false,stage);say('MISSÃO '+stage+' INICIADA');return}if(e.target.id==='saveSettings'){mouseSensitivity=Number($('#sens').value);volumeLevel=Number($('#vol').value);graphicsLevel=$('#gfx').value;const previousDifficulty=enemyDifficulty;enemyDifficulty=$('#enemyDifficulty').value;const speedRatio=enemyDifficultyData[enemyDifficulty].speed/enemyDifficultyData[previousDifficulty].speed;for(const enemy of enemies)enemy.speed*=speedRatio;renderer.setPixelRatio(Math.min(devicePixelRatio,graphicsLevel==='low'?.8:graphicsLevel==='medium'?1.15:1.6));renderer.shadowMap.enabled=graphicsLevel==='high';rainEnabled=graphicsLevel==='high';rainPoints.visible=rainEnabled;try{localStorage.setItem('operacaoRupturaSettings',JSON.stringify({mouseSensitivity,volumeLevel,graphicsLevel,enemyDifficulty}))}catch{}closeSub();say('CONFIGURAÇÕES SALVAS')}if(e.target.id==='armorUpgrade'){if(armorUpgrade<3){armorUpgrade++;armor=Math.min(100,armor+10);saveGame();$('#inventoryBtn').click();say('COLETE MELHORADO')}else say('COLETE JÁ ESTÁ NO NÍVEL MÁXIMO')}if(e.target.id==='helmetToggle'){helmetEquipped=!helmetEquipped;$('#inventoryBtn').click()}if(e.target.id==='medkitRefill'){medkits=Math.min(6,medkits+2);saveGame();say('KITS MÉDICOS REABASTECIDOS');$('#inventoryBtn').click()}if(e.target.id==='saveNow'){saveGame();say('CAMPANHA SALVA');$('#saveManagerBtn').click()}if(e.target.id==='loadNow'){if(loadSave()){closeSub();reset(true);say('CAMPANHA CARREGADA')}}if(e.target.id==='deleteSave'){if(confirm('Apagar permanentemente o progresso salvo?')){localStorage.removeItem('operacaoRupturaSave');$('#saveManagerBtn').click();say('SAVE APAGADO')}}});
 try{const cfg=JSON.parse(localStorage.getItem('operacaoRupturaSettings')||'null');if(cfg){mouseSensitivity=cfg.mouseSensitivity??mouseSensitivity;volumeLevel=cfg.volumeLevel??volumeLevel;graphicsLevel=cfg.graphicsLevel??graphicsLevel;enemyDifficulty=cfg.enemyDifficulty&&enemyDifficultyData[cfg.enemyDifficulty]?cfg.enemyDifficulty:enemyDifficulty;suppressorEquipped=cfg.suppressorEquipped??suppressorEquipped;redDotEquipped=cfg.redDotEquipped??redDotEquipped;extendedMagEquipped=cfg.extendedMagEquipped??extendedMagEquipped;renderer.setPixelRatio(Math.min(devicePixelRatio,graphicsLevel==='low'?.8:graphicsLevel==='medium'?1.15:1.6));renderer.shadowMap.enabled=graphicsLevel==='high';rainEnabled=graphicsLevel==='high';rainPoints.visible=rainEnabled}}catch{}
 window.__bootStage='Menus registrados; iniciando a primeira renderização';
-function frame(){requestAnimationFrame(frame);const dt=Math.min(clock.getDelta(),.04);update(dt);renderer.render(scene,camera)}frame();
+function frame(){requestAnimationFrame(frame);const dt=Math.min(clock.getDelta(),.04);update(dt);renderer.render(scene,camera);
+ if(firstPersonRig.visible&&missionStage===6&&!driving&&running&&!ended){
+  const autoClear=renderer.autoClear;renderer.autoClear=false;
+  renderer.clearDepth();renderer.render(firstPersonScene,firstPersonCamera);
+  renderer.autoClear=autoClear;
+ }
+}frame();
 window.__bootStage='Jogo inicializado; aguardando JOGAR';
-addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,1.6))});
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();firstPersonCamera.aspect=innerWidth/innerHeight;firstPersonCamera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,1.6))});
 /* Só troca para o menu normal depois de confirmar a inicialização completa. */
 window.__gameReady=true;
 const realMenu=document.getElementById('start');
