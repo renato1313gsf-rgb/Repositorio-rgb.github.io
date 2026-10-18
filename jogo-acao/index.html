@@ -504,6 +504,57 @@ function buildMissionMap(spec){
  const wetMat=new THREE.MeshStandardMaterial({color:0x26353b,roughness:.22,metalness:.08,transparent:true,opacity:.34,depthWrite:false});
  const chipMat=new THREE.MeshStandardMaterial({color:0x2b3032,roughness:.96});
  const wornPaint=new THREE.MeshStandardMaterial({color:0xb5a06c,roughness:.94,transparent:true,opacity:.48,depthWrite:false});
+ // DETALHES DE CENÁRIO MAIS VISÍVEIS: infraestrutura industrial, não apenas correção de cor.
+ // Canaletas metálicas no piso e faixas de segurança gastas ajudam a dar escala ao espaço.
+ const drainMat=new THREE.MeshStandardMaterial({color:0x242b2e,roughness:.72,metalness:.48});
+ const stripeMat=new THREE.MeshStandardMaterial({color:0xb28a3c,roughness:.9,metalness:0});
+ for(const z of [-30,-10,10,30]){
+  const drain=new THREE.Mesh(new THREE.BoxGeometry(5,.075,.24),drainMat);
+  drain.position.set((z%20===10)?-27:27,.07,z);drain.castShadow=true;drain.receiveShadow=true;group.add(drain);
+  for(let k=-2;k<=2;k++){
+   const slot=new THREE.Mesh(new THREE.BoxGeometry(.045,.012,.18),black);
+   slot.position.set(drain.position.x+k*.82,.113,z);group.add(slot);
+  }
+ }
+ for(const [x,z,rot] of [[-34,-20,0],[34,20,0],[-20,34,Math.PI/2],[20,-34,Math.PI/2]]){
+  for(let k=0;k<5;k++){
+   const stripe=new THREE.Mesh(new THREE.BoxGeometry(1.05,.025,.16),stripeMat);
+   stripe.position.set(x+Math.cos(rot)*k*1.45,.066,z+Math.sin(rot)*k*1.45);
+   stripe.rotation.y=rot;group.add(stripe);
+  }
+ }
+ // Pórticos, suportes e tubos aparentes nas zonas periféricas.
+ const pipeMat=new THREE.MeshStandardMaterial({color:0x39464b,roughness:.48,metalness:.72});
+ const rustMat=new THREE.MeshStandardMaterial({color:0x65463a,roughness:.88,metalness:.18});
+ for(const [x,z,axis] of [[-39,-12,'z'],[39,12,'z'],[-12,-39,'x'],[12,39,'x']]){
+  const horizontal=new THREE.Mesh(new THREE.CylinderGeometry(.12,.12,18,10),pipeMat);
+  horizontal.rotation.z=axis==='z'?Math.PI/2:0;
+  if(axis==='x')horizontal.rotation.z=Math.PI/2;
+  horizontal.rotation.x=axis==='z'?Math.PI/2:0;
+  horizontal.position.set(x,3.2,z);horizontal.castShadow=true;horizontal.receiveShadow=true;group.add(horizontal);
+  for(const offset of [-7,0,7]){
+   const support=new THREE.Mesh(new THREE.BoxGeometry(.16,3.1,.16),rustMat);
+   support.position.set(axis==='z'?x+offset:x,1.55,axis==='z'?z:z+offset);
+   support.castShadow=true;group.add(support);
+   const foot=new THREE.Mesh(new THREE.BoxGeometry(.6,.12,.6),drainMat);
+   foot.position.set(support.position.x,.08,support.position.z);foot.castShadow=true;group.add(foot);
+  }
+ }
+ // Entulho com silhueta maior e irregular, distribuído nas bordas para não bloquear rotas.
+ const rubbleMat=new THREE.MeshStandardMaterial({color:0x565653,roughness:.98});
+ for(const [x,z,sc,rot] of [[-36,-31,1.0,.2],[36,-29,.8,1.1],[-35,27,.9,.7],[34,30,1.1,2.2],[-25,38,.65,.4],[26,-38,.75,1.6],[-40,11,.7,2.1],[40,-8,.8,.8]]){
+  const chunk=new THREE.Mesh(new THREE.DodecahedronGeometry(sc,0),rubbleMat);
+  chunk.scale.set(1.25,.48,.8);chunk.position.set(x,sc*.22,z);chunk.rotation.set(rot,rot*1.4,rot*.6);chunk.castShadow=true;chunk.receiveShadow=true;group.add(chunk);
+ }
+ // Luminárias de segurança com carcaça, suporte e luz localizada.
+ const lampHousing=new THREE.MeshStandardMaterial({color:0x20272b,roughness:.55,metalness:.5});
+ for(const [x,z] of [[-40,-24],[40,-24],[-40,24],[40,24],[-24,-40],[24,40]]){
+  const post=new THREE.Mesh(new THREE.BoxGeometry(.13,2.8,.13),pipeMat);post.position.set(x,1.4,z);post.castShadow=true;group.add(post);
+  const hood=new THREE.Mesh(new THREE.BoxGeometry(.65,.18,.38),lampHousing);hood.position.set(x,2.82,z);hood.castShadow=true;group.add(hood);
+  const bulb=new THREE.Mesh(new THREE.BoxGeometry(.42,.035,.23),new THREE.MeshBasicMaterial({color:0xffd39a}));
+  bulb.position.set(x,2.71,z);group.add(bulb);
+  const lamp=new THREE.PointLight(0xffbd7a,1.2,7,2);lamp.position.set(x,2.55,z);group.add(lamp);
+ }
  // Lajes/juntas quebram a aparência de uma placa lisa sem introduzir colisões novas.
  for(let z=-40;z<=40;z+=8){
   const seam=new THREE.Mesh(new THREE.PlaneGeometry(88,.035),grimeMat);
