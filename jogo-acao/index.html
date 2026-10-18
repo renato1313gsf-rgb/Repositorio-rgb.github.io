@@ -658,7 +658,7 @@ const hearingRadius=suppressedShot?10:(weapon==='pistol'?30:42);
 for(const nearby of enemies){if(nearby.alive&&nearby.mesh.position.distanceTo(player.position)<=hearingRadius){nearby.alert=true;nearby.alertPosition=player.position.clone()}}
 const origin=camera.position.clone();const ndc=new THREE.Vector2(0,0);const ray=new THREE.Raycaster();ray.setFromCamera(ndc,camera);const dir=ray.ray.direction.clone();const start=player.position.clone().add(new THREE.Vector3(0,1.45,0));spawnEffect(start.clone().add(dir.clone().multiplyScalar(1.1)),0xffd58b,.055,.045);if(weapon!=='launcher'){const casing=new THREE.Mesh(new THREE.CylinderGeometry(.018,.018,.06,6),gearMetal);casing.position.copy(start).add(new THREE.Vector3(.28,.1,.04));casing.rotation.x=Math.PI/2;scene.add(casing);const cv=new THREE.Vector3(2.5+Math.random()*1.5,1.8+Math.random(),(Math.random()-.5)*1.2).applyAxisAngle(new THREE.Vector3(0,1,0),yaw);projectiles.push({mesh:casing,velocity:cv,life:.7,kind:'casing'})}
 const targets=[];for(const e of enemies)if(e.alive){e.mesh.traverse(part=>{if(!part.isMesh)return;part.userData.enemyRoot=e.mesh;part.userData.hitZone=part===e.mesh.userData.head?'head':part===e.mesh.userData.body?'torso':e.mesh.userData.legs.some(leg=>part.parent===leg)?'legs':'armor';targets.push(part)})}for(const d of destructibles)if(d.alive&&!gulagActive)targets.push(d.mesh);const effectiveRange=weaponData[weapon].range*(redDotEquipped?1.2:1);const hit=new THREE.Raycaster(origin,dir,0,effectiveRange).intersectObjects(targets,false)[0];let impact=origin.clone().add(dir.clone().multiplyScalar(effectiveRange));if(hit){impact.copy(hit.point);const target=enemies.find(e=>e.alive&&e.mesh===hit.object.userData.enemyRoot);if(target){
- target.alert=true;target.alertPosition=null;
+ target.alert=true;target.alertPosition=null;target.seekingCoverUntil=missionElapsed+4;
  const localHit=target.mesh.worldToLocal(hit.point.clone());let hitZone=hit.object.userData.hitZone||'torso';if(hitZone==='armor'&&localHit.y>1.78&&Math.abs(localHit.x)<.38)hitZone='head';else if(hitZone==='armor'&&localHit.y<.74)hitZone='legs';else if(hitZone==='armor'&&localHit.y>.72&&localHit.y<1.72&&Math.abs(localHit.x)>.42)hitZone='arms';
  const isHeadshot=hitZone==='head';const damageMultiplier=isHeadshot?2.5:hitZone==='legs'?.65:hitZone==='arms'?.8:hitZone==='armor'?.78:1;
  target.hp-=weaponData[weapon].damage*damageMultiplier;hits++;if(isHeadshot)headshots++;else if(hitZone==='legs'){legHits++;target.injuredLegUntil=missionElapsed+7}else if(hitZone==='arms'){armHits++;target.injuredArmUntil=missionElapsed+7}else bodyHits++;
@@ -772,7 +772,11 @@ for(const e of enemies){
  if(e.alert&&visible&&playerDist<profile.detect+5)e.alertPosition=null;
  const moveTarget=e.alertPosition||player.position;
  const to=moveTarget.clone().sub(p),dist=to.length();
- if(e.type==='cover'&&e.alert&&!e.alertPosition&&dist>profile.min+3){const lateral=new THREE.Vector3(-playerDelta.z,0,playerDelta.x).normalize().multiplyScalar(e.strafe*4);to.add(lateral)}
+ if(e.seekingCoverUntil>missionElapsed){
+  const coverList=gulagActive?gulagCollision:obstacles;let chosenCover=null,bestCover=Infinity;
+  for(const cover of coverList){const dx=cover.x-p.x,dz=cover.z-p.z,d=Math.hypot(dx,dz);if(d<.8||d>12)continue;const score=d+Math.hypot(player.position.x-cover.x,player.position.z-cover.z)*.08;if(score<bestCover){bestCover=score;chosenCover=cover}}
+  if(chosenCover){const away=new THREE.Vector3(p.x-chosenCover.x,0,p.z-chosenCover.z).normalize();const hideX=chosenCover.x+away.x*(Math.max(chosenCover.hx,chosenCover.hz)+.65),hideZ=chosenCover.z+away.z*(Math.max(chosenCover.hx,chosenCover.hz)+.65);to.set(hideX-p.x,0,hideZ-p.z)}
+ }else if(e.type==='cover'&&e.alert&&!e.alertPosition&&dist>profile.min+3){const lateral=new THREE.Vector3(-playerDelta.z,0,playerDelta.x).normalize().multiplyScalar(e.strafe*4);to.add(lateral)}
  e.mesh.rotation.y=Math.atan2(-playerDelta.x,-playerDelta.z);
  e.attack-=dt;
  // Guardas distantes patrulham em vez de rastrear a posição do jogador pelo mapa inteiro.
