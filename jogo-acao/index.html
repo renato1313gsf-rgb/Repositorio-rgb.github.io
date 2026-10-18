@@ -355,30 +355,125 @@ function soldier(isEnemy=false,role='rifle'){
  g.userData={legs,body,gun:weaponAssembly,weaponAssembly,isEnemy,head,helmet,pack,gear,headset:headRig,headDetails,arms,neck,equipment,role,eyes};
  return g;
 }
-// Arma e braços em primeira pessoa, usados exclusivamente na missão final.
+// Modelos de primeira pessoa: braços e cada tipo de arma têm modelos próprios.
+const firstPersonWeaponModels=Object.create(null);
+const firstPersonArmModels=Object.create(null);
 function buildFirstPersonView(){
- const add=(geometry,material,position,rotation=[0,0,0])=>{
+ const part=(group,geometry,material,position,rotation=[0,0,0])=>{
   const mesh=new THREE.Mesh(geometry,material);
   mesh.position.set(...position);mesh.rotation.set(...rotation);
-  mesh.castShadow=false;mesh.receiveShadow=false;firstPersonRig.add(mesh);return mesh;
+  mesh.castShadow=false;mesh.receiveShadow=false;group.add(mesh);return mesh;
  };
- // Braços avançados segurando o fuzil; o corpo do soldado fica fora da câmera.
- add(new THREE.CapsuleGeometry(.145,.55,3,7),allyCloth,[-.34,-.42,-.66],[-.96,0,-.28]);
- add(new THREE.CapsuleGeometry(.145,.55,3,7),allyCloth,[.39,-.43,-.51],[-.94,0,.34]);
- add(new THREE.BoxGeometry(.23,.075,.22),gearFabric,[-.05,-.31,-.91],[.08,0,-.12]);
- add(new THREE.BoxGeometry(.22,.075,.22),gearFabric,[.38,-.32,-.54],[.08,0,.1]);
- add(new THREE.SphereGeometry(.115,8,6),gearRubber,[-.02,-.29,-.93]);
- add(new THREE.SphereGeometry(.115,8,6),gearRubber,[.38,-.30,-.56]);
- // Fuzil de assalto em perspectiva, com coronha, carregador, óptica e cano.
- add(new THREE.BoxGeometry(.14,.14,.48),gearDark,[.28,-.255,-.70],[.02,0,0]);
- add(new THREE.BoxGeometry(.115,.12,.31),gearOlive,[.28,-.24,-.98]);
- add(new THREE.CylinderGeometry(.032,.038,.58,8),gearMetal,[.28,-.235,-1.28],[Math.PI/2,0,0]);
- add(new THREE.CylinderGeometry(.047,.047,.10,8),gearDark,[.28,-.235,-1.58],[Math.PI/2,0,0]);
- add(new THREE.BoxGeometry(.12,.12,.25),gearDark,[.28,-.245,-.43]);
- add(new THREE.BoxGeometry(.095,.24,.12),gearDark,[.28,-.38,-.72],[-.10,0,0]);
- add(new THREE.BoxGeometry(.105,.09,.16),gearMetal,[.28,-.155,-.69]);
- add(new THREE.BoxGeometry(.08,.05,.012),gearLens,[.28,-.15,-.775]);
- add(new THREE.BoxGeometry(.07,.13,.08),gearDark,[.28,-.34,-.98]);
+ const armSet=(name)=>{
+  const group=new THREE.Group();group.name='arms-'+name;firstPersonRig.add(group);
+  return group;
+ };
+ // Braços camuflados, luvas e punhos. A pose muda ao usar a pistola.
+ const rifleArms=armSet('rifle');
+ part(rifleArms,new THREE.CapsuleGeometry(.145,.55,3,7),allyCloth,[-.34,-.42,-.66],[-.96,0,-.28]);
+ part(rifleArms,new THREE.CapsuleGeometry(.145,.55,3,7),allyCloth,[.39,-.43,-.51],[-.94,0,.34]);
+ part(rifleArms,new THREE.BoxGeometry(.23,.075,.22),gearFabric,[-.05,-.31,-.91],[.08,0,-.12]);
+ part(rifleArms,new THREE.BoxGeometry(.22,.075,.22),gearFabric,[.38,-.32,-.54],[.08,0,.1]);
+ part(rifleArms,new THREE.SphereGeometry(.115,8,6),gearRubber,[-.02,-.29,-.93]);
+ part(rifleArms,new THREE.SphereGeometry(.115,8,6),gearRubber,[.38,-.30,-.56]);
+ const pistolArms=armSet('pistol');
+ part(pistolArms,new THREE.CapsuleGeometry(.14,.52,3,7),allyCloth,[.42,-.42,-.46],[-1.08,0,.34]);
+ part(pistolArms,new THREE.BoxGeometry(.22,.075,.22),gearFabric,[.36,-.32,-.59],[.08,0,.1]);
+ part(pistolArms,new THREE.SphereGeometry(.115,8,6),gearRubber,[.32,-.30,-.68]);
+ part(pistolArms,new THREE.CapsuleGeometry(.105,.39,3,7),allyCloth,[-.47,-.52,-.23],[-.30,0,-.74]);
+ part(pistolArms,new THREE.BoxGeometry(.2,.07,.18),gearFabric,[-.26,-.42,-.49],[.08,0,-.5]);
+ part(pistolArms,new THREE.SphereGeometry(.105,8,6),gearRubber,[-.16,-.39,-.56]);
+ firstPersonArmModels.rifle=rifleArms;
+ firstPersonArmModels.pistol=pistolArms;
+
+ const model=(name)=>{const group=new THREE.Group();group.name='weapon-'+name;firstPersonRig.add(group);firstPersonWeaponModels[name]=group;return group};
+ const box=(g,material,position,size,rotation=[0,0,0])=>part(g,new THREE.BoxGeometry(...size),material,position,rotation);
+ const tube=(g,material,position,length,radius,rotation=[Math.PI/2,0,0])=>part(g,new THREE.CylinderGeometry(radius,radius,length,10),material,position,rotation);
+ // 1 — Fuzil de assalto
+ {
+  const g=model('rifle');
+  box(g,gearDark,[.25,-.275,-.70],[.15,.14,.43]);
+  box(g,gearOlive,[.25,-.265,-.98],[.12,.12,.30]);
+  tube(g,gearMetal,[.25,-.25,-1.25],.42,.034);
+  tube(g,gearDark,[.25,-.25,-1.48],.09,.047);
+  box(g,gearDark,[.25,-.275,-.42],[.12,.12,.26]);
+  box(g,gearDark,[.25,-.40,-.72],[.095,.23,.12],[-.10,0,0]);
+  box(g,gearMetal,[.25,-.16,-.72],[.11,.09,.16]);
+  box(g,gearLens,[.25,-.15,-.805],[.08,.05,.012]);
+  box(g,gearDark,[.25,-.34,-.98],[.07,.13,.08]);
+ }
+ // 2 — Pistola semiautomática, menor e mais compacta
+ {
+  const g=model('pistol');
+  box(g,gearDark,[.25,-.295,-.70],[.145,.115,.31]);
+  box(g,gearMetal,[.25,-.26,-.85],[.11,.055,.18]);
+  tube(g,gearDark,[.25,-.285,-.91],.19,.025);
+  tube(g,gearMetal,[.25,-.285,-1.015],.025,.031);
+  box(g,gearDark,[.25,-.405,-.62],[.105,.22,.125],[-.18,0,0]);
+  box(g,gearMetal,[.25,-.225,-.66],[.055,.025,.06]);
+  box(g,gearDark,[.25,-.22,-.78],[.055,.025,.06]);
+  box(g,gearRubber,[.25,-.475,-.61],[.11,.06,.11]);
+ }
+ // 3 — Escopeta com cano longo e tubo sob o cano
+ {
+  const g=model('shotgun');
+  box(g,gearDark,[.25,-.285,-.69],[.15,.14,.40]);
+  box(g,gearOlive,[.25,-.275,-.99],[.115,.105,.34]);
+  tube(g,gearMetal,[.25,-.25,-1.22],.53,.035);
+  tube(g,gearDark,[.25,-.25,-1.51],.085,.048);
+  tube(g,gearDark,[.25,-.335,-1.08],.47,.027);
+  box(g,gearDark,[.25,-.29,-.42],[.12,.12,.26]);
+  box(g,gearOlive,[.25,-.405,-.68],[.095,.22,.13],[-.10,0,0]);
+  box(g,gearMetal,[.25,-.18,-.74],[.055,.035,.10]);
+ }
+ // 4 — Rifle de precisão com cano estendido, luneta e bipé
+ {
+  const g=model('sniper');
+  box(g,gearDark,[.25,-.28,-.69],[.145,.14,.45]);
+  box(g,gearOlive,[.25,-.27,-.99],[.115,.11,.36]);
+  tube(g,gearMetal,[.25,-.245,-1.39],.78,.03);
+  tube(g,gearDark,[.25,-.245,-1.805],.09,.046);
+  box(g,gearDark,[.25,-.28,-.40],[.12,.12,.27]);
+  box(g,gearDark,[.25,-.40,-.69],[.095,.22,.12],[-.12,0,0]);
+  tube(g,gearMetal,[.25,-.15,-.75],.24,.046);
+  tube(g,gearDark,[.25,-.15,-.75],.29,.029);
+  box(g,gearLens,[.25,-.15,-.89],[.065,.065,.012]);
+  box(g,gearMetal,[.25,-.20,-1.04],[.045,.20,.05],[.16,0,0]);
+  box(g,gearMetal,[.32,-.20,-1.04],[.045,.20,.05],[.16,0,0]);
+ }
+ // 5 — Submetralhadora compacta, cano curto e carregador curvo estilizado
+ {
+  const g=model('smg');
+  box(g,gearDark,[.25,-.29,-.69],[.15,.14,.38]);
+  box(g,gearOlive,[.25,-.275,-.92],[.12,.12,.22]);
+  tube(g,gearMetal,[.25,-.26,-1.11],.30,.032);
+  tube(g,gearDark,[.25,-.26,-1.28],.075,.045);
+  box(g,gearDark,[.25,-.28,-.43],[.12,.11,.22]);
+  box(g,gearDark,[.25,-.40,-.69],[.10,.20,.13],[-.1,0,0]);
+  box(g,gearMetal,[.25,-.17,-.72],[.075,.07,.11]);
+  box(g,gearDark,[.25,-.34,-.94],[.07,.12,.08]);
+ }
+ // 6 — Lança-foguetes tubular, com anéis e alças próprias
+ {
+  const g=model('launcher');
+  tube(g,gearDark,[.24,-.265,-1.00],.91,.092);
+  tube(g,gearMetal,[.24,-.265,-.54],.07,.105);
+  tube(g,gearMetal,[.24,-.265,-1.46],.07,.108);
+  tube(g,gearRubber,[.24,-.265,-1.51],.055,.08);
+  box(g,gearDark,[.24,-.39,-.77],[.13,.18,.13],[-.12,0,0]);
+  box(g,gearOlive,[.24,-.16,-.77],[.17,.07,.17]);
+  box(g,gearMetal,[.24,-.105,-.77],[.07,.05,.08]);
+  box(g,gearDark,[.24,-.38,-1.16],[.14,.15,.18]);
+  box(g,gearOlive,[.24,-.25,-.45],[.18,.13,.24]);
+ }
+ for(const group of Object.values(firstPersonWeaponModels))group.visible=false;
+ pistolArms.visible=false;
+}
+function updateFirstPersonWeapon(){
+ if(typeof weapon==='undefined')return;
+ for(const [name,group] of Object.entries(firstPersonWeaponModels))group.visible=name===weapon;
+ firstPersonArmModels.rifle.visible=weapon!=='pistol';
+ firstPersonArmModels.pistol.visible=weapon==='pistol';
 }
 buildFirstPersonView();
 firstPersonRig.visible=false;
@@ -457,7 +552,7 @@ function refreshMissionHUD(){
  if(typeof pricePrisoner!=='undefined')pricePrisoner.visible=missionStage===6&&gulagPhase>=5&&!prisonerRescued;
 }
 function clearWorld(){for(const e of enemies)scene.remove(e.mesh);for(const p of projectiles)scene.remove(p.mesh);for(const e of effects)scene.remove(e.mesh);if(player)scene.remove(player);enemies=[];projectiles=[];effects=[]}
-function reset(fromSave=false,chosenStage=null){clearWorld();player=soldier(false);player.position.set(-40,0,-40);scene.add(player);health=100;armor=50+armorUpgrade*10;ammo=30;reserve=150;pistolAmmo=12;pistolReserve=48;smgAmmo=45;smgReserve=225;launcherAmmo=3;launcherReserve=12;shotgunAmmo=8;shotgunReserve=40;sniperAmmo=5;sniperReserve=25;grenades=2;medkits=2;stealthMode=false;alarmTriggered=false;kills=0;shots=0;hits=0;ended=false;reloading=false;weapon='rifle';yaw=-Math.PI*0.75;pitch=-.05;driving=false;createVehicle();const saved=fromSave?loadSave():null;if(!saved)missionStage=chosenStage||1;if(saved){missionStage=saved.missionStage||1;suppressorEquipped=saved.suppressorEquipped??suppressorEquipped;redDotEquipped=saved.redDotEquipped??redDotEquipped;extendedMagEquipped=saved.extendedMagEquipped??extendedMagEquipped;for(const k of ['health','armor','ammo','reserve','pistolAmmo','pistolReserve','smgAmmo','smgReserve','launcherAmmo','launcherReserve','shotgunAmmo','shotgunReserve','sniperAmmo','sniperReserve','grenades','medkits','kills','shots','hits','armorUpgrade','helmetEquipped'])if(saved[k]!==undefined)({health,armor,ammo,reserve,pistolAmmo,pistolReserve,shotgunAmmo,shotgunReserve,sniperAmmo,sniperReserve,grenades,kills,shots,hits}[k]=saved[k]);health=saved.health??health;armor=saved.armor??armor;ammo=saved.ammo??ammo;reserve=saved.reserve??reserve;pistolAmmo=saved.pistolAmmo??pistolAmmo;pistolReserve=saved.pistolReserve??pistolReserve;shotgunAmmo=saved.shotgunAmmo??shotgunAmmo;shotgunReserve=saved.shotgunReserve??shotgunReserve;sniperAmmo=saved.sniperAmmo??sniperAmmo;sniperReserve=saved.sniperReserve??sniperReserve;grenades=saved.grenades??grenades;medkits=saved.medkits??medkits;kills=Math.min(saved.kills??0,30);shots=saved.shots??0;hits=saved.hits??0;missionStage=saved.missionStage||1;/* O início de cada sessão/missão é sempre no canto seguro, mesmo ao continuar save. */}
+function reset(fromSave=false,chosenStage=null){clearWorld();player=soldier(false);player.position.set(-40,0,-40);scene.add(player);health=100;armor=50+armorUpgrade*10;ammo=30;reserve=150;pistolAmmo=12;pistolReserve=48;smgAmmo=45;smgReserve=225;launcherAmmo=3;launcherReserve=12;shotgunAmmo=8;shotgunReserve=40;sniperAmmo=5;sniperReserve=25;grenades=2;medkits=2;stealthMode=false;alarmTriggered=false;kills=0;shots=0;hits=0;ended=false;reloading=false;weapon='rifle';updateFirstPersonWeapon();yaw=-Math.PI*0.75;pitch=-.05;driving=false;createVehicle();const saved=fromSave?loadSave():null;if(!saved)missionStage=chosenStage||1;if(saved){missionStage=saved.missionStage||1;suppressorEquipped=saved.suppressorEquipped??suppressorEquipped;redDotEquipped=saved.redDotEquipped??redDotEquipped;extendedMagEquipped=saved.extendedMagEquipped??extendedMagEquipped;for(const k of ['health','armor','ammo','reserve','pistolAmmo','pistolReserve','smgAmmo','smgReserve','launcherAmmo','launcherReserve','shotgunAmmo','shotgunReserve','sniperAmmo','sniperReserve','grenades','medkits','kills','shots','hits','armorUpgrade','helmetEquipped'])if(saved[k]!==undefined)({health,armor,ammo,reserve,pistolAmmo,pistolReserve,shotgunAmmo,shotgunReserve,sniperAmmo,sniperReserve,grenades,kills,shots,hits}[k]=saved[k]);health=saved.health??health;armor=saved.armor??armor;ammo=saved.ammo??ammo;reserve=saved.reserve??reserve;pistolAmmo=saved.pistolAmmo??pistolAmmo;pistolReserve=saved.pistolReserve??pistolReserve;shotgunAmmo=saved.shotgunAmmo??shotgunAmmo;shotgunReserve=saved.shotgunReserve??shotgunReserve;sniperAmmo=saved.sniperAmmo??sniperAmmo;sniperReserve=saved.sniperReserve??sniperReserve;grenades=saved.grenades??grenades;medkits=saved.medkits??medkits;kills=Math.min(saved.kills??0,30);shots=saved.shots??0;hits=saved.hits??0;missionStage=saved.missionStage||1;/* O início de cada sessão/missão é sempre no canto seguro, mesmo ao continuar save. */}
 gulagActive=missionStage===6;setGulagWorld(gulagActive);if(vehicle)vehicle.visible=!gulagActive;
 gulagPhase=(saved&&saved.missionStage===6)?Math.min(6,Number(saved.gulagPhase)||0):0;
 gulagIntel=saved&&saved.missionStage===6&&Array.isArray(saved.gulagIntel)?[0,1,2].map(i=>!!saved.gulagIntel[i]):[false,false,false];
@@ -539,7 +634,7 @@ function interactMission(){
  else if(!missionRequirementsMet())say('OBJETIVOS PENDENTES — '+missionProgressText());
  else say('VÁ ATÉ O CÍRCULO AMARELO DE EXTRAÇÃO');
 }
-function switchWeapon(w){if(!running||reloading||weapon===w)return;weapon=w;updateHUD();sound(weapon==='sniper'?120:weapon==='shotgun'?160:280,.07);say('ARMA: '+weaponData[w].name)}
+function switchWeapon(w){if(!running||reloading||weapon===w)return;weapon=w;updateFirstPersonWeapon();updateHUD();sound(weapon==='sniper'?120:weapon==='shotgun'?160:weapon==='launcher'?55:weapon==='pistol'?260:280,.07);say('ARMA: '+weaponData[w].name)}
 function saveAmmo(){if(weapon==='rifle'){ammoNow=ammo;}}
 function currentAmmo(){return ({rifle:ammo,pistol:pistolAmmo,shotgun:shotgunAmmo,sniper:sniperAmmo,smg:smgAmmo,launcher:launcherAmmo})[weapon]}function currentReserve(){return ({rifle:reserve,pistol:pistolReserve,shotgun:shotgunReserve,sniper:sniperReserve,smg:smgReserve,launcher:launcherReserve})[weapon]}function setAmmo(v){if(weapon==='rifle')ammo=v;else if(weapon==='pistol')pistolAmmo=v;else if(weapon==='shotgun')shotgunAmmo=v;else if(weapon==='smg')smgAmmo=v;else if(weapon==='launcher')launcherAmmo=v;else sniperAmmo=v}function setReserve(v){if(weapon==='rifle')reserve=v;else if(weapon==='pistol')pistolReserve=v;else if(weapon==='shotgun')shotgunReserve=v;else if(weapon==='smg')smgReserve=v;else if(weapon==='launcher')launcherReserve=v;else sniperReserve=v}
 function magazineCapacity(){return Math.round(weaponData[weapon].mag*(extendedMagEquipped?1.5:1))}
