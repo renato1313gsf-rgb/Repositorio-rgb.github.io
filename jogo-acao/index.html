@@ -249,7 +249,7 @@ gulagBox(8,1.65,32.95,8,.18,.18,gulagRed);
 const gulagExtract=new THREE.Group();gulagExtract.position.set(0,0,42);gulagGroup.add(gulagExtract);
 const extractRing=new THREE.Mesh(new THREE.TorusGeometry(4,.18,8,40),new THREE.MeshBasicMaterial({color:0x61e39b,transparent:true,opacity:.95}));extractRing.rotation.x=Math.PI/2;extractRing.position.y=.12;gulagExtract.add(extractRing);
 const extractBeam=new THREE.Mesh(new THREE.CylinderGeometry(3.7,3.7,4,32,1,true),new THREE.MeshBasicMaterial({color:0x61e39b,transparent:true,opacity:.10,side:THREE.DoubleSide}));extractBeam.position.y=2;gulagExtract.add(extractBeam);
-gulagBox(-6,3.4,40, .25,6,.25,gulagBars);gulagBox(6,3.4,40,.25,6,.25,gulagBars);gulagBox(0,6.4,40,12,.22,.22,gulagBars);gulagBox(0,4.4,42,.12,4,.12,gulagRed);
+gulagSolidBox(-6,3.4,40,.25,6,.25,gulagBars);gulagSolidBox(6,3.4,40,.25,6,.25,gulagBars);gulagBox(0,6.4,40,12,.22,.22,gulagBars);gulagBox(0,4.4,42,.12,4,.12,gulagRed);
 // Objective markers: breach, control room, circular cells, armory, showers/tunnel, prisoner, extraction.
 const gulagMarkers=[
  makeMissionMarker(0,-34,0xffc247),makeMissionMarker(0,-17,0xff765f),
@@ -635,7 +635,7 @@ const floorPalette={1:0x535e61,2:0x716653,3:0x4a6670,4:0x292f3c,5:0x594d50,6:0x3
 const standardSpots=[[-10,-4],[10,-7],[-22,0],[22,2],[4,-19],[-5,-24],[34,12],[-35,-12],[0,14],[15,29],[30,-8],[-34,2],[34,-2],[-7,-35],[7,35],[-18,34],[19,-35]];
 const gulagSpots=[[-28,-27],[-21,-27],[-10,-26],[10,-26],[21,-26],[28,-26],[-28,-18],[-20,-18],[-12,-17],[12,-18],[20,-18],[28,-17],[-28,-7],[-19,-7],[-13,-7],[13,-7],[19,-7],[28,-6],[-28,4],[-19,4],[-13,5],[13,4],[19,5],[28,6],[-26,15],[-16,16],[-5,17],[5,16],[16,16],[26,17],[-12,27],[0,26],[18,27]];
 const spots=missionStage===6?gulagSpots:standardSpots;
-spots.forEach((p,i)=>{if(i===(missionStage===6?spots.length-1:10)&&missionStage<5)return;const type=i===(missionStage===6?spots.length-1:10)?'boss':i%5===0?'heavy':i%4===0?'sniper':i%3===0?'cover':'rifle';const mesh=soldier(true,type);/* O papel do inimigo já altera o colete, o capacete e a arma no modelo 3D. */mesh.position.set(p[0],0,p[1]);const alive=!(saved&&saved.missionStage===missionStage&&i<kills);if(alive)scene.add(mesh);enemies.push({mesh,type,hp:Math.ceil((type==='boss'?24+missionStage*3:type==='heavy'?9+missionStage*1.5:type==='sniper'?5+missionStage*1.3:i%4===0?6+missionStage:4+Math.min(missionStage-1,2))*(1+(missionStage-1)*.12)),speed:(type==='sniper'?.72:type==='heavy'?.9:type==='boss'?.9:1.18+(i%3)*.19)*(1+Math.min(missionStage-1,4)*.16)*enemyDifficultyData[enemyDifficulty].speed,attack:1+Math.random(),alive,strafe:i%2?1:-1,alert:false,state:'patrol',home:p.map(v=>v),patrol:p.map((v,j)=>v+(j===0?((i%3)-1)*9:((i%2)*14-7)))})});
+spots.forEach((p,i)=>{if(i===(missionStage===6?spots.length-1:10)&&missionStage<5)return;const type=i===(missionStage===6?spots.length-1:10)?'boss':i%5===0?'heavy':i%4===0?'sniper':i%3===0?'cover':'rifle';const mesh=soldier(true,type);/* O papel de cada classe é preservado, mas a posição inicial não pode ficar dentro de uma parede. */const bodyRadius=(type==='heavy'||type==='boss')?.82:.72;const safeSpawn=findEnemySpawn(p[0],p[1],bodyRadius);mesh.position.set(safeSpawn.x,0,safeSpawn.z);const alive=!(saved&&saved.missionStage===missionStage&&i<kills);if(alive)scene.add(mesh);const patrolHome=[safeSpawn.x,safeSpawn.z];enemies.push({mesh,type,hp:Math.ceil((type==='boss'?24+missionStage*3:type==='heavy'?9+missionStage*1.5:type==='sniper'?5+missionStage*1.3:i%4===0?6+missionStage:4+Math.min(missionStage-1,2))*(1+(missionStage-1)*.12)),speed:(type==='sniper'?.72:type==='heavy'?.9:type==='boss'?.9:1.18+(i%3)*.19)*(1+Math.min(missionStage-1,4)*.16)*enemyDifficultyData[enemyDifficulty].speed,attack:1+Math.random(),alive,strafe:i%2?1:-1,alert:false,state:'patrol',home:patrolHome,patrol:patrolHome.map((v,j)=>v+(j===0?((i%3)-1)*9:((i%2)*14-7)))});});
 updateHUD();refreshMissionHUD();document.body.classList.add('game-running');$('#start').classList.add('hidden');['display','visibility','opacity','z-index'].forEach(p=>$('#start').style.removeProperty(p));$('#end').classList.add('hidden');$('#hud').classList.remove('hidden');$('#crosshair').classList.remove('hidden');$('#vehiclePrompt').classList.add('hidden');running=true;clock.start();sound(440,.15,'sawtooth');startMusic();say('OPERAÇÃO INICIADA — SINAL HOSTIL DETECTADO');saveGame()}
 function finish(win,reportStage=missionStage){
  if(ended)return;ended=true;running=false;document.exitPointerLock?.();$('#crosshair').classList.add('hidden');$('#evacTimer').classList.add('hidden');
@@ -758,12 +758,85 @@ function moveActorSafe(position,dx,dz,r=.58,min=-44,max=44){
   if(nextPenaltyZ===0||(currentPenalty>0&&nextPenaltyZ<currentPenalty-.002))position.z=candidateZ;
  }
 }
+// Colisão dedicada dos inimigos: corpo circular contra caixas orientadas, não apenas o centro do personagem.
+function enemyWallHit(x,z,r){
+ const list=gulagActive?gulagCollision:obstacles;
+ for(const o of list){
+  const rot=o.rotY||0,c=Math.cos(rot),sn=Math.sin(rot),dx=x-o.x,dz=z-o.z;
+  const lx=dx*c-dz*sn,lz=dx*sn+dz*c;
+  const cx=THREE.MathUtils.clamp(lx,-o.hx,o.hx),cz=THREE.MathUtils.clamp(lz,-o.hz,o.hz);
+  const ex=lx-cx,ez=lz-cz;
+  if(ex*ex+ez*ez<(r+.045)*(r+.045))return true;
+ }
+ return false;
+}
+function enemyBodyBlocked(x,z,r,self){
+ for(const other of enemies){
+  if(!other.alive||other===self)continue;
+  const rr=(other.type==='heavy'||other.type==='boss')?.78:.68;
+  const min=r+rr+.06,dx=x-other.mesh.position.x,dz=z-other.mesh.position.z;
+  if(dx*dx+dz*dz<min*min)return true;
+ }
+ if(player&&player.position){
+  const min=r+.62,dx=x-player.position.x,dz=z-player.position.z;
+  if(dx*dx+dz*dz<min*min)return true;
+ }
+ if(companion&&!companionDown&&companion.position){
+  const min=r+.62,dx=x-companion.position.x,dz=z-companion.position.z;
+  if(dx*dx+dz*dz<min*min)return true;
+ }
+ return false;
+}
+function enemyPositionBlocked(x,z,r,self){return enemyWallHit(x,z,r)||enemyBodyBlocked(x,z,r,self)}
+function pushEnemyOutOfWalls(position,r){
+ const list=gulagActive?gulagCollision:obstacles;
+ for(let pass=0;pass<8;pass++){
+  let moved=false;
+  for(const o of list){
+   const rot=o.rotY||0,c=Math.cos(rot),sn=Math.sin(rot),dx=position.x-o.x,dz=position.z-o.z;
+   let lx=dx*c-dz*sn,lz=dx*sn+dz*c;
+   const cx=THREE.MathUtils.clamp(lx,-o.hx,o.hx),cz=THREE.MathUtils.clamp(lz,-o.hz,o.hz);
+   let ex=lx-cx,ez=lz-cz,dist=Math.hypot(ex,ez),pushX=0,pushZ=0;
+   if(dist>=r+.025)continue;
+   if(dist>1e-5){const amount=r+.04-dist;pushX=ex/dist*amount;pushZ=ez/dist*amount}
+   else{
+    const edgeX=o.hx-Math.abs(lx),edgeZ=o.hz-Math.abs(lz);
+    if(edgeX<edgeZ)pushX=(lx>=0?1:-1)*(edgeX+r+.04);
+    else pushZ=(lz>=0?1:-1)*(edgeZ+r+.04);
+   }
+   position.x+=pushX*c+pushZ*sn;
+   position.z+=-pushX*sn+pushZ*c;
+   moved=true;
+  }
+  position.x=THREE.MathUtils.clamp(position.x,-45.5,45.5);
+  position.z=THREE.MathUtils.clamp(position.z,-45.5,45.5);
+  if(!moved)break;
+ }
+}
+function findEnemySpawn(x,z,r){
+ const candidate=new THREE.Vector3(x,0,z);
+ pushEnemyOutOfWalls(candidate,r);
+ if(!enemyPositionBlocked(candidate.x,candidate.z,r,null))return candidate;
+ for(let radius=.35;radius<=8;radius+=.35){
+  for(let a=0;a<Math.PI*2;a+=Math.PI/12){
+   const p=new THREE.Vector3(THREE.MathUtils.clamp(x+Math.cos(a)*radius,-43,43),0,THREE.MathUtils.clamp(z+Math.sin(a)*radius,-43,43));
+   if(!enemyPositionBlocked(p.x,p.z,r,null))return p;
+  }
+ }
+ return candidate;
+}
 function moveEnemySafe(e,dx,dz){
- const p=e.mesh.position,r=(e.type==='heavy'||e.type==='boss')?.7:.58,ox=p.x,oz=p.z;
- moveActorSafe(p,dx,dz,r,-45.5,45.5);
- if(Math.abs(p.x-ox)+Math.abs(p.z-oz)<.0001&&Math.hypot(dx,dz)>.0001){
-  const sideX=THREE.MathUtils.clamp(ox-dz*e.strafe,-45.5,45.5),sideZ=THREE.MathUtils.clamp(oz+dx*e.strafe,-45.5,45.5);
-  moveActorSafe(p,sideX-ox,sideZ-oz,r,-45.5,45.5);
+ const p=e.mesh.position,r=(e.type==='heavy'||e.type==='boss')?.82:.72;
+ // Removes initial wall intersections too, e.g. when a spawn is close to a partition.
+ pushEnemyOutOfWalls(p,r);
+ const distance=Math.hypot(dx,dz),steps=Math.max(1,Math.ceil(distance/.065)),sx=dx/steps,sz=dz/steps;
+ for(let i=0;i<steps;i++){
+  const ox=p.x,oz=p.z;
+  const tx=THREE.MathUtils.clamp(ox+sx,-45.5,45.5),tz=THREE.MathUtils.clamp(oz+sz,-45.5,45.5);
+  if(!enemyPositionBlocked(tx,tz,r,e)){p.x=tx;p.z=tz;continue}
+  // Axis separation lets guards follow walls instead of tunnelling diagonally through them.
+  if(!enemyPositionBlocked(tx,oz,r,e))p.x=tx;
+  if(!enemyPositionBlocked(p.x,tz,r,e))p.z=tz;
  }
 }
 function solidIntersectionDistance(from,to,padding=.08){
