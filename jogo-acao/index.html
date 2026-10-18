@@ -374,7 +374,24 @@ function buildMissionMap(spec){
  const perimeter=(exitPositive)=>{b(-45,0,.8,90,4,mapMat.dark,true,2);b(45,0,.8,90,4,mapMat.dark,true,2);const far=exitPositive?-46:46,exit=exitPositive?46:-46;b(0,far,90,.8,4,mapMat.dark,true,2);b(-24,exit,38,.8,4,mapMat.dark,true,2);b(24,exit,38,.8,4,mapMat.dark,true,2);for(const x of [-5.25,5.25]){b(x,exit,.38,.9,3.8,mapMat.steel,true,1.9);b(x,exit,.48,1,.18,mapMat.amber,false,3.95)}b(0,exit,10.1,.8,.2,mapMat.steel,false,4.05)};
  const barricades=(coords,material=mapMat.dark)=>coords.forEach(([x,z])=>{b(x,z,3.8,1.5,1.25,material,true,.625);b(x,z,3.9,1.6,.12,mapMat.steel,false,1.31)});
  patch(0,0,92,92,spec.groundColor);perimeter(spec.exitPositive);
- if(spec.kind==='quarry'){
+ if(spec.kind==='lastViaduct'){
+  // ÚLTIMO VIADUTO: malha rodoviária própria, rio transversal, pedágio e viadutos sobrepostos.
+  patch(0,8,92,22,0x173c4b);patch(0,-25,38,13,0x4b5051);patch(0,27,42,14,0x4b5051);
+  patch(-20,0,13,72,0x55595a);patch(20,1,12,68,0x55595a);
+  const bridgeDeck=new THREE.Mesh(new THREE.PlaneGeometry(17,24),new THREE.MeshStandardMaterial({color:0x41484b,roughness:.94}));bridgeDeck.rotation.x=-Math.PI/2;bridgeDeck.position.set(0,.075,8);bridgeDeck.receiveShadow=true;group.add(bridgeDeck);
+  for(let z=-40;z<=40;z+=8)b(0,z,17,.13,.08,mapMat.amber,false,.09);
+  for(const z of [-27,-12,3,18,33]){b(-7,z,14,8,.42,mapMat.concrete,false,7.1);b(7,z,14,8,.42,mapMat.concrete,false,9.6);b(-7,z,14,.18,.12,mapMat.amber,false,7.36);b(7,z,14,.18,.12,mapMat.amber,false,9.86)}
+  for(const [x,z,h] of [[-14,-30,8],[-14,-14,8],[-14,2,8],[-14,18,8],[-14,34,8],[14,-30,10],[14,-14,10],[14,2,10],[14,18,10],[14,34,10]]){b(x,z,1.5,1.5,h,mapMat.concrete,true,h/2);b(x,z,1.8,1.8,.22,mapMat.steel,false,h+.1)}
+  for(const x of [-12,-6,6,12]){b(x,22,3.2,3,2.6,mapMat.dark,true,1.3);b(x,22,3.3,3.1,.12,mapMat.red,false,2.66)}
+  b(0,22,27,4,.32,mapMat.steel,false,4.1);b(0,22,27,.18,.18,mapMat.amber,false,4.32);
+  for(const [x,z,rot] of [[-4,-25,.12],[4,-8,-.22],[-3,17,.32],[5,31,-.4],[-24,2,.1],[24,-21,-.25]]){b(x,z,2.1,4.2,1.25,mapMat.rust,true,.625,rot);b(x,z-1.5,1.6,.5,.42,mapMat.dark,false,1.4,rot)}
+  barricades([[-8,-31],[8,-20],[-8,-3],[8,12],[-19,28],[20,25]],mapMat.dark);
+  for(const [x,z] of [[-28,-22],[28,-8],[-28,15],[28,31]]){b(x,z,1.2,1.2,5,mapMat.concrete,true,2.5);b(x+1.5,z,3.4,1.2,.55,mapMat.steel,true,.28,.18)}
+  for(const [x,z] of [[-32,-32],[32,-30],[-32,32],[32,32]])pole(x,z,6,mapMat.red);
+  b(-25,-5,8,5,3,mapMat.concrete,true,1.5);b(25,12,9,5,3,mapMat.concrete,true,1.5);
+  b(-9,0,.55,60,1.25,mapMat.concrete,true,.625);b(9,0,.55,60,1.25,mapMat.concrete,true,.625);
+  b(-9,-35,.55,12,1.25,mapMat.concrete,true,.625);b(9,-35,.55,12,1.25,mapMat.concrete,true,.625);
+ }else if(spec.kind==='quarry'){
   patch(-3,0,16,85,0x514c43);patch(-3,0,7,84,0x6a6253,.94);
   for(const [x,z,r,h] of [[-35,-29,6,11],[-34,-5,7,13],[-34,21,6,10],[35,-28,7,13],[34,1,6,10],[33,29,7,12],[-17,-34,4,7],[17,32,5,8]])rock(x,z,r,h);
   for(const [x,z] of [[-23,-27],[-22,-17],[-22,5],[24,-15],[24,9],[18,25]])b(x,z,6,2,2,mapMat.sand,true,1);
@@ -430,6 +447,7 @@ const missionMapSpecs=[
  {key:'c1-3',title:'PORTO SOB CERCO',kind:'harbor',groundColor:0x5a686d,fogColor:0x203946,exitPositive:false,spawns:[[-31,-30],[-18,-17],[-8,-28],[3,-30],[18,-26],[34,-15],[-30,1],[-12,9],[10,10],[23,23],[30,-8],[-35,25],[0,30],[7,-8],[-18,33],[19,34],[36,28]]},
  {key:'c1-4',title:'COMPLEXO DE COMUNICAÇÕES',kind:'comms',groundColor:0x343b40,fogColor:0x0c151d,exitPositive:false,spawns:[[-31,-31],[-20,-14],[-7,-28],[7,-30],[25,-27],[34,-11],[-31,4],[-12,12],[12,12],[27,21],[30,-8],[-33,25],[0,31],[8,-5],[-18,34],[19,34],[36,30]]},
  {key:'c1-5',title:'FORTALEZA VERMELHA',kind:'fortress',groundColor:0x554a4a,fogColor:0x211b20,exitPositive:false,spawns:[[-31,-30],[-20,-20],[-7,-29],[8,-30],[25,-27],[35,-12],[-28,3],[-12,12],[10,17],[20,10],[30,-8],[-32,25],[0,29],[7,-5],[-18,34],[19,34],[36,29]]},
+ {key:'c2-1',title:'ÚLTIMO VIADUTO',kind:'lastViaduct',groundColor:0x4b5051,fogColor:0x3c4248,exitPositive:true,lampColor:0xff7b48,spawns:[[-30,-25],[-22,-10],[-4,-24],[8,-28],[25,-24],[31,-8],[-29,2],[-18,15],[15,12],[25,28],[0,18],[-30,28],[0,34],[5,-3],[-20,34],[20,35],[34,20]]},
  {key:'c2-2',title:'RODOVIA CONGELADA',kind:'iceRoad',groundColor:0xb7c8d0,fogColor:0x193546,exitPositive:true,spawns:[[-34,-30],[-22,-13],[-10,-30],[8,-30],[25,-25],[34,-12],[-31,0],[-14,10],[12,9],[26,24],[0,14],[-32,25],[0,32],[7,-8],[-18,34],[19,34],[36,29]]},
  {key:'c2-3',title:'ARQUIVO SUBTERRÂNEO',kind:'archive',groundColor:0x4c565e,fogColor:0x101b25,exitPositive:true,spawns:[[-28,-30],[-22,-15],[-10,-27],[10,-30],[27,-27],[31,-14],[-29,1],[-12,8],[12,8],[28,24],[0,14],[-30,25],[0,32],[7,-8],[-18,34],[19,34],[36,29]]},
  {key:'c2-4',title:'MONTANHA DE ANTENAS',kind:'mountainRelay',groundColor:0xa7b7c0,fogColor:0x1b2b38,exitPositive:true,spawns:[[-32,-30],[-22,-14],[-10,-29],[9,-30],[27,-25],[34,-13],[-30,0],[-13,10],[12,10],[26,24],[0,14],[-32,25],[0,32],[7,-8],[-18,34],[19,34],[36,29]]},
@@ -775,7 +793,7 @@ const missionDefinitions={
   6:{name:'OPERAÇÃO: PRISÃO DE FERRO',brief:'Infiltre-se no complexo penitenciário e resgate o Capitão Price, prisioneiro 627.',main:'Invada o complexo e resgate o Capitão Price',detail:'Atravesse o perímetro, assegure a sala de controle, varra as alas celulares, recolha as três intel, abra a cela especial e extraia sob contra-ataque.'}
 };
 const campaignTwoDefinitions={
-  1:{name:'ESTAÇÃO POLAR',brief:'Recupere a estação de rastreamento isolada na neve.',main:'Retome a estação polar',detail:'Elimine a guarnição do perímetro e alcance o ponto de extração.'},
+  1:{name:'ÚLTIMO VIADUTO',brief:'Atravesse o Nó Rodoviário 7 enquanto as rodovias elevadas desabam sob bombardeio.',main:'Abra caminho até a ponte principal',detail:'Neutralize a resistência, atravesse as pistas destruídas e alcance a extração no extremo sul da ponte.'},
   2:{name:'COMBOIO FANTASMA',brief:'Destrua o transporte de armas antes que desapareça na tempestade.',main:'Destrua os dois veículos militares',detail:'Destrua o jipe e o blindado, neutralize pelo menos 5 hostis e extraia.'},
   3:{name:'ARQUIVO FANTASMA',brief:'Recupere os dados roubados do programa Noite Zero.',main:'Recupere o núcleo de inteligência',detail:'Localize o marcador ciano, pressione E, neutralize pelo menos 4 hostis e extraia.'},
   4:{name:'SILÊNCIO DE RÁDIO',brief:'Desative a rede que orienta os reforços inimigos.',main:'Sabote os três transmissores',detail:'Desative os três transmissores com E, neutralize pelo menos 5 hostis e extraia.'},
@@ -877,7 +895,7 @@ setGulagGateState(missionStage===6&&gulagPhase>0);
 gulagIntel=saved&&saved.missionStage===6&&Array.isArray(saved.gulagIntel)?[0,1,2].map(i=>!!saved.gulagIntel[i]):[false,false,false];
 gulagShieldTaken=!!(saved&&saved.missionStage===6&&saved.gulagShieldTaken);
 prisonerRescued=!!(saved&&saved.missionStage===6&&saved.prisonerRescued);
-if(missionStage===6){player.position.set(-4.3,0,-41.5);yaw=Math.PI;}else if(campaign2Active){player.position.set(-40,0,36);yaw=-Math.PI/4;}
+if(missionStage===6){player.position.set(-4.3,0,-41.5);yaw=Math.PI;}else if(campaign2Active){player.position.set(-40,0,missionStage===1?-36:36);yaw=missionStage===1?Math.PI:-Math.PI/4;}
 const optionalSpots={1:[-5,-31],2:[-27,12],3:[-5,-34],4:[8,32],5:[0,30],6:[14,21]};optionalMarker.position.set(...optionalSpots[missionStage]);optionalMarker.visible=!optionalObjectiveFound;
 companion=soldier(false,'rifle');const buddyForward=new THREE.Vector3(-Math.sin(yaw),0,-Math.cos(yaw)),buddyRight=new THREE.Vector3(Math.cos(yaw),0,-Math.sin(yaw));companion.position.copy(player.position).addScaledVector(buddyForward,-2.6).addScaledVector(buddyRight,-1.4);companion.rotation.y=yaw;scene.add(companion);
 intelRecovered=!!(saved&&saved.missionStage===missionStage&&saved.intelRecovered);
@@ -1484,12 +1502,12 @@ if(realMenu){
       heading='SELECIONAR CAMPANHA';
       html='<p style="color:#b9c9d5;line-height:1.6">Duas operações independentes. Cada uma tem seis missões e save separado.</p>'+
         btn('CAMPANHA 01 · OPERAÇÃO RUPTURA<br><span style="font-weight:500;color:#b9c9d5;font-size:12px">Zona industrial, comboio inimigo, fortaleza e resgate no complexo penitenciário.</span>','campaign','data-campaign="1"')+
-        btn('CAMPANHA 02 · OPERAÇÃO NOITE ZERO<br><span style="font-weight:500;color:#b9c9d5;font-size:12px">Estação polar, comboio fantasma, dados secretos, sabotagem de rádio e extração no blacksite.</span>','campaign','data-campaign="2"');
+        btn('CAMPANHA 02 · OPERAÇÃO NOITE ZERO<br><span style="font-weight:500;color:#b9c9d5;font-size:12px">Último Viaduto, comboio fantasma, dados secretos, sabotagem de rádio e extração no blacksite.</span>','campaign','data-campaign="2"');
     }else if(which==='missions'){
       heading='MISSÕES DA CAMPANHA '+String(api&&api.getCampaign?api.getCampaign():1).padStart(2,'0');
       const campaign=(api&&api.getCampaign?api.getCampaign():1);
       const list=campaign===2?[
-        ['1','ESTAÇÃO POLAR','Retome o perímetro da estação'],
+        ['1','ÚLTIMO VIADUTO','Atravesse o complexo rodoviário em colapso'],
         ['2','COMBOIO FANTASMA','Destrua o jipe e o blindado'],
         ['3','ARQUIVO FANTASMA','Recupere os dados secretos'],
         ['4','SILÊNCIO DE RÁDIO','Sabote três transmissores'],
