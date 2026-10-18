@@ -144,8 +144,13 @@ function setGulagWorld(active){
  for(const o of gulagBaseMapObjects)o.visible=!active;
  floor.visible=true;grid.visible=!active;floor.material.color.setHex(active?0x343c42:0x535e61);
  rainPoints.visible=active?true:rainEnabled;
- if(active){scene.fog.near=18;scene.fog.far=92;scene.fog.color.setHex(0x1d2931);scene.background.setHex(0x1d2931)}
- else{scene.fog.near=35;scene.fog.far=100}
+ if(active){
+  scene.fog.near=12;scene.fog.far=76;scene.fog.color.setHex(0x182128);scene.background.setHex(0x182128);
+  ambientLight.intensity=.72;sun.intensity=.42;sun.color.setHex(0x8b9ba5);
+ }else{
+  scene.fog.near=35;scene.fog.far=100;
+  ambientLight.intensity=1.8;sun.intensity=2.5;sun.color.setHex(0xffe2c0);
+ }
 }
 // Campanha 02: posto militar ártico do projeto Noite Zero.
 const campaign2Group=new THREE.Group();campaign2Group.name='CAMPANHA 02 — ESTAÇÃO POLAR';scene.add(campaign2Group);campaign2Group.visible=false;
@@ -344,6 +349,59 @@ const gulagExtract=new THREE.Group();gulagExtract.position.set(0,0,42);gulagGrou
 const extractRing=new THREE.Mesh(new THREE.TorusGeometry(4,.18,8,40),new THREE.MeshBasicMaterial({color:0x61e39b,transparent:true,opacity:.95}));extractRing.rotation.x=Math.PI/2;extractRing.position.y=.12;gulagExtract.add(extractRing);
 const extractBeam=new THREE.Mesh(new THREE.CylinderGeometry(3.7,3.7,4,32,1,true),new THREE.MeshBasicMaterial({color:0x61e39b,transparent:true,opacity:.10,side:THREE.DoubleSide}));extractBeam.position.y=2;gulagExtract.add(extractBeam);
 gulagSolidBox(-6,3.4,40,.25,6,.25,gulagBars);gulagSolidBox(6,3.4,40,.25,6,.25,gulagBars);gulagBox(0,6.4,40,12,.22,.22,gulagBars);gulagBox(0,4.4,42,.12,4,.12,gulagRed);
+
+// Camada de acabamento físico da prisão: juntas, drenagem, cabos, câmeras e luminárias
+// são objetos visuais separados para não alterar os colisores de gameplay existentes.
+const gulagDetailMetal=mat(0x68747a,.52,.62),gulagConcreteWear=mat(0x252d32,.98,.02),gulagPipeMat=mat(0x59646a,.58,.55),gulagLampMat=new THREE.MeshStandardMaterial({color:0xc9d6d6,emissive:0x91b7c4,emissiveIntensity:.42,roughness:.35});
+function gulagDetail(x,y,z,sx,sy,sz,material,rotY=0){
+ const m=gulagBox(x,y,z,sx,sy,sz,material);m.rotation.y=rotY;return m;
+}
+// Juntas de dilatação e drenagens no piso exterior, sem linhas decorativas exageradas.
+for(let z=-30;z<=30;z+=6)gulagDetail(0,.055,z,68,.018,.055,gulagConcreteWear);
+for(let x=-30;x<=30;x+=6)gulagDetail(x,.056,0,.055,.018,64,gulagConcreteWear);
+for(const [x,z] of [[-28,-15],[28,-15],[-28,15],[28,15],[0,-29],[0,29]]){
+ gulagDetail(x,.075,z,3.2,.035,.42,gulagDark);
+ for(let k=-5;k<=5;k++)gulagDetail(x+k*.25,.098,z,.035,.012,.35,gulagDetailMetal);
+}
+// Tubulações de água e conduítes elétricos seguindo as paredes, com suportes espaçados.
+for(const side of [-1,1]){
+ gulagDetail(side*35.95,2.55,0,.22,.22,61,gulagPipeMat);
+ gulagDetail(side*35.95,2.18,0,.12,.12,61,gulagDark);
+ for(let z=-30;z<=30;z+=5){
+  gulagDetail(side*35.78,2.55,z,.42,.08,.12,gulagDetailMetal);
+  gulagDetail(side*35.78,2.18,z,.32,.06,.1,gulagDetailMetal);
+ }
+}
+// Câmeras de vigilância fixadas em suportes angulados; pequenas lentes vermelhas discretas.
+for(const [x,z,rot] of [[-34,-29,.5],[34,-29,-.5],[-34,29,2.6],[34,29,-2.6],[-8,-22,0],[8,-22,Math.PI],[0,12,Math.PI/2]]){
+ const mount=gulagDetail(x,3.35,z,.42,.12,.18,gulagDetailMetal,rot);
+ const cam=gulagDetail(x,3.22,z,.24,.18,.34,gulagDark,rot);
+ const lens=gulagDetail(x,3.22,z-.12,.09,.07,.035,gulagRed,rot);
+ const led=new THREE.PointLight(0xe33d32,.25,2,2);led.position.set(x,3.2,z-.18);gulagGroup.add(led);
+}
+// Luminárias industriais protegidas por grade: luz localizada, sem iluminar a prisão inteira.
+for(const [x,z] of [[-28,-26],[28,-26],[-28,0],[28,0],[-28,26],[28,26],[-8,-20],[8,-20],[0,17],[0,26]]){
+ gulagDetail(x,3.72,z,.95,.12,.28,gulagDark);
+ gulagDetail(x,3.64,z,.72,.045,.18,gulagLampMat);
+ for(let k=-2;k<=2;k++)gulagDetail(x+k*.13,3.61,z,.025,.035,.2,gulagBars);
+ const light=new THREE.PointLight(0xb8c9d0,1.35,10,2);light.position.set(x,3.45,z);gulagGroup.add(light);
+}
+// Caixas de derivação, eletrocalhas e válvulas tornam a infraestrutura legível de perto.
+for(const [x,z] of [[-35,-10],[35,10],[-35,20],[35,-20],[0,-31],[0,31]]){
+ gulagDetail(x,2.9,z,.48,.62,.16,gulagDark);
+ gulagDetail(x,2.9,z-.095,.28,.34,.035,gulagDetailMetal);
+ gulagDetail(x,2.9,z-.12,.08,.08,.045,gulagRed);
+}
+for(const z of [-30,-24,-18,-12,12,18,24,30]){
+ gulagDetail(-32,3.25,z,.12,.12,5,gulagPipeMat);
+ gulagDetail(32,3.25,z,.12,.12,5,gulagPipeMat);
+}
+// Marcas de circulação e zonas de segurança gastas, pintadas no concreto.
+const gulagPaint=new THREE.MeshStandardMaterial({color:0xb49b57,roughness:.96,metalness:0});
+for(const [x,z,w,d] of [[0,-29,9,.12],[0,31,9,.12],[-29,0,.12,8],[29,0,.12,8]]){
+ const stripe=gulagDetail(x,.068,z,w,.012,d,gulagPaint);stripe.material.transparent=true;stripe.material.opacity=.62;
+}
+
 // Objective markers: breach, control room, circular cells, armory, showers/tunnel, prisoner, extraction.
 const gulagMarkers=[
  makeMissionMarker(0,-34,0xffc247),makeMissionMarker(0,-17,0xff765f),
