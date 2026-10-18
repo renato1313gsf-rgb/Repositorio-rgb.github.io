@@ -133,8 +133,9 @@ const gulagIntelGlow=new THREE.MeshBasicMaterial({color:0x4bdfff});
 const gulagGatePivots=[];
 let gulagGateOpen=false,gulagGateAnimating=false,gulagGateProgress=0,gulagGateBlocker=null;
 function gulagBox(x,y,z,sx,sy,sz,material){const m=new THREE.Mesh(new THREE.BoxGeometry(sx,sy,sz),material);m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;gulagGroup.add(m);return m}
-function gulagBlocker(x,y,z,sx,sy,sz){gulagCollision.push({x,y,z,hx:sx/2,hy:sy/2,hz:sz/2,minY:y-sy/2,maxY:y+sy/2,top:sy})}
-function gulagWall(x,y,z,sx,sy,sz){gulagBox(x,y,z,sx,sy,sz,gulagMaterial);gulagBlocker(x,y,z,sx,sy,sz)}
+function gulagBlocker(x,y,z,sx,sy,sz,rotY=0){gulagCollision.push({x,y,z,hx:sx/2,hy:sy/2,hz:sz/2,minY:y-sy/2,maxY:y+sy/2,top:sy,rotY})}
+function gulagSolidBox(x,y,z,sx,sy,sz,material,rotY=0){const m=gulagBox(x,y,z,sx,sy,sz,material);m.rotation.y=rotY;gulagBlocker(x,y,z,sx,sy,sz,rotY);return m}
+function gulagWall(x,y,z,sx,sy,sz){gulagSolidBox(x,y,z,sx,sy,sz,gulagMaterial)}
 function setGulagWorld(active){
  gulagActive=active;gulagGroup.visible=active;
  for(const o of gulagBaseMapObjects)o.visible=!active;
@@ -199,15 +200,16 @@ function setGulagGateState(open){
 for(const [x,z] of [[-33,-32],[33,-32],[-33,31],[33,31]]){
  gulagBox(x,4.2,z,4,8,4,gulagDark);gulagBox(x,8.35,z,4.5,.3,4.5,gulagBars);
  for(let k=0;k<5;k++)gulagBox(x-1.45+k*.72,6.6,z,.08,3.5,.08,gulagBars);
+ gulagBlocker(x,4.2,z,4,8,4);
  const search=new THREE.SpotLight(0xffd7a0,42,36,Math.PI/5,.45,1.4);search.position.set(x,8,z);search.target.position.set(x*.2,0,z*.4);gulagGroup.add(search,search.target);
 }
 // Pátio externo: barreiras de concreto, caixas militares e sacos de areia.
 for(const [x,z,w,d] of [[-16,-27,7,2.3],[16,-27,7,2.3],[-24,-22,3,4],[24,-22,3,4],[-10,-23,3,2],[10,-23,3,2],[0,-25,5,1.4]]){
- gulagBox(x,1,z,w,2,d,gulagDark);gulagBox(x,2.05,z,w+.12,.12,d+.1,gulagBars);
+ gulagSolidBox(x,1,z,w,2,d,gulagDark);gulagBox(x,2.05,z,w+.12,.12,d+.1,gulagBars);
 }
 for(let x=-30;x<=30;x+=3){gulagBox(x,4.25,-34,.13,.55,.13,gulagBars);gulagBox(x,4.25,34,.13,.55,.13,gulagBars)}
 // Sala de controle com console e mesa de inteligência.
-gulagBox(-8,1.8,-18,1,3.6,10,gulagMaterial);gulagBox(8,1.8,-18,1,3.6,10,gulagMaterial);
+gulagSolidBox(-8,1.8,-18,1,3.6,10,gulagMaterial);gulagSolidBox(8,1.8,-18,1,3.6,10,gulagMaterial);
 gulagBox(0,3.4,-23,17,.3,1,gulagMaterial);gulagBox(-4,3.4,-13,9,.3,1,gulagMaterial);gulagBox(6,3.4,-13,4,.3,1,gulagMaterial);
 gulagBox(0,.8,-17,4,.85,1.4,gulagDark);gulagBox(0,1.28,-17,3.5,.12,1.05,gulagIntelGlow);
 for(const x of [-4,-2,2,4])gulagBox(x,.22,-15,.09,.2,.09,gulagRed);
@@ -216,14 +218,14 @@ const cellRing=new THREE.Mesh(new THREE.TorusGeometry(13,.28,8,64),gulagBars);ce
 const innerRing=new THREE.Mesh(new THREE.TorusGeometry(7.3,.18,8,48),gulagDark);innerRing.rotation.x=Math.PI/2;innerRing.position.set(0,.17,0);gulagGroup.add(innerRing);
 for(let i=0;i<12;i++){
  const a=i*Math.PI/6,x=Math.sin(a)*10,z=Math.cos(a)*10;
- const cell=gulagBox(x,1.55,z,4.6,3.1,2.8,gulagDark);cell.rotation.y=a;
+ const cell=gulagSolidBox(x,1.55,z,4.6,3.1,2.8,gulagDark,a);
  for(let j=-2;j<=2;j++)gulagBox(x+Math.cos(a)*1.7+j*.28,1.55,z-Math.sin(a)*1.7,.065,3,.065,gulagBars);
 }
-for(const [x,z] of [[-15,-2],[15,-2],[-2,-15],[2,15]]){gulagBox(x,1.2,z,2.3,2.4,.55,gulagDark);gulagBox(x,2.45,z,2.5,.12,.7,gulagBars)}
+for(const [x,z] of [[-15,-2],[15,-2],[-2,-15],[2,15]]){gulagSolidBox(x,1.2,z,2.3,2.4,.55,gulagDark);gulagBox(x,2.45,z,2.5,.12,.7,gulagBars)}
 // Descida, armaria e escudos antimotim que recuperam proteção ao interagir.
-for(const [x,z] of [[-5,8],[5,8],[-5,12],[5,12]]){gulagBox(x,.65,z,1.2,1.3,1.7,gulagDark);gulagBox(x,.95,z-.9,1.3,.12,.1,gulagRed)}
-const riotShieldLeft=gulagBox(-2,1.15,9,.82,1.8,.16,gulagBars);
-const riotShieldRight=gulagBox(2,1.15,9,.82,1.8,.16,gulagBars);
+for(const [x,z] of [[-5,8],[5,8],[-5,12],[5,12]]){gulagSolidBox(x,.65,z,1.2,1.3,1.7,gulagDark);gulagBox(x,.95,z-.9,1.3,.12,.1,gulagRed)}
+const riotShieldLeft=gulagSolidBox(-2,1.15,9,.82,1.8,.16,gulagBars);
+const riotShieldRight=gulagSolidBox(2,1.15,9,.82,1.8,.16,gulagBars);
 gulagBox(-2,1.15,8.89,.6,1.5,.04,gulagDark);gulagBox(2,1.15,8.89,.6,1.5,.04,gulagDark);
 for(const x of [-2,2])gulagBox(x,1.15,8.84,.08,1.5,.08,gulagRed);
 // Chuveiros: azulejos, divisórias e canos.
@@ -239,7 +241,7 @@ gulagBox(0,3,19,25,.16,.16,gulagBars);
 for(const x of [-7,-3,3,7]){gulagBox(x,2.8,27,.18,.18,15,gulagBars);gulagBox(x,2.55,27,.08,.08,15,gulagRed)}
 gulagBox(0,3.7,27,16,.18,.18,gulagBars);gulagBox(0,1.9,27,16,.12,.12,gulagDark);
 // Cela especial do prisioneiro e parede de brecha.
-gulagBox(8,1.6,29,9,3.2,.28,gulagDark);gulagBox(12.5,1.6,31, .25,3.2,4,gulagDark);gulagBox(3.5,1.6,31,.25,3.2,4,gulagDark);
+gulagSolidBox(8,1.6,29,9,3.2,.28,gulagDark);gulagSolidBox(12.5,1.6,31,.25,3.2,4,gulagDark);gulagSolidBox(3.5,1.6,31,.25,3.2,4,gulagDark);gulagBlocker(8,1.6,29.12,8.1,3.1,.10);
 for(let x=4.3;x<12.2;x+=.42)gulagBox(x,1.6,29.12,.07,3.1,.07,gulagBars);
 gulagBox(8,2.9,30.8,9,.18,4,gulagBars);
 gulagBox(8,1.65,32.95,8,.18,.18,gulagRed);
@@ -716,7 +718,7 @@ function shoot(){if(!running||ended||reloading||fireCooldown>0||driving)return;c
 const hearingRadius=suppressedShot?10:(weapon==='pistol'?30:42);
 for(const nearby of enemies){if(nearby.alive&&nearby.mesh.position.distanceTo(player.position)<=hearingRadius){nearby.alert=true;nearby.alertPosition=player.position.clone()}}
 const origin=camera.position.clone();const ndc=new THREE.Vector2(0,0);const ray=new THREE.Raycaster();ray.setFromCamera(ndc,camera);const dir=ray.ray.direction.clone();const start=player.position.clone().add(new THREE.Vector3(0,1.45,0));spawnEffect(start.clone().add(dir.clone().multiplyScalar(1.1)),0xffd58b,.055,.045);if(weapon!=='launcher'){const casing=new THREE.Mesh(new THREE.CylinderGeometry(.018,.018,.06,6),gearMetal);casing.position.copy(start).add(new THREE.Vector3(.28,.1,.04));casing.rotation.x=Math.PI/2;scene.add(casing);const cv=new THREE.Vector3(2.5+Math.random()*1.5,1.8+Math.random(),(Math.random()-.5)*1.2).applyAxisAngle(new THREE.Vector3(0,1,0),yaw);projectiles.push({mesh:casing,velocity:cv,life:.7,kind:'casing'})}
-const targets=[];for(const e of enemies)if(e.alive){e.mesh.traverse(part=>{if(!part.isMesh)return;part.userData.enemyRoot=e.mesh;part.userData.hitZone=part===e.mesh.userData.head?'head':part===e.mesh.userData.body?'torso':e.mesh.userData.legs.some(leg=>part.parent===leg)?'legs':'armor';targets.push(part)})}for(const d of destructibles)if(d.alive&&!gulagActive)targets.push(d.mesh);const effectiveRange=weaponData[weapon].range*(redDotEquipped?1.2:1);const hit=new THREE.Raycaster(origin,dir,0,effectiveRange).intersectObjects(targets,false)[0];let impact=origin.clone().add(dir.clone().multiplyScalar(effectiveRange));if(hit){impact.copy(hit.point);const target=enemies.find(e=>e.alive&&e.mesh===hit.object.userData.enemyRoot);if(target){
+const targets=[];for(const e of enemies)if(e.alive){e.mesh.traverse(part=>{if(!part.isMesh)return;part.userData.enemyRoot=e.mesh;part.userData.hitZone=part===e.mesh.userData.head?'head':part===e.mesh.userData.body?'torso':e.mesh.userData.legs.some(leg=>part.parent===leg)?'legs':'armor';targets.push(part)})}for(const d of destructibles)if(d.alive&&!gulagActive)targets.push(d.mesh);const effectiveRange=weaponData[weapon].range*(redDotEquipped?1.2:1);const rawHit=new THREE.Raycaster(origin,dir,0,effectiveRange).intersectObjects(targets,false)[0];const solidDistance=solidIntersectionDistance(origin,origin.clone().addScaledVector(dir,effectiveRange),.025);const hit=rawHit&&solidDistance+.13<rawHit.distance?null:rawHit;let impact=origin.clone().add(dir.clone().multiplyScalar(hit?hit.distance:Math.min(effectiveRange,solidDistance)));if(hit){impact.copy(hit.point);const target=enemies.find(e=>e.alive&&e.mesh===hit.object.userData.enemyRoot);if(target){
  target.alert=true;target.alertPosition=null;target.seekingCoverUntil=missionElapsed+4;
  const localHit=target.mesh.worldToLocal(hit.point.clone());let hitZone=hit.object.userData.hitZone||'torso';if(hitZone==='armor'&&localHit.y>1.78&&Math.abs(localHit.x)<.38)hitZone='head';else if(hitZone==='armor'&&localHit.y<.74)hitZone='legs';else if(hitZone==='armor'&&localHit.y>.72&&localHit.y<1.72&&Math.abs(localHit.x)>.42)hitZone='arms';
  const isHeadshot=hitZone==='head';const damageMultiplier=isHeadshot?2.5:hitZone==='legs'?.65:hitZone==='arms'?.8:hitZone==='armor'?.78:1;
@@ -733,44 +735,79 @@ const targets=[];for(const e of enemies)if(e.alive){e.mesh.traverse(part=>{if(!p
 // Brief tracer to make shots readable.
 const tracer=new THREE.Mesh(new THREE.CylinderGeometry(.025,.025,Math.min(impact.distanceTo(start),effectiveRange),5),new THREE.MeshBasicMaterial({color:0xffd18a,transparent:true,opacity:.65}));tracer.position.copy(start).add(impact).multiplyScalar(.5);tracer.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),impact.clone().sub(start).normalize());scene.add(tracer);effects.push({mesh:tracer,life:.055})}
 function canSee(from,to){const origin=from.clone().add(new THREE.Vector3(0,1.4,0)),delta=to.clone().add(new THREE.Vector3(0,1,0)).sub(origin),distance=delta.length();const ray=new THREE.Raycaster(origin,delta.normalize(),0,distance);const visibleThroughAncestors=o=>{let n=o;while(n&&n!==scene){if(!n.visible)return false;n=n.parent}return true};return !ray.intersectObjects(scene.children,true).some(h=>visibleThroughAncestors(h.object)&&h.object!==floor&&h.object!==grid&&h.object!==player&&h.object.parent!==player&&h.distance>1.2&&h.distance<distance-.4&&h.object.material!==undefined&&h.object.material!==yellow)}
-function blocked(x,z,r=.65){const blockList=gulagActive?gulagCollision:obstacles;for(const o of blockList){if(Math.abs(x-o.x)<o.hx+r&&Math.abs(z-o.z)<o.hz+r)return true}return false}
-function moveEnemySafe(e,dx,dz){
-  const p=e.mesh.position;
-  const radius=(e.type==='heavy'||e.type==='boss') ? 0.7 : 0.55;
-  const clamp=v=>THREE.MathUtils.clamp(v,-45.5,45.5);
-  const ox=p.x, oz=p.z;
-  let x=ox, z=oz;
-  const targetX=clamp(ox+dx), targetZ=clamp(oz+dz);
-  // Teste cada eixo contra as mesmas caixas sólidas usadas pelo jogador.
-  if(!blocked(targetX,oz,radius)) x=targetX;
-  if(!blocked(x,targetZ,radius)) z=targetZ;
-  // Se ficou totalmente preso, tenta um desvio lateral, também validado.
-  if(x===ox&&z===oz){
-    const sideX=clamp(ox-dz*e.strafe), sideZ=clamp(oz+dx*e.strafe);
-    if(!blocked(sideX,oz,radius)) x=sideX;
-    if(!blocked(x,sideZ,radius)) z=sideZ;
-  }
-  p.x=x;
-  p.z=z;
+function actorCollisionPenalty(x,z,r){
+ const blockList=gulagActive?gulagCollision:obstacles;let total=0;
+ for(const o of blockList){
+  const dx=x-o.x,dz=z-o.z,rot=o.rotY||0,c=Math.cos(rot),sn=Math.sin(rot);
+  const lx=dx*c-dz*sn,lz=dx*sn+dz*c;
+  const px=o.hx+r+.035-Math.abs(lx),pz=o.hz+r+.035-Math.abs(lz);
+  if(px>0&&pz>0)total+=Math.min(px,pz);
+ }
+ return total;
 }
-function projectileHitsSolid(from,to){
-  const starts=[from.x,from.y,from.z],deltas=[to.x-from.x,to.y-from.y,to.z-from.z];
-  for(const o of (gulagActive?gulagCollision:obstacles)){
-    const mins=[o.x-o.hx,o.minY??0,o.z-o.hz],maxs=[o.x+o.hx,o.maxY??(o.top??100),o.z+o.hz];
-    let enter=0,exit=1,hit=true;
-    for(let axis=0;axis<3;axis++){
-      const start=starts[axis],delta=deltas[axis],min=mins[axis],max=maxs[axis];
-      if(Math.abs(delta)<1e-8){if(start<min||start>max){hit=false;break}}
-      else{
-        let t1=(min-start)/delta,t2=(max-start)/delta;
-        if(t1>t2){const temp=t1;t1=t2;t2=temp}
-        enter=Math.max(enter,t1);exit=Math.min(exit,t2);
-        if(enter>exit){hit=false;break}
-      }
-    }
-    if(hit&&exit>=0&&enter<=1)return true;
+function blocked(x,z,r=.6){return actorCollisionPenalty(x,z,r)>0}
+function moveActorSafe(position,dx,dz,r=.58,min=-44,max=44){
+ const length=Math.hypot(dx,dz),steps=Math.max(1,Math.ceil(length/.18)),sx=dx/steps,sz=dz/steps;
+ for(let i=0;i<steps;i++){
+  const oldX=position.x,oldZ=position.z,oldPenalty=actorCollisionPenalty(oldX,oldZ,r);
+  const nx=THREE.MathUtils.clamp(oldX+sx,min,max),nz=THREE.MathUtils.clamp(oldZ+sz,min,max);
+  const nextPenaltyX=actorCollisionPenalty(nx,oldZ,r);
+  if(nextPenaltyX===0||(oldPenalty>0&&nextPenaltyX<oldPenalty-.002))position.x=nx;
+  const currentPenalty=actorCollisionPenalty(position.x,position.z,r),candidateZ=THREE.MathUtils.clamp(position.z+sz,min,max);
+  const nextPenaltyZ=actorCollisionPenalty(position.x,candidateZ,r);
+  if(nextPenaltyZ===0||(currentPenalty>0&&nextPenaltyZ<currentPenalty-.002))position.z=candidateZ;
+ }
+}
+function moveEnemySafe(e,dx,dz){
+ const p=e.mesh.position,r=(e.type==='heavy'||e.type==='boss')?.7:.58,ox=p.x,oz=p.z;
+ moveActorSafe(p,dx,dz,r,-45.5,45.5);
+ if(Math.abs(p.x-ox)+Math.abs(p.z-oz)<.0001&&Math.hypot(dx,dz)>.0001){
+  const sideX=THREE.MathUtils.clamp(ox-dz*e.strafe,-45.5,45.5),sideZ=THREE.MathUtils.clamp(oz+dx*e.strafe,-45.5,45.5);
+  moveActorSafe(p,sideX-ox,sideZ-oz,r,-45.5,45.5);
+ }
+}
+function solidIntersectionDistance(from,to,padding=.08){
+ const list=gulagActive?gulagCollision:obstacles,dx=to.x-from.x,dy=to.y-from.y,dz=to.z-from.z,segmentLength=Math.hypot(dx,dy,dz);
+ if(segmentLength<1e-8)return Infinity;
+ let nearest=Infinity;
+ for(const o of list){
+  const rot=o.rotY||0,c=Math.cos(rot),sn=Math.sin(rot),rx=from.x-o.x,rz=from.z-o.z;
+  const starts=[rx*c-rz*sn,from.y,rx*sn+rz*c],deltas=[dx*c-dz*sn,dy,dx*sn+dz*c];
+  const mins=[-o.hx-padding,(o.minY??0)-padding,-o.hz-padding];
+  const maxs=[o.hx+padding,(o.maxY??(o.top??100))+padding,o.hz+padding];
+  let enter=0,exit=1,hit=true;
+  for(let axis=0;axis<3;axis++){
+   const start=starts[axis],delta=deltas[axis],min=mins[axis],max=maxs[axis];
+   if(Math.abs(delta)<1e-8){if(start<min||start>max){hit=false;break}}
+   else{
+    let t1=(min-start)/delta,t2=(max-start)/delta;
+    if(t1>t2){const temp=t1;t1=t2;t2=temp}
+    enter=Math.max(enter,t1);exit=Math.min(exit,t2);
+    if(enter>exit){hit=false;break}
+   }
   }
-  return false;
+  if(hit&&exit>=0&&enter<=1)nearest=Math.min(nearest,Math.max(0,enter)*segmentLength);
+ }
+ return nearest;
+}
+function projectileHitsSolid(from,to){return solidIntersectionDistance(from,to,.10)<Infinity}
+function projectileSegmentHitsActor(from,to,actor,radius=.56){
+ if(!actor)return false;
+ const mins=[actor.position.x-radius,actor.position.y+.12,actor.position.z-radius];
+ const maxs=[actor.position.x+radius,actor.position.y+1.98,actor.position.z+radius];
+ const starts=[from.x,from.y,from.z],deltas=[to.x-from.x,to.y-from.y,to.z-from.z];
+ let enter=0,exit=1;
+ for(let axis=0;axis<3;axis++){
+  const start=starts[axis],delta=deltas[axis],min=mins[axis],max=maxs[axis];
+  if(Math.abs(delta)<1e-8){if(start<min||start>max)return false}
+  else{
+   let t1=(min-start)/delta,t2=(max-start)/delta;
+   if(t1>t2){const temp=t1;t1=t2;t2=temp}
+   enter=Math.max(enter,t1);exit=Math.min(exit,t2);
+   if(enter>exit)return false;
+  }
+ }
+ return exit>=0&&enter<=1;
 }
 function destroyProp(d,explosive=false){d.alive=false;scene.remove(d.mesh);if(d.extras)d.extras.forEach(o=>scene.remove(o));if(d.obstacle){const index=obstacles.indexOf(d.obstacle);if(index>=0)obstacles.splice(index,1)}if(d.type==='crate')spawnEffect(d.mesh.position.clone().add(new THREE.Vector3(0,.7,0)),0xffc36b,.35,.22);else if(explosive)spawnEffect(d.mesh.position.clone().add(new THREE.Vector3(0,.7,0)),0xff7b32,.7,.2)}
 function detonate(pos){sound(48,.45,'sawtooth',.07);spawnEffect(pos,0xff7b32,1.5,.4);spawnEffect(pos,0xffd48a,2.2,.24);spawnEffect(pos.clone().add(new THREE.Vector3(.5,.5,0)),0x383d42,.9,.9);spawnEffect(pos.clone().add(new THREE.Vector3(-.4,.2,.5)),0x242a30,.75,1.1);for(let i=0;i<8;i++)spawnEffect(pos.clone().add(new THREE.Vector3((Math.random()-.5)*2,Math.random()*1.8,(Math.random()-.5)*2)),0xffb34d,.08,.25);for(const e of enemies){if(e.alive&&e.mesh.position.distanceTo(pos)<5.5){e.hp-=4;if(e.hp<=0){e.alive=false;scene.remove(e.mesh);kills++}}}if(!gulagActive)for(const d of destructibles){if(d.alive&&d.mesh.position.distanceTo(pos)<5){destroyProp(d,true);spawnEffect(d.mesh.position,0xff7b32,1,.25);for(const e of enemies){if(e.alive&&e.mesh.position.distanceTo(d.mesh.position)<4){e.hp-=3;if(e.hp<=0){e.alive=false;scene.remove(e.mesh);kills++}}}}}updateHUD();saveGame();refreshMissionHUD()}
@@ -795,7 +832,7 @@ for(const enemy of enemies){
  sound(62,.16,'sawtooth',.055);say('ATROPELAMENTO! HOSTIL NEUTRALIZADO');
  updateHUD();saveGame();refreshMissionHUD();
 }
-}player.position.copy(vehicle.position)}else if(move.lengthSq()>0){move.normalize().multiplyScalar((keys.ShiftLeft||keys.ShiftRight?8.5:keys.KeyC?2.1:4.7)*(lightArmorEquipped?1.12:1)*dt);const nx=THREE.MathUtils.clamp(player.position.x+move.x,-44,44),nz=THREE.MathUtils.clamp(player.position.z+move.z,-44,44);if(!blocked(nx,player.position.z))player.position.x=nx;if(!blocked(player.position.x,nz))player.position.z=nz;player.userData.legs.forEach((l,i)=>l.rotation.x=Math.sin(walkTime*10+i*Math.PI)*.55)}else player.userData.legs.forEach(l=>l.rotation.x=0);
+}player.position.copy(vehicle.position)}else if(move.lengthSq()>0){move.normalize().multiplyScalar((keys.ShiftLeft||keys.ShiftRight?8.5:keys.KeyC?2.1:4.7)*(lightArmorEquipped?1.12:1)*dt);moveActorSafe(player.position,move.x,move.z,.58,-44,44);player.userData.legs.forEach((l,i)=>l.rotation.x=Math.sin(walkTime*10+i*Math.PI)*.55)}else player.userData.legs.forEach(l=>l.rotation.x=0);
 // O companheiro acompanha o jogador, pode segurar posição e dispara contra alvos visíveis.
 if(companion&&companion.visible&&!companionDown){
  companionAttackCooldown=Math.max(0,companionAttackCooldown-dt);
@@ -913,7 +950,7 @@ for(const e of enemies){
  }
  if(playerDist<1.7&&e.attack<=0){e.attack=1.1;damagePlayer(Math.round(8*enemyDifficultyData[enemyDifficulty].damage));say('INIMIGO PERTO — RECUAR!')}else if(companion&&!companionDown&&companionDist<1.7&&e.attack<=0){e.attack=1.1;damageCompanion(Math.round(7*enemyDifficultyData[enemyDifficulty].damage));}
 }
-for(let i=projectiles.length-1;i>=0;i--){const p=projectiles[i];p.life-=dt;if(p.kind==='casing'){p.velocity.y-=9.8*dt;p.mesh.position.addScaledVector(p.velocity,dt);p.mesh.rotation.x+=dt*12;p.mesh.rotation.z+=dt*9;if(p.life<=0){scene.remove(p.mesh);projectiles.splice(i,1)}continue}if(p.kind==='rocket'){p.mesh.position.addScaledVector(p.dir,p.speed*dt);spawnEffect(p.mesh.position.clone(),0xff8d38,.035,.06);const close=enemies.some(e=>e.alive&&e.mesh.position.distanceTo(p.mesh.position)<.8);if(close||p.life<=0||blocked(p.mesh.position.x,p.mesh.position.z,.12)){const pos=p.mesh.position.clone();scene.remove(p.mesh);projectiles.splice(i,1);detonate(pos);continue}continue}if(p.kind==='grenade'){const v=p.velocity;v.y-=18*dt;const next=p.mesh.position.clone().addScaledVector(v,dt);if(next.y<=.18){next.y=.18;if(v.y < -2 && p.bounces<3){v.y=-v.y*.38;v.x*=.72;v.z*=.72;p.bounces++;spawnEffect(next,0xc5c9c9,.07,.06)}else{v.y=0;v.x*=Math.pow(.12,dt);v.z*=Math.pow(.12,dt)}}if(blocked(next.x,next.z,.17)){v.x*=-.35;v.z*=-.35;next.x=p.mesh.position.x+v.x*dt;next.z=p.mesh.position.z+v.z*dt}p.mesh.position.copy(next);p.mesh.rotation.x+=dt*5;p.mesh.rotation.z+=dt*4;if(p.life<=0){const pos=p.mesh.position.clone();pos.y=Math.max(.18,pos.y);scene.remove(p.mesh);projectiles.splice(i,1);detonate(pos);continue}continue}const previous=p.mesh.position.clone(),next=previous.clone().addScaledVector(p.dir,p.speed*dt);if(p.kind==='enemy'&&projectileHitsSolid(previous,next)){spawnEffect(previous.clone().lerp(next,.5),0xff8d38,.06,.07);scene.remove(p.mesh);projectiles.splice(i,1);continue}p.mesh.position.copy(next);if(p.kind==='enemy'&&!companionDown&&companion&&p.mesh.position.distanceTo(companion.position.clone().add(new THREE.Vector3(0,1,0)))<.82){damageCompanion(p.damage||8);spawnEffect(p.mesh.position,0xff4d35,.18,.15);scene.remove(p.mesh);projectiles.splice(i,1);continue}if(p.kind==='enemy'&&p.mesh.position.distanceTo(player.position.clone().add(new THREE.Vector3(0,1,0)))<.75){damagePlayer(p.damage||8);spawnEffect(p.mesh.position,0xff4d35,.18,.15);scene.remove(p.mesh);projectiles.splice(i,1);continue}if(p.life<=0){scene.remove(p.mesh);projectiles.splice(i,1)}}
+for(let i=projectiles.length-1;i>=0;i--){const p=projectiles[i];p.life-=dt;if(p.kind==='casing'){p.velocity.y-=9.8*dt;p.mesh.position.addScaledVector(p.velocity,dt);p.mesh.rotation.x+=dt*12;p.mesh.rotation.z+=dt*9;if(p.life<=0){scene.remove(p.mesh);projectiles.splice(i,1)}continue}if(p.kind==='rocket'){const previousRocket=p.mesh.position.clone(),nextRocket=previousRocket.clone().addScaledVector(p.dir,p.speed*dt),wallDistance=solidIntersectionDistance(previousRocket,nextRocket,.06),segmentLength=previousRocket.distanceTo(nextRocket),hitsWall=wallDistance<=segmentLength;p.mesh.position.copy(nextRocket);spawnEffect(p.mesh.position.clone(),0xff8d38,.035,.06);const close=enemies.some(e=>e.alive&&e.mesh.position.distanceTo(p.mesh.position)<.8);if(close||p.life<=0||hitsWall||blocked(p.mesh.position.x,p.mesh.position.z,.12)){const pos=p.mesh.position.clone();if(hitsWall)pos.copy(previousRocket).lerp(nextRocket,Math.max(0,Math.min(1,(wallDistance||0)/Math.max(.001,segmentLength))));scene.remove(p.mesh);projectiles.splice(i,1);detonate(pos);continue}continue}if(p.kind==='grenade'){const v=p.velocity;v.y-=18*dt;const next=p.mesh.position.clone().addScaledVector(v,dt);if(next.y<=.18){next.y=.18;if(v.y < -2 && p.bounces<3){v.y=-v.y*.38;v.x*=.72;v.z*=.72;p.bounces++;spawnEffect(next,0xc5c9c9,.07,.06)}else{v.y=0;v.x*=Math.pow(.12,dt);v.z*=Math.pow(.12,dt)}}if(blocked(next.x,next.z,.17)){v.x*=-.35;v.z*=-.35;next.x=p.mesh.position.x+v.x*dt;next.z=p.mesh.position.z+v.z*dt}p.mesh.position.copy(next);p.mesh.rotation.x+=dt*5;p.mesh.rotation.z+=dt*4;if(p.life<=0){const pos=p.mesh.position.clone();pos.y=Math.max(.18,pos.y);scene.remove(p.mesh);projectiles.splice(i,1);detonate(pos);continue}continue}const previous=p.mesh.position.clone(),next=previous.clone().addScaledVector(p.dir,p.speed*dt);if(p.kind==='enemy'&&projectileHitsSolid(previous,next)){spawnEffect(previous.clone().lerp(next,.5),0xff8d38,.06,.07);scene.remove(p.mesh);projectiles.splice(i,1);continue}if(p.kind==='enemy'&&!companionDown&&companion&&projectileSegmentHitsActor(previous,next,companion,.56)){p.mesh.position.copy(next);damageCompanion(p.damage||8);spawnEffect(p.mesh.position,0xff4d35,.18,.15);scene.remove(p.mesh);projectiles.splice(i,1);continue}if(p.kind==='enemy'&&projectileSegmentHitsActor(previous,next,player,.56)){p.mesh.position.copy(next);damagePlayer(p.damage||8);spawnEffect(p.mesh.position,0xff4d35,.18,.15);scene.remove(p.mesh);projectiles.splice(i,1);continue}p.mesh.position.copy(next);if(p.life<=0){scene.remove(p.mesh);projectiles.splice(i,1)}}
 for(let i=effects.length-1;i>=0;i--){effects[i].life-=dt;if(effects[i].life<=0){scene.remove(effects[i].mesh);effects.splice(i,1)}}
 const firstPersonMode=missionStage===6&&!driving;
 player.visible=!firstPersonMode&&!driving;
